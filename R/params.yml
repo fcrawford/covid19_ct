@@ -1,0 +1,48 @@
+
+##### Epi parameters
+beta_pre: 0.78
+q_Im: 0.59
+q_A: 0.35
+delta: 0.25
+alpha: 0.1190476
+gamma_H: 0.09615385
+gamma_Hbar: 0.09615385
+gamma_Im: 0.25
+gamma_A: 0.1
+m_H: 0.25
+slope: 500
+k_A: 0.375
+k_n: 0.1
+# user-defined
+m_Hbar_mult: 2
+
+# model timeframe
+timeframe: 183
+
+# reporting lag (days): not user-defined
+rcase_lag: 4 
+rhosp_lag: 3 
+rdeath_lag: 1
+
+# effectiveness of stay-at-home intervention: user-defined
+effect_intvx: 0.5 # default
+
+# hospital beds occupancy: user-defined
+bed_occup: 0.65 #default
+
+
+# increasing hospital capacity
+# capacity ramping time interval (days), not user-defined
+t_C: 10 
+# proportion increase (1.5 means 50 percent increase): user-defined
+k_C: 1 # default
+
+# capacity increase start date
+start_C: 45 #default
+start_C_min: 1
+start_C_max: 180
+
+
+
+
+
