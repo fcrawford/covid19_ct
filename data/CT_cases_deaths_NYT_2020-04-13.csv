@@ -1,0 +1,252 @@
+"date","county","state","fips","cases","deaths"
+"2020-03-08","Fairfield","Connecticut",9001,1,0
+"2020-03-09","Fairfield","Connecticut",9001,2,0
+"2020-03-10","Fairfield","Connecticut",9001,2,0
+"2020-03-11","Fairfield","Connecticut",9001,3,0
+"2020-03-12","Fairfield","Connecticut",9001,5,0
+"2020-03-12","Litchfield","Connecticut",9005,1,0
+"2020-03-13","Fairfield","Connecticut",9001,8,0
+"2020-03-13","Litchfield","Connecticut",9005,3,0
+"2020-03-14","Fairfield","Connecticut",9001,15,0
+"2020-03-14","Hartford","Connecticut",9003,1,0
+"2020-03-14","Litchfield","Connecticut",9005,3,0
+"2020-03-14","New Haven","Connecticut",9009,1,0
+"2020-03-15","Fairfield","Connecticut",9001,16,0
+"2020-03-15","Hartford","Connecticut",9003,3,0
+"2020-03-15","Litchfield","Connecticut",9005,4,0
+"2020-03-15","New Haven","Connecticut",9009,3,0
+"2020-03-16","Fairfield","Connecticut",9001,29,0
+"2020-03-16","Hartford","Connecticut",9003,4,0
+"2020-03-16","Litchfield","Connecticut",9005,4,0
+"2020-03-16","New Haven","Connecticut",9009,4,0
+"2020-03-17","Fairfield","Connecticut",9001,48,0
+"2020-03-17","Hartford","Connecticut",9003,7,0
+"2020-03-17","Litchfield","Connecticut",9005,5,0
+"2020-03-17","New Haven","Connecticut",9009,8,0
+"2020-03-18","Fairfield","Connecticut",9001,69,1
+"2020-03-18","Hartford","Connecticut",9003,11,0
+"2020-03-18","Litchfield","Connecticut",9005,5,0
+"2020-03-18","Middlesex","Connecticut",9007,1,0
+"2020-03-18","New Haven","Connecticut",9009,10,0
+"2020-03-19","Fairfield","Connecticut",9001,102,4
+"2020-03-19","Hartford","Connecticut",9003,18,0
+"2020-03-19","Litchfield","Connecticut",9005,7,0
+"2020-03-19","Middlesex","Connecticut",9007,3,0
+"2020-03-19","New Haven","Connecticut",9009,24,0
+"2020-03-19","Tolland","Connecticut",9013,4,0
+"2020-03-19","Windham","Connecticut",9015,1,0
+"2020-03-20","Fairfield","Connecticut",9001,122,4
+"2020-03-20","Hartford","Connecticut",9003,29,0
+"2020-03-20","Litchfield","Connecticut",9005,8,0
+"2020-03-20","Middlesex","Connecticut",9007,5,0
+"2020-03-20","New Haven","Connecticut",9009,24,0
+"2020-03-20","New London","Connecticut",9011,1,0
+"2020-03-20","Tolland","Connecticut",9013,4,0
+"2020-03-20","Windham","Connecticut",9015,1,0
+"2020-03-21","Fairfield","Connecticut",9001,140,4
+"2020-03-21","Hartford","Connecticut",9003,35,0
+"2020-03-21","Litchfield","Connecticut",9005,11,0
+"2020-03-21","Middlesex","Connecticut",9007,6,0
+"2020-03-21","New Haven","Connecticut",9009,24,0
+"2020-03-21","New London","Connecticut",9011,1,0
+"2020-03-21","Tolland","Connecticut",9013,5,1
+"2020-03-21","Windham","Connecticut",9015,1,0
+"2020-03-22","Fairfield","Connecticut",9001,208,5
+"2020-03-22","Hartford","Connecticut",9003,54,1
+"2020-03-22","Litchfield","Connecticut",9005,12,0
+"2020-03-22","Middlesex","Connecticut",9007,6,0
+"2020-03-22","New Haven","Connecticut",9009,29,0
+"2020-03-22","New London","Connecticut",9011,3,0
+"2020-03-22","Tolland","Connecticut",9013,14,2
+"2020-03-22","Windham","Connecticut",9015,1,0
+"2020-03-23","Fairfield","Connecticut",9001,270,6
+"2020-03-23","Hartford","Connecticut",9003,61,2
+"2020-03-23","Litchfield","Connecticut",9005,13,0
+"2020-03-23","Middlesex","Connecticut",9007,8,0
+"2020-03-23","New Haven","Connecticut",9009,41,0
+"2020-03-23","New London","Connecticut",9011,4,0
+"2020-03-23","Tolland","Connecticut",9013,16,2
+"2020-03-23","Windham","Connecticut",9015,2,0
+"2020-03-24","Fairfield","Connecticut",9001,384,7
+"2020-03-24","Hartford","Connecticut",9003,88,2
+"2020-03-24","Litchfield","Connecticut",9005,22,0
+"2020-03-24","Middlesex","Connecticut",9007,8,0
+"2020-03-24","New Haven","Connecticut",9009,89,0
+"2020-03-24","New London","Connecticut",9011,6,0
+"2020-03-24","Tolland","Connecticut",9013,19,3
+"2020-03-24","Windham","Connecticut",9015,2,0
+"2020-03-25","Fairfield","Connecticut",9001,546,12
+"2020-03-25","Hartford","Connecticut",9003,116,2
+"2020-03-25","Litchfield","Connecticut",9005,33,0
+"2020-03-25","Middlesex","Connecticut",9007,15,0
+"2020-03-25","New Haven","Connecticut",9009,127,2
+"2020-03-25","New London","Connecticut",9011,9,0
+"2020-03-25","Tolland","Connecticut",9013,27,3
+"2020-03-25","Windham","Connecticut",9015,2,0
+"2020-03-26","Fairfield","Connecticut",9001,607,13
+"2020-03-26","Hartford","Connecticut",9003,138,2
+"2020-03-26","Litchfield","Connecticut",9005,44,0
+"2020-03-26","Middlesex","Connecticut",9007,18,1
+"2020-03-26","New Haven","Connecticut",9009,156,2
+"2020-03-26","New London","Connecticut",9011,13,0
+"2020-03-26","Tolland","Connecticut",9013,33,3
+"2020-03-26","Windham","Connecticut",9015,3,0
+"2020-03-27","Fairfield","Connecticut",9001,752,15
+"2020-03-27","Hartford","Connecticut",9003,189,2
+"2020-03-27","Litchfield","Connecticut",9005,52,0
+"2020-03-27","Middlesex","Connecticut",9007,25,1
+"2020-03-27","New Haven","Connecticut",9009,222,6
+"2020-03-27","New London","Connecticut",9011,15,0
+"2020-03-27","Tolland","Connecticut",9013,33,3
+"2020-03-27","Windham","Connecticut",9015,3,0
+"2020-03-28","Fairfield","Connecticut",9001,908,20
+"2020-03-28","Hartford","Connecticut",9003,228,2
+"2020-03-28","Litchfield","Connecticut",9005,65,0
+"2020-03-28","Middlesex","Connecticut",9007,28,1
+"2020-03-28","New Haven","Connecticut",9009,236,6
+"2020-03-28","New London","Connecticut",9011,19,0
+"2020-03-28","Tolland","Connecticut",9013,37,4
+"2020-03-28","Windham","Connecticut",9015,3,0
+"2020-03-29","Fairfield","Connecticut",9001,1245,21
+"2020-03-29","Hartford","Connecticut",9003,276,2
+"2020-03-29","Litchfield","Connecticut",9005,87,0
+"2020-03-29","Middlesex","Connecticut",9007,38,1
+"2020-03-29","New Haven","Connecticut",9009,280,6
+"2020-03-29","New London","Connecticut",9011,20,0
+"2020-03-29","Tolland","Connecticut",9013,40,4
+"2020-03-29","Windham","Connecticut",9015,7,0
+"2020-03-30","Fairfield","Connecticut",9001,1445,21
+"2020-03-30","Hartford","Connecticut",9003,330,3
+"2020-03-30","Litchfield","Connecticut",9005,113,1
+"2020-03-30","Middlesex","Connecticut",9007,50,1
+"2020-03-30","New Haven","Connecticut",9009,373,6
+"2020-03-30","New London","Connecticut",9011,24,0
+"2020-03-30","Tolland","Connecticut",9013,50,4
+"2020-03-30","Unknown","Connecticut",NA,176,0
+"2020-03-30","Windham","Connecticut",9015,10,0
+"2020-03-31","Fairfield","Connecticut",9001,1870,38
+"2020-03-31","Hartford","Connecticut",9003,393,7
+"2020-03-31","Litchfield","Connecticut",9005,121,1
+"2020-03-31","Middlesex","Connecticut",9007,56,1
+"2020-03-31","New Haven","Connecticut",9009,517,12
+"2020-03-31","New London","Connecticut",9011,27,1
+"2020-03-31","Tolland","Connecticut",9013,56,7
+"2020-03-31","Unknown","Connecticut",NA,77,2
+"2020-03-31","Windham","Connecticut",9015,11,0
+"2020-04-01","Fairfield","Connecticut",9001,1986,46
+"2020-04-01","Hartford","Connecticut",9003,469,11
+"2020-04-01","Litchfield","Connecticut",9005,131,1
+"2020-04-01","Middlesex","Connecticut",9007,66,2
+"2020-04-01","New Haven","Connecticut",9009,611,15
+"2020-04-01","New London","Connecticut",9011,29,1
+"2020-04-01","Tolland","Connecticut",9013,61,7
+"2020-04-01","Unknown","Connecticut",NA,185,2
+"2020-04-01","Windham","Connecticut",9015,19,0
+"2020-04-02","Fairfield","Connecticut",9001,2132,65
+"2020-04-02","Hartford","Connecticut",9003,539,13
+"2020-04-02","Litchfield","Connecticut",9005,141,2
+"2020-04-02","Middlesex","Connecticut",9007,74,3
+"2020-04-02","New Haven","Connecticut",9009,647,17
+"2020-04-02","New London","Connecticut",9011,29,1
+"2020-04-02","Tolland","Connecticut",9013,67,10
+"2020-04-02","Unknown","Connecticut",NA,174,1
+"2020-04-02","Windham","Connecticut",9015,21,0
+"2020-04-03","Fairfield","Connecticut",9001,2717,76
+"2020-04-03","Hartford","Connecticut",9003,679,18
+"2020-04-03","Litchfield","Connecticut",9005,173,4
+"2020-04-03","Middlesex","Connecticut",9007,91,2
+"2020-04-03","New Haven","Connecticut",9009,891,18
+"2020-04-03","New London","Connecticut",9011,40,3
+"2020-04-03","Tolland","Connecticut",9013,79,10
+"2020-04-03","Unknown","Connecticut",NA,218,1
+"2020-04-03","Windham","Connecticut",9015,27,0
+"2020-04-04","Fairfield","Connecticut",9001,2824,86
+"2020-04-04","Hartford","Connecticut",9003,726,26
+"2020-04-04","Litchfield","Connecticut",9005,182,5
+"2020-04-04","Middlesex","Connecticut",9007,100,4
+"2020-04-04","New Haven","Connecticut",9009,1024,29
+"2020-04-04","New London","Connecticut",9011,57,3
+"2020-04-04","Tolland","Connecticut",9013,91,10
+"2020-04-04","Unknown","Connecticut",NA,241,1
+"2020-04-04","Windham","Connecticut",9015,31,1
+"2020-04-05","Fairfield","Connecticut",9001,3050,96
+"2020-04-05","Hartford","Connecticut",9003,751,29
+"2020-04-05","Litchfield","Connecticut",9005,197,6
+"2020-04-05","Middlesex","Connecticut",9007,110,5
+"2020-04-05","New Haven","Connecticut",9009,1162,36
+"2020-04-05","New London","Connecticut",9011,57,4
+"2020-04-05","Tolland","Connecticut",9013,94,11
+"2020-04-05","Unknown","Connecticut",NA,222,1
+"2020-04-05","Windham","Connecticut",9015,32,1
+"2020-04-06","Fairfield","Connecticut",9001,3719,101
+"2020-04-06","Hartford","Connecticut",9003,882,31
+"2020-04-06","Litchfield","Connecticut",9005,230,8
+"2020-04-06","Middlesex","Connecticut",9007,135,7
+"2020-04-06","New Haven","Connecticut",9009,1468,41
+"2020-04-06","New London","Connecticut",9011,65,4
+"2020-04-06","Tolland","Connecticut",9013,103,13
+"2020-04-06","Unknown","Connecticut",NA,264,0
+"2020-04-06","Windham","Connecticut",9015,40,1
+"2020-04-07","Fairfield","Connecticut",9001,4136,132
+"2020-04-07","Hartford","Connecticut",9003,1045,48
+"2020-04-07","Litchfield","Connecticut",9005,255,9
+"2020-04-07","Middlesex","Connecticut",9007,150,7
+"2020-04-07","New Haven","Connecticut",9009,1664,60
+"2020-04-07","New London","Connecticut",9011,85,4
+"2020-04-07","Tolland","Connecticut",9013,111,13
+"2020-04-07","Unknown","Connecticut",NA,292,3
+"2020-04-07","Windham","Connecticut",9015,43,1
+"2020-04-08","Fairfield","Connecticut",9001,4417,155
+"2020-04-08","Hartford","Connecticut",9003,1290,68
+"2020-04-08","Litchfield","Connecticut",9005,292,12
+"2020-04-08","Middlesex","Connecticut",9007,174,9
+"2020-04-08","New Haven","Connecticut",9009,1945,70
+"2020-04-08","New London","Connecticut",9011,120,5
+"2020-04-08","Tolland","Connecticut",9013,128,13
+"2020-04-08","Unknown","Connecticut",NA,366,3
+"2020-04-08","Windham","Connecticut",9015,49,1
+"2020-04-09","Fairfield","Connecticut",9001,4882,178
+"2020-04-09","Hartford","Connecticut",9003,1471,75
+"2020-04-09","Litchfield","Connecticut",9005,315,13
+"2020-04-09","Middlesex","Connecticut",9007,205,14
+"2020-04-09","New Haven","Connecticut",9009,2183,78
+"2020-04-09","New London","Connecticut",9011,139,6
+"2020-04-09","Tolland","Connecticut",9013,145,13
+"2020-04-09","Unknown","Connecticut",NA,392,2
+"2020-04-09","Windham","Connecticut",9015,52,1
+"2020-04-10","Fairfield","Connecticut",9001,5180,203
+"2020-04-10","Hartford","Connecticut",9003,1615,88
+"2020-04-10","Litchfield","Connecticut",9005,346,16
+"2020-04-10","Middlesex","Connecticut",9007,240,17
+"2020-04-10","New Haven","Connecticut",9009,2383,98
+"2020-04-10","New London","Connecticut",9011,156,7
+"2020-04-10","Tolland","Connecticut",9013,152,14
+"2020-04-10","Unknown","Connecticut",NA,407,4
+"2020-04-10","Windham","Connecticut",9015,59,1
+"2020-04-11","Fairfield","Connecticut",9001,5407,220
+"2020-04-11","Hartford","Connecticut",9003,1832,101
+"2020-04-11","Litchfield","Connecticut",9005,388,20
+"2020-04-11","Middlesex","Connecticut",9007,290,18
+"2020-04-11","New Haven","Connecticut",9009,2715,107
+"2020-04-11","New London","Connecticut",9011,185,7
+"2020-04-11","Tolland","Connecticut",9013,171,15
+"2020-04-11","Unknown","Connecticut",NA,456,5
+"2020-04-11","Windham","Connecticut",9015,66,1
+"2020-04-12","Fairfield","Connecticut",9001,5534,248
+"2020-04-12","Hartford","Connecticut",9003,1914,116
+"2020-04-12","Litchfield","Connecticut",9005,403,24
+"2020-04-12","Middlesex","Connecticut",9007,299,18
+"2020-04-12","New Haven","Connecticut",9009,2946,119
+"2020-04-12","New London","Connecticut",9011,190,7
+"2020-04-12","Tolland","Connecticut",9013,182,17
+"2020-04-12","Unknown","Connecticut",NA,501,4
+"2020-04-12","Windham","Connecticut",9015,66,1
+"2020-04-13","Fairfield","Connecticut",9001,6004,262
+"2020-04-13","Hartford","Connecticut",9003,2243,133
+"2020-04-13","Litchfield","Connecticut",9005,446,24
+"2020-04-13","Middlesex","Connecticut",9007,339,19
+"2020-04-13","New Haven","Connecticut",9009,3358,135
+"2020-04-13","New London","Connecticut",9011,222,7
+"2020-04-13","Tolland","Connecticut",9013,195,17
+"2020-04-13","Unknown","Connecticut",NA,491,4
+"2020-04-13","Windham","Connecticut",9015,83,1
