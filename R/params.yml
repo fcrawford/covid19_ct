@@ -1,18 +1,18 @@
 
 ##### Epi parameters
-beta_pre: 0.78
+beta_pre: 0.86
 q_Im: 0.59
-q_A: 0.35
+q_A: 0.36
 delta: 0.25
 alpha: 0.1190476
 gamma_H: 0.09615385
 gamma_Hbar: 0.09615385
 gamma_Im: 0.25
-gamma_A: 0.1
-m_H: 0.25
+gamma_A: 0.125
+m_H: 0.35
 slope: 500
 k_A: 0.375
-k_n: 0.1
+k_n: 0.05
 # user-defined
 m_Hbar_mult: 2
 

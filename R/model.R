@@ -6,7 +6,7 @@
 # need intervention coding 
 # hosp capacity
 
-run_sir_model = function(state0, params, region_adj, tmax) {
+run_sir_model = function(state0, params, region_adj, populations, tmax) {
 
   nregions = nrow(region_adj) # number of counties or towns, whatever. 
 
@@ -32,8 +32,10 @@ run_sir_model = function(state0, params, region_adj, tmax) {
   beta_pre = params$beta_pre
   #beta_post = (1-params$effect_intvx)*beta_pre 
   
-  beta_matrix_pre  = ( (1-params$k_n)*diag(1,nregions) + params$k_n*region_adj ) * beta_pre
-
+  # number of adjacent regions for each region: use to keep overall beta the same for each county
+  region_adj_num <- rowSums(region_adj)
+  
+  beta_matrix_pre  = ( (1-params$k_n)*diag(1,nregions) + params$k_n*(1/region_adj_num)*region_adj ) * beta_pre
 
   params$m_Hbar = params$m_H * params$m_Hbar_mult
 
@@ -85,9 +87,9 @@ run_sir_model = function(state0, params, region_adj, tmax) {
       #################
   
       
-      dS    <-            -S*( beta %*% (I_s + I_m + k_A*A)/1 )    # populations normalizes contact rates; for now set to 1
+      dS    <-            -S*( beta %*% (I_s + I_m + k_A*A)/populations )    # populations normalized contact rates
       
-      dE    <-  -delta*E + S*( beta %*% (I_s + I_m + k_A*A)/1 )
+      dE    <-  -delta*E + S*( beta %*% (I_s + I_m + k_A*A)/populations )
       
       dI_s  <- (1 - q_Im - q_A)*delta*E - alpha*I_s
       
@@ -122,6 +124,22 @@ run_sir_model = function(state0, params, region_adj, tmax) {
                  paste0("Hbar.", region_names, sep=""),
                  paste0("D.", region_names, sep=""),
                  paste0("R.", region_names, sep=""))
+
+  out$S.Connecticut    = rowSums(out[,paste0("S.", region_names, sep="")])
+  out$E.Connecticut    = rowSums(out[,paste0("E.", region_names, sep="")])
+  out$I_s.Connecticut  = rowSums(out[,paste0("I_s.", region_names, sep="")])
+  out$I_m.Connecticut  = rowSums(out[,paste0("I_m.", region_names, sep="")])
+  out$A.Connecticut    = rowSums(out[,paste0("A.", region_names, sep="")])
+  out$H.Connecticut    = rowSums(out[,paste0("H.", region_names, sep="")])
+  out$Hbar.Connecticut = rowSums(out[,paste0("Hbar.", region_names, sep="")])
+  out$D.Connecticut    = rowSums(out[,paste0("D.", region_names, sep="")])
+  out$R.Connecticut    = rowSums(out[,paste0("R.", region_names, sep="")])
+
+  out$dailyI.Connecticut <- params$delta * out$E.Connecticut
+  out$dailyH.Connecticut <- params$alpha * out$I_s.Connecticut
+  out$cum_modI.Connecticut <- cumsum(out$dailyI.Connecticut)
+  out$cum_modH.Connecticut <- cumsum(out$dailyH.Connecticut)
+
 
   return(out)
 }
