@@ -1,25 +1,52 @@
-# Get COVID-19 Data from NYT
-nyt <- read.csv("https://raw.githubusercontent.com/nytimes/covid-19-data/master/us-counties.csv")
-nyt <- subset(nyt, state == "Connecticut")
-date <- as.character(nyt[dim(nyt)[1],  1])
-write.csv(nyt, file = paste0("../data/CT_cases_deaths_NYT_", date, ".csv"), row.names=FALSE)
+library(lubridate)
+
+######### Get data on reported counts: updated daily #########
 
 
-# Get ACS 2018 CT data: population and age distribution
-library(tidycensus)
-library(tidyr)
-dat <- get_acs(geography = "county", table = "S0101", state = "CT")
-dat <- data.frame(dat)
-var <- c(paste0("S0101_C01_00", 1:9), paste0("S0101_C01_0", 10:19))
-label <- c("population", paste(seq(0, 85, by=5), seq(0, 85, by=5)+4, sep="-"))
-label[19] <-  "85 and over"
-dat$label <- NA
-for(i in 1:length(var)){
-	dat$label[dat$variable == var[i]] <- label[i]
+# Get COVID-19 Data from NYT #
+
+get_ct_data <- function(day0 = ymd("2020-03-01")){
+
+nyt <- "https://raw.githubusercontent.com/nytimes/covid-19-data/master/us-counties.csv"
+data <- try(read.csv(nyt), TRUE)
+if(is(data, "try-error")){
+	# resolve to local version if NYT site is down
+	data <- read.csv("../data/us-counties.csv")
 }
-demog <- subset(dat, !is.na(label))
-demog$county <- gsub(" County, Connecticut", "", demog$NAME)
-demog <- demog[, c("county", "label",  "estimate")]
-demog$label <-  factor(demog$label, levels = label)
-demog.wide <- spread(demog, label, estimate)
-write.csv(demog.wide, file = "../data/CT_demog_ACS2018_5year_estimates.csv", row.names=FALSE)
+
+dat_ct_county <- subset(data, state == "Connecticut")
+dat_ct_county$date <- ymd(dat_ct_county$date)
+
+## caclulate state-wide observations ##
+dat2 <- subset(dat_ct_county, select=c(date, cases, deaths))
+dat_ct_state <- aggregate(. ~ date, data=dat2, FUN=function(x){sum(x)})
+dat_ct_state <- dat_ct_state[order(dat_ct_state$date),]
+
+first.data.time <- round(as.numeric(difftime(dat_ct_state$date[1], day0, units="days")),0)
+
+dat_ct_state$time <- c(first.data.time:(nrow(dat_ct_state)+first.data.time-1)) # add time variable that indexes time 
+
+#time.date <- subset(nyt_ct, select=c(date,time)) # for future matching use
+# calculate daily new reported cases and deaths 
+#nyt_ct$new_cases <- nyt_ct$new_deaths <- 0
+#nyt_ct$new_cases[1] <- nyt_ct$cases[1] 
+#for (i in 2:nrow(nyt_ct)){
+#   nyt_ct$new_cases[i] <- nyt_ct$cases[i] - nyt_ct$cases[i-1]
+#   nyt_ct$new_deaths[i] <- nyt_ct$deaths[i] - nyt_ct$deaths[i-1]
+# }
+
+## add state-level hospitalizations (current counts): this csv file needs to be updated manually ##
+ct.hosp <- read.csv('../data/ct_hosp.csv')
+ct.hosp$date <- mdy(ct.hosp$date)
+first.hosp.data.time <- round(as.numeric(difftime(ct.hosp$date[1], day0, units="days")),0)
+
+ct.hosp$time <- c(first.hosp.data.time:(nrow(ct.hosp)+first.hosp.data.time-1)) 
+
+dat_ct_state <- merge(dat_ct_state, ct.hosp, by='time', all=T)
+dat_ct_state$date.y <- NULL
+names(dat_ct_state)[names(dat_ct_state) == "date.x"] <- "date"
+
+return(list(dat_ct_state=dat_ct_state, dat_ct_county=dat_ct_county))
+}
+
+
