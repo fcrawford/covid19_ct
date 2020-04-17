@@ -42,26 +42,47 @@ state0 = c(S=S_init, E=E_init, I_s=I_s_init, I_m=I_m_init, A=A_init, H=H_init, H
 #################
 # run the model 
 
-sir_result = run_sir_model(state0=state0, params=params_init, region_adj=adj, tmax=100)
+tmax = 100
 
+sir_result = run_sir_model(state0=state0, params=params_init, region_adj=adj, tmax=tmax)
+
+# get whole-state result 
+
+# make region-specific plotting function
+
+# give it whole-state data to get whole-state results 
 
 # melt this? 
 
-compartment_labels = c("S", "I_s", "I_m", "A", "H", "Hbar", "D", "R")
+
+compartment_plot_labels = c("S", "I_s", "I_m", "A", "H", "Hbar", "D", "R")
+compartment_plot_names = c("Susceptible", "Severe infection", "Mild infection", "Asymptomatic", "Hospitalized", "Unhospitalized", "Deaths", "Recovered")
+compartment_plot_colors = rainbow(length(compartment_plot_labels))
 
 
+plot_ct_region = function(region_name) {
 
-par(mar=c(4,4,1,1), mfrow=c(2,4), bty="n")
+  par(mar=c(4,4,3,4), bty="n")
 
-for(i in 1:nregions) {
+  plot(sir_result$time, sir_result[,paste("I_s",region_name,sep=".")], type="n", xlab="Time", ylab="People", main=region_name, col="red", ylim=c(0,max(sir_result[,-1])))
 
-  region = region_names[i]
+	for(j in 1:length(compartment_plot_labels)) {
 
-  compartment = "I_s"
-  idx = paste(compartment, region, sep=".")
-  plot(sir_result$time, sir_result[,idx], type="l", xlab="Time", ylab=idx)
+    cidx = paste(compartment_plot_labels[j], region_name, sep=".")
+    lines(sir_result$time, sir_result[,cidx], col=compartment_plot_colors[j])
+	  text(sir_result$time[tmax], sir_result[tmax,cidx], format(sir_result[tmax,cidx],digits=1), pos=4, col=compartment_plot_colors[j])
 
+	}
+
+	legend(0.6*tmax, max(sir_result[,-1]), compartment_plot_names, lty=1, col=compartment_plot_colors, bty="n")
+
+  # return some useful info
+	region_summary = paste("In ", region_name,
+                       " on date ", tmax,
+											 " projections show ", format(sir_result[tmax,paste("D",region_name,sep=".")], digits=2),
+											 " deaths.", sep="")
 }
+
 
 
 

@@ -1,5 +1,6 @@
 library(rgdal)
-library(SUMMER)
+library(ggplot2)
+library(sp)
 
 # Load shapefile
 CTmap <- readOGR("../map/wgs84/countyct_37800_0000_2010_s100_census_1_shp_wgs84.shp")

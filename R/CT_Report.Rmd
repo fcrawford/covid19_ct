@@ -1,0 +1,150 @@
+---
+title: "COVID-19 Projections for Connecticut"
+author: 
+  - "Forrest W. Crawford, Olga Morozova, Zehang Richard Li, and Soheil Eshghi"
+  - "Yale School of Public Health"
+date: "`r format(Sys.time(), '%I:%M %p %B %d %Y')`"
+header-includes:
+  - \usepackage{helvet}
+  - \usepackage[T1]{fontenc}
+  - \renewcommand\familydefault{\sfdefault} 
+output:
+  pdf_document:
+    toc: true
+    fig_crop: false
+fontsize: 11pt
+geometry: margin=1in
+---
+
+```{r, echo=FALSE}
+source("run_ct_model.R")
+
+```
+
+
+
+# Introduction 
+
+This document presents projections of COVID-19 infections, hospitalizations, and deaths in Connecticut counties, and the state as a whole.  
+
+## Data sources
+
+## Model assumptions
+
+To describe parameters, use the yaml info! 
+
+The case reporting lag is `r params_init$rcase_lag` days 
+
+hospital reporting lag is `r params_init$rhosp_lag` days
+
+death reporting lag is `r params_init$rdeath_lag` days 
+
+percent reduction in contact due to stay-at-home order is `r params_init$effect_intvx`
+
+
+## Hospital capacity and occupancy 
+
+
+## Historical and actual interventions
+
+
+## Future intervention scenarios
+
+
+
+
+# Projections 
+
+## Connecticut State 
+
+```{r, echo=FALSE}
+source("run_ct_model.R")
+
+```
+
+## Fairfield 
+
+```{r echo=FALSE}
+fairfield_summary = plot_ct_region("Fairfield")
+```
+
+`r fairfield_summary`
+
+
+
+## New London
+
+```{r echo=FALSE}
+plot_ct_region("New London")
+```
+
+
+## Litchfield
+```{r echo=FALSE}
+plot_ct_region("Litchfield")
+```
+
+## Windham
+```{r echo=FALSE}
+plot_ct_region("Windham")
+```
+
+## Tolland
+```{r echo=FALSE}
+plot_ct_region("Tolland")
+```
+
+## Hartford
+```{r echo=FALSE}
+plot_ct_region("Hartford")
+```
+
+## Middlesex
+```{r echo=FALSE}
+plot_ct_region("Middlesex")
+```
+
+## New Haven
+
+```{r echo=FALSE}
+plot_ct_region("New Haven")
+```
+
+
+
+# About
+
+
+## Data Sources 
+
+## Model structure 
+
+## Parameterization 
+
+## About the authors
+
+Forrest W. Crawford is an Associate Professor of Biostatistics, Statistics & Data Science, Operations, and Ecology & Evolutionary Biology at Yale University. He is affiliated with the Center for Interdisciplinary Research on AIDS, the Institute for Network Science, the Computational Biology and Bioinformatics Program, and the Public Health Modeling Unit.
+
+Olga Morozova is... 
+
+Zehang Richard Li is...
+
+Soheil Eshghi...
+
+Lab website: <http://www.crawfordlab.io>
+
+## Citation
+
+To cite this document: 
+
+> Forrest W. Crawford, Olga Morozova, Zehang Richard Li, Soheil Eshghi.  COVID-19 Projections for Connecticut.  `r format(Sys.time(), '%B %d %Y')`. 
+
+
+## About this document
+
+This document is generated from [Rmarkdown](https://rmarkdown.rstudio.com/) using code in the Github repository <https://github.com/fcrawford/covid19_ct>. 
+
+Code version reference: `r system("git rev-parse HEAD", intern=TRUE)`
+
+`r system("git status --porcelain", intern=TRUE)`
+
