@@ -3,6 +3,7 @@ title: "COVID-19 Projections for Connecticut"
 author: 
   - "Forrest W. Crawford, Olga Morozova, Zehang Richard Li, and Soheil Eshghi"
   - "Yale School of Public Health"
+  - "Prepared for the Governor's Reopen Connecticut Advisory Group"
 date: "`r format(Sys.time(), '%I:%M %p %B %d %Y')`"
 header-includes:
   - \usepackage{helvet}
@@ -16,11 +17,10 @@ fontsize: 11pt
 geometry: margin=1in
 ---
 
-```{r, echo=FALSE}
+```{r, echo=FALSE, include=FALSE}
 source("run_ct_model.R")
 
 ```
-
 
 
 # Introduction 
@@ -58,9 +58,9 @@ percent reduction in contact due to stay-at-home order is `r params_init$effect_
 ## Connecticut State 
 
 ```{r, echo=FALSE}
-source("run_ct_model.R")
-
+connecticut_summary = plot_ct_region("Connecticut")
 ```
+`r connecticut_summary`
 
 ## Fairfield 
 
@@ -75,40 +75,57 @@ fairfield_summary = plot_ct_region("Fairfield")
 ## New London
 
 ```{r echo=FALSE}
-plot_ct_region("New London")
+new_london_summary = plot_ct_region("New London")
 ```
+`r new_london_summary`
 
 
 ## Litchfield
 ```{r echo=FALSE}
 plot_ct_region("Litchfield")
 ```
+`r connecticut_summary`
+
+
 
 ## Windham
 ```{r echo=FALSE}
-plot_ct_region("Windham")
+windham_summary = plot_ct_region("Windham")
 ```
+`r windham_summary`
+
+
 
 ## Tolland
 ```{r echo=FALSE}
-plot_ct_region("Tolland")
+tolland_summary = plot_ct_region("Tolland")
 ```
+`r tolland_summary`
+
+
 
 ## Hartford
 ```{r echo=FALSE}
-plot_ct_region("Hartford")
+hartford_summary = plot_ct_region("Hartford")
 ```
+`r connecticut_summary`
+
+
 
 ## Middlesex
 ```{r echo=FALSE}
-plot_ct_region("Middlesex")
+middlesex_summary = plot_ct_region("Middlesex")
 ```
+`r middlesex_summary`
+
+
 
 ## New Haven
 
 ```{r echo=FALSE}
-plot_ct_region("New Haven")
+new_haven_summary = plot_ct_region("New Haven")
 ```
+`r new_haven_summary`
 
 
 
