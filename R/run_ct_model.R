@@ -67,16 +67,18 @@ daymonthseq = difftime(monthseq, day0, units="days")
 params_init = yaml.load_file("params.yml") 
 
 # load region adjacency matrix 
-adj = read.csv("../map/CT_adj_matrix.csv")
+adj = read.csv("../map/CT_adj_matrix.csv", stringsAsFactors=FALSE)
 rownames(adj) = adj$X
 adj = adj[,-1]
 adj = as.matrix(adj)
 
 # populations and initial conditions
 nregions = nrow(adj)
-region_names = rownames(adj)
 
-init <- read.csv('../data/ct_init.csv') 
+init <- read.csv('../data/ct_init.csv', stringsAsFactors=FALSE) 
+region_names = init$county
+
+
 #pop.prop <- init$population/sum(init$population) # proportion of state populaiton in each county
 
 
@@ -132,14 +134,17 @@ plot_ct_region = function(region_name) {
     points(obs.region$time, obs.region$deaths, pch=16, col=rgb(1,0,0,alpha=0.5))
   }
 
-
 	legend(0, max(nyt_ct$deaths), compartment_plot_names, lty=1, col=compartment_plot_colors, bty="n")
 
   # return some useful info
-	region_summary = paste("In ", region_name,
-                       " on date ", tmax,
+  # capacity exceeded?
+  # describe intvx
+	region_summary = paste("On ", format(daymax, "%b %d, %Y"),
 											 " projections show ", format(sir_result[tmax,paste("D",region_name,sep=".")], digits=2),
-											 " deaths.", sep="")
+											 " deaths in ", region_name,
+                       sep="")
+
+  return(region_summary)
 }
 
 
