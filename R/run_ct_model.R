@@ -293,7 +293,6 @@ plot_ct_region("Connecticut")
 sapply(region_names, plot_ct_region)
 
 # test plot multiple lines
-tmax=40
 plot_ct_region("Connecticut", c("D", "H", "Hbar"), add = dat_ct_capacity)
 for(i in region_names){
   plot_ct_region(i, c("D", "H", "Hbar"), add = dat_ct_capacity)
