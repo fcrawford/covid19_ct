@@ -26,7 +26,7 @@ source("run_ct_model.R")
 
 # Introduction 
 
-This document presents projections of COVID-19 hospitalizations and deaths in Connecticut as a whole, and by county. It was prepared for the Governor's Reopen Connecticut Advisory group. 
+This report presents projections of COVID-19 hospitalizations and deaths in Connecticut as a whole, and by county.  The report was prepared for the Governor's Reopen Connecticut Advisory group. 
 
 
 ## Data sources
@@ -60,13 +60,18 @@ We present projections of COVID-19 deaths and hospitalizations for Connecticut a
 
 ## Connecticut State 
 
+The projections take into account historical and hypothetical future state-level interventions, including closing of schools on `r format(state_schools_close,"%b %d, %Y")` and the state-level stay-at-home order issued on `r format(state_lockdown_start,"%b %d, %Y")` which took effect on `r format(state_lockdown_order, "%b %d, %Y")`.  
 
-Interventions assumed
+School closure is assumed to reduce transmission by `r params_init$school_closure_effect * 100`%, and the state-level stay-at-home order reduces transmission by `r params_init$lockdown_effect * 100`%.  
+
+These projections evaluate the effect of a hypothetical lifting of the stay-at-home order on `r format(lockdown_end_date, "%b %d, %Y")` and re-opening of schhols on `r format(state_schools_reopen_date, "%b %d, %Y")`. 
+
+When the stay-at-home order is lifted, the projections assume an ongoing `r params_init$distancing_effect * 100`% reduction in transmission. 
+
 
 ```{r echo=FALSE}
 plot_interventions()
 ```
-
 
 
 ```{r echo=FALSE}

@@ -21,7 +21,7 @@ source("intervention_functions.R")
 day0 = ymd("2020-03-01")
 
 # ending day
-daymax = ymd("2020-11-01")
+daymax = ymd("2020-09-01")
 
 # to use in the model
 tmax = as.numeric(difftime(daymax, day0, units="days"))
@@ -94,15 +94,18 @@ rparams = function() {
 #######################
 # set intervention patterns
 
-lockfun = get_state_lockdown_fun(offdate=dmy("01/06/2020"), post_off_effect=params_init$distancing_effect)
+lockdown_end_date=dmy("01/06/2020") 
 
-schoolsfun = get_school_in_session_fun(state_schools_reopen=dmy("01/09/2020"))
+lockfun = get_state_lockdown_fun(offdate=lockdown_end_date, post_off_effect=params_init$distancing_effect)
+
+state_schools_reopen_date = dmy("01/09/2020")
+schoolsfun = get_school_in_session_fun(state_schools_reopen=state_schools_reopen_date)
 
 
 #######################
 # run the sims
 
-nsim = 1
+nsim = 50
 
 sir_results = lapply(1:nsim, function(i){
   res = run_sir_model(state0=state0, 
@@ -211,17 +214,20 @@ plot_interventions = function() {
   axis(1, at=daymonthseq, lab=monthseq_lab)
   axis(2)
   polygon(c(1,1:(tmax+1), tmax+1), c(0,sir_results[[1]]$intervention_schools, 0), col="orange", border=NA)
+  abline(v=Sys.Date()-day0, col="gray", lty=2)
 
   plot(sir_results[[1]]$intervention_lockdown, ylim=c(0,1), type="n", ylab="", xlab="", main="Stay-at-home order in place", axes=FALSE)
   axis(1, at=daymonthseq, lab=monthseq_lab)
   axis(2)
   polygon(c(1,1:(tmax+1), tmax+1), c(0,sir_results[[1]]$intervention_lockdown, 0), col="orange", border=NA)
+  abline(v=Sys.Date()-day0, col="gray", lty=2)
 
 
   plot(sir_results[[1]]$intervention_pattern, ylim=c(0,1),  type="n", ylab="", xlab="", main="Relative reduction in transmission", axes=FALSE)
   axis(1, at=daymonthseq, lab=monthseq_lab)
   axis(2)
   polygon(c(1,1:(tmax+1), tmax+1), c(0,sir_results[[1]]$intervention_pattern, 0), col="orange", border=NA)
+  abline(v=Sys.Date()-day0, col="gray", lty=2)
 
 }
 
