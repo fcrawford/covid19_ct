@@ -48,6 +48,8 @@ mapplot_ct_region(which.plot="rD", label="Cumulative Deaths", palette="Reds")
 mapplot_ct_region(which.plot="cum_modH",  label="Cumulative Hospitalizations", palette="Blues")  
 ```
 
+\clearpage
+
 ```{r echo=FALSE}
 connecticut_summary_deaths = plot_ct_region("Connecticut", which.plot="rD")
 ```
@@ -60,7 +62,6 @@ connecticut_summary_hospitalization = plot_ct_region("Connecticut", which.plot="
 ```
 
 `r connecticut_summary_hospitalization`
-
 
 
 
