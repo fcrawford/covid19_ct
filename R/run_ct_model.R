@@ -165,13 +165,22 @@ plot_ct_region = function(region_name) {
 }
 
 #####################################
-
-mapplot_ct_region = function(...) {
+#
+# @param which.plot the prefix of the compartment to plot, e.g., S, E, I_s, I_m. If a vector of more than one specified, it takes the sum of the compartment (only the mean!)
+mapplot_ct_region = function(which.plot = "D", label = "Cumulative Deaths", ...) {
   map = CTmap
   ncol=3 # customize based on date range? 
   region_names <- as.character(map$NAME10)
-  sir_result_internal = data.frame(filter(sir_results_summary, variable%in%paste("D.",region_names,sep="")))
-  sir_result_internal$County <- gsub("D.", "", sir_result_internal$variable)
+  toplot <- paste(rep(which.plot,each=length(region_names)),
+                  rep(region_names, length(which.plot)),sep=".")
+  sir_result_internal = data.frame(filter(sir_results_summary, variable%in%toplot))
+  sir_result_internal$County <- sir_result_internal$variable
+  for(i in which.plot) sir_result_internal$County <- gsub(paste0(i,"\\."), "", sir_result_internal$County)
+  
+  # take the sum if necessary, remove lower and upper though
+  if(length(which.plot) >  1){
+    sir_result_internal <- aggregate(mean ~ County+time, data=sir_result_internal, FUN=function(x){mean(x)})
+  }
   sir_result_internal$Date <- format(sir_result_internal$time + day0, "%B")
   sir_result_internal$Date <- factor(sir_result_internal$Date, unique(sir_result_internal$Date))
   # Plot last day cumulative at each month? Or take diff?
@@ -181,8 +190,10 @@ mapplot_ct_region = function(...) {
   g <- mapPlot(data=subset(sir_result_internal, time %in% t.index), geo=map,
     by.data="County", by.geo = "NAME10",
     variables = "Date", values = "mean", is.long=TRUE, 
-    legend.label = "Cumulative Deaths", ...) #, direction=-1,  ...) 
-  g <- g + scale_fill_distiller("Cumulative Deaths",  palette = "Reds", direction=1) + ggtitle("Projected cumulative deaths in Connecticut counties by month")
+    legend.label = label, ...) #, direction=-1,  ...) 
+  suppressMessages(
+    g <- g + scale_fill_distiller(label,  palette = "Reds", direction=1) + ggtitle(paste("Projected", tolower(gsub("\n"," ",label)), "in Connecticut counties by month"))
+  )
   return(g)
 }
 
@@ -200,6 +211,6 @@ plot_ct_region("Connecticut")
 sapply(region_names, plot_ct_region)
 
 plot.new()
-pmap = mapplot_ct_region() #map=CTmap, ncol=3)
-print(pmap)
+death.map = mapplot_ct_region() #map=CTmap, ncol=3)
+print(death.map)
 
