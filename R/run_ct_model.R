@@ -136,8 +136,8 @@ plot_ct_region = function(region_name, which.plot = "D") {
   #compartment_plot_colors = rainbow(length(compartment_plot_labels))
 
   par(mar=c(3,4,3,0), bty="n")
-  toplot <- paste(rep(which.plot,each=length(region_names)),
-                  rep(region_names, length(which.plot)),sep=".")
+  toplot <- paste(rep(which.plot,each=length(region_name)),
+                  rep(region_name, length(which.plot)),sep=".")
   sir_result_region= filter(sir_results_summary, variable%in%toplot)
 
   plot(0, type="n", xlab="", ylab="People", main=region_name, col="black", 
@@ -233,8 +233,10 @@ par(mfrow=c(3,3))
 plot_ct_region("Connecticut")
 sapply(region_names, plot_ct_region)
 
+
+# test plot multiple lines
+plot_ct_region("Connecticut", c("H", "Hbar", "cum_modH"))
 for(i in region_names){
-  debug(plot_ct_region)
   plot_ct_region(i, c("H", "Hbar", "cum_modH"))
 }
 
