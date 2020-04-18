@@ -105,7 +105,7 @@ schoolsfun = get_school_in_session_fun(state_schools_reopen=state_schools_reopen
 #######################
 # run the sims
 
-nsim = 10
+nsim = 100
 
 sir_results = lapply(1:nsim, function(i){
   res = run_sir_model(state0=state0, 

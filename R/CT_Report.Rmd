@@ -14,6 +14,7 @@ output:
     toc: true
     fig_crop: false
     fig_width: 7.0
+    fig_height: 3.0
 fontsize: 11pt
 geometry: margin=0.75in
 ---
@@ -26,39 +27,7 @@ source("run_ct_model.R")
 
 # Introduction 
 
-This report presents projections of COVID-19 hospitalizations and deaths in Connecticut as a whole, and by county.  The report was prepared for the Governor's Reopen Connecticut Advisory group. 
-
-
-## Data sources
-
-We use death and hospitalization from ...
-
-Hospital capacity and occupancy
-
-map data
-
-Historical and actual interventions
-
-## Model assumptions
-
-
-The projections in this document were created using a customized SEIR infectious disease transmission model, augmented with asymptomatic, moderate, and severe infection categories, hospitalization, and death.  The model includes time-varying hospital capacities for each county; when occupancy reaches capacity, unhospitalized patients with severe disease are assumed to be `r params_init$m_Hbar_mult` times more likely to die.  
-
-The model incorporates features of the public health information and recordkeeping during covid-19 outbreak, including a case reporting lag of `r params_init$rcase_lag` days, hospital reporting lag of `r params_init$rhosp_lag` days, and a death reporting lag of `r params_init$rdeath_lag` days. 
-
-The model also accommodates past and potential future interventions, including stay-at-home orders, school and business closures, and social distancing measures targeting specific demographic groups.   
-
-[Describe these features and parameters]
-
-percent reduction in contact due to stay-at-home order is `r params_init$effect_intvx`
-
-
-# Projections 
-
-We present projections of COVID-19 deaths and hospitalizations for Connecticut as a whole, followed by projections by county.  Projections are shown as lines with uncertainty intervals in lighter colors, and actual data (if available) overlaid. Horizontal axes extend to the time horizon for this analysis, `r format(daymax, "%b %d, %Y")`. 
-
-
-
+This report presents projections of COVID-19 hospitalizations and deaths in Connecticut as a whole, and by county. Projections are shown as lines with uncertainty intervals in lighter colors, and actual data (if available) overlaid. Horizontal axes extend to the time horizon for this analysis, `r format(daymax, "%b %d, %Y")`.  The report was prepared for the Governor's Reopen Connecticut Advisory group. 
 
 ## Connecticut State 
 
@@ -94,10 +63,14 @@ connecticut_summary_hospitalization = plot_ct_region("Connecticut", which.plot="
 
 ```{r echo=FALSE}
 fairfield_summary = plot_ct_region("Fairfield", which.plot="D")
+plot_ct_region("Fairfield", which.plot="D")
 ```
 
 `r fairfield_summary`
 
+```{r echo=FALSE}
+plot_ct_region("Fairfield", which.plot="H")
+```
 
 
 ## New London
@@ -107,12 +80,21 @@ new_london_summary = plot_ct_region("New London", which.plot="D")
 ```
 `r new_london_summary`
 
+```{r echo=FALSE}
+plot_ct_region("New London", which.plot="H")
+```
+
 
 ## Litchfield
 ```{r echo=FALSE}
 litchfield_summary = plot_ct_region("Litchfield", which.plot="D")
 ```
 `r litchfield_summary`
+
+```{r echo=FALSE}
+plot_ct_region("Litchfield", which.plot="H")
+```
+
 
 
 
@@ -122,6 +104,9 @@ windham_summary = plot_ct_region("Windham", which.plot="D")
 ```
 `r windham_summary`
 
+```{r echo=FALSE}
+plot_ct_region("Windham", which.plot="H")
+```
 
 
 ## Tolland
@@ -129,6 +114,10 @@ windham_summary = plot_ct_region("Windham", which.plot="D")
 tolland_summary = plot_ct_region("Tolland", which.plot="D")
 ```
 `r tolland_summary`
+
+```{r echo=FALSE}
+plot_ct_region("Tolland", which.plot="H")
+```
 
 
 
@@ -138,6 +127,11 @@ hartford_summary = plot_ct_region("Hartford", which.plot="D")
 ```
 `r hartford_summary`
 
+```{r echo=FALSE}
+plot_ct_region("Hartford", which.plot="H")
+```
+
+
 
 
 ## Middlesex
@@ -145,6 +139,11 @@ hartford_summary = plot_ct_region("Hartford", which.plot="D")
 middlesex_summary = plot_ct_region("Middlesex", which.plot="D")
 ```
 `r middlesex_summary`
+
+```{r echo=FALSE}
+plot_ct_region("Middlesex", which.plot="H")
+```
+
 
 
 
@@ -154,6 +153,12 @@ middlesex_summary = plot_ct_region("Middlesex", which.plot="D")
 new_haven_summary = plot_ct_region("New Haven", which.plot="D")
 ```
 `r new_haven_summary`
+
+```{r echo=FALSE}
+plot_ct_region("New Haven", which.plot="H")
+```
+
+
 
 
 
