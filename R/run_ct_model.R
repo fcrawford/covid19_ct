@@ -7,6 +7,7 @@ library(dplyr)
 library(rgdal)
 library(SUMMER)
 library(ggplot2)
+library(mapproj)
 #####################
 
 source("model.R")
@@ -119,7 +120,7 @@ plot_ct_region = function(region_name) {
   #compartment_plot_names = c("Deaths")
   #compartment_plot_colors = rainbow(length(compartment_plot_labels))
 
-  par(mar=c(4,4,3,4), bty="n")
+  par(mar=c(4,4,3,0), bty="n")
 
   sir_result_region = filter(sir_results_summary, variable==paste("D.",region_name,sep=""))
 
@@ -132,8 +133,12 @@ plot_ct_region = function(region_name) {
   abline(v=Sys.Date()-day0, col="gray", lty=2)
 
   polygon(c(sir_result_region$time, rev(sir_result_region$time)), c(sir_result_region$lower, rev(sir_result_region$upper)), col=rgb(1,0,0,alpha=0.5), border=NA)
+
   lines(sir_result_region$time, sir_result_region$mean, col="red")
+  # label mean
   text(sir_result_region$time[tmax+1], sir_result_region$mean[tmax+1], format(sir_result_region$mean[tmax+1],digits=1), pos=4, col="red")
+  text(sir_result_region$time[tmax+1], sir_result_region$lower[tmax+1], format(sir_result_region$lower[tmax+1],digits=1), pos=4, col=rgb(1,0,0,alpha=0.5))
+  text(sir_result_region$time[tmax+1], sir_result_region$upper[tmax+1], format(sir_result_region$upper[tmax+1],digits=1), pos=4, col=rgb(1,0,0,alpha=0.5))
 
   if(region_name == "Connecticut") {
     points(dat_ct_state$time, dat_ct_state$deaths, pch=16, col=rgb(1,0,0,alpha=0.5)) 
@@ -159,7 +164,11 @@ plot_ct_region = function(region_name) {
   return(region_summary)
 }
 
-mapplot_ct_region = function(map, ...) {
+#####################################
+
+mapplot_ct_region = function(...) {
+  map = CTmap
+  ncol=3 # customize based on date range? 
   region_names <- as.character(map$NAME10)
   sir_result_internal = data.frame(filter(sir_results_summary, variable%in%paste("D.",region_names,sep="")))
   sir_result_internal$County <- gsub("D.", "", sir_result_internal$variable)
@@ -172,8 +181,8 @@ mapplot_ct_region = function(map, ...) {
   g <- mapPlot(data=subset(sir_result_internal, time %in% t.index), geo=map,
     by.data="County", by.geo = "NAME10",
     variables = "Date", values = "mean", is.long=TRUE, 
-    legend.label = "Deaths", direction=-1,  ...) 
-  g <- g + scale_fill_distiller("Deaths",  palette = "Blues", direction=1)
+    legend.label = "Cumulative Deaths", ...) #, direction=-1,  ...) 
+  g <- g + scale_fill_distiller("Cumulative Deaths",  palette = "Reds", direction=1) + ggtitle("Projected cumulative deaths in Connecticut counties by month")
   return(g)
 }
 
@@ -190,6 +199,7 @@ par(mfrow=c(3,3))
 plot_ct_region("Connecticut")
 sapply(region_names, plot_ct_region)
 
-CTmap <- readOGR("../map/wgs84/countyct_37800_0000_2010_s100_census_1_shp_wgs84.shp")
-mapplot_ct_region(map=CTmap, ncol=3)
+plot.new()
+pmap = mapplot_ct_region() #map=CTmap, ncol=3)
+print(pmap)
 

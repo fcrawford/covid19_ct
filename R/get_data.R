@@ -1,6 +1,17 @@
 library(lubridate)
 
+
+
+#####################################
+# CT Map 
+
+CTmap <- readOGR("../map/wgs84/countyct_37800_0000_2010_s100_census_1_shp_wgs84.shp")
+
+
 ######### Get data on reported counts: updated daily #########
+
+
+# Can we replace this with CT hospital association data? 
 
 
 # Get COVID-19 Data from NYT #

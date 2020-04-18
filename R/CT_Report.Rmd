@@ -13,8 +13,9 @@ output:
   pdf_document:
     toc: true
     fig_crop: false
+    fig_width: 7.0
 fontsize: 11pt
-geometry: margin=1in
+geometry: margin=0.75in
 ---
 
 ```{r, echo=FALSE, include=FALSE}
@@ -53,8 +54,15 @@ percent reduction in contact due to stay-at-home order is `r params_init$effect_
 
 ```{r echo=FALSE}
 connecticut_summary = plot_ct_region("Connecticut")
+mapplot_ct_region()
 ```
+
+
 `r connecticut_summary`
+
+
+
+
 
 ## Fairfield 
 
