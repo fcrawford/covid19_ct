@@ -143,16 +143,21 @@ plot_ct_region = function(region_name, which.plot = "D", add=NULL) {
   #compartment_plot_labels = c("D")
   #compartment_plot_names = c("Deaths")
   #compartment_plot_colors = rainbow(length(compartment_plot_labels))
-  lab.table <- data.frame(compartment=c("D","H","Hbar","cum_modH","S","E","I_s","I_m","A"),
-                          color=c('#e41a1c','#377eb8','#4daf4a','#984ea3',
-                                  '#ff7f00','#ffff33','#a65628','#f781bf','#999999'),
-                          labels=c("Cumulative Deaths","Hospitalizations","Hospital Overflow",
+  lab.table <- data.frame(compartment=c("D","rD.Connecticut",
+                                        "H","rH.Connecticut",
+                                        "Hbar","cum_modH","S","E","I_s","I_m","A"),
+                          color=c('#e41a1c','#e41a1c','#377eb8','#377eb8',
+                                  '#4daf4a','#984ea3','#ff7f00','#ffff33',
+                                  '#a65628','#f781bf','#999999'),
+                          labels=c("Cumulative Deaths","Cumulative Deaths",
+                                    "Hospitalizations","Hospitalizations",
+                                    "Hospital Overflow",
                                     "Cumulative Hospitalizations",
                                     "Susceptible Population","Exposed Population",
                                     "Severe Infections","Mild Infections",
                                     "Asymptomatic Infections"))
 
-  if("H" %in% which.plot) add <- dat_ct_capacity
+  if("rH.Connecticut" %in% which.plot) add <- dat_ct_capacity
 
   par(mar=c(3,4,3,0), bty="n")
   toplot <- paste(rep(which.plot,each=length(region_name)),
@@ -201,9 +206,9 @@ plot_ct_region = function(region_name, which.plot = "D", add=NULL) {
 
   # Add observed deaths
   col.line <- lab.table$color[which(lab.table$compartment=="D")]
-  if(region_name == "Connecticut" && "D" %in% which.plot) {
+  if(region_name == "Connecticut" && "rD.Connecticut" %in% which.plot) {
     points(dat_ct_state$time, dat_ct_state$deaths, pch=16, col=col.line) 
-  } else if("D" %in% which.plot) {
+  } else if("rD.Connecticut" %in% which.plot) {
     obs.region <- subset(dat_ct_county, county == region_name)
     obs.region$date <- ymd(obs.region$date)
     first.region.time <- round(as.numeric(difftime(obs.region$date[1], day0, units="days")),0)
@@ -214,16 +219,16 @@ plot_ct_region = function(region_name, which.plot = "D", add=NULL) {
 
   # Add observed hospitalization
   col.line <- lab.table$color[which(lab.table$compartment=="H")]
-  if(region_name == "Connecticut" && "H" %in% which.plot) {
+  if(region_name == "Connecticut" && "rH.Connecticut" %in% which.plot) {
       points(dat_ct_state$time, dat_ct_state$cur_hosp, pch=16, col=col.line) 
-    } else if("H" %in% which.plot) {
-      obs.region <- subset(dat_ct_county, county == region_name)
-      obs.region$date <- ymd(obs.region$date)
-      first.region.time <- round(as.numeric(difftime(obs.region$date[1], day0, units="days")),0)
-      obs.region$time <- c(first.region.time:(nrow(obs.region)+first.region.time-1)) # add time variable that indexes time 
-      #obs.region <- merge(obs.region, date.time, by='date')
-      points(obs.region$time, obs.region$cur_hosp, pch=16, col=col.line)
-    }
+  } else if("rH.Connecticut" %in% which.plot) {
+    obs.region <- subset(dat_ct_county, county == region_name)
+    obs.region$date <- ymd(obs.region$date)
+    first.region.time <- round(as.numeric(difftime(obs.region$date[1], day0, units="days")),0)
+    obs.region$time <- c(first.region.time:(nrow(obs.region)+first.region.time-1)) # add time variable that indexes time 
+    #obs.region <- merge(obs.region, date.time, by='date')
+    points(obs.region$time, obs.region$cur_hosp, pch=16, col=col.line)
+  }
 
 	#legend(0, max(dat_ct_state$deaths), compartment_plot_names, lty=1, col=compartment_plot_colors, bty="n")
 
@@ -231,8 +236,8 @@ plot_ct_region = function(region_name, which.plot = "D", add=NULL) {
   # capacity exceeded?
   # describe intvx
   region_summary <- NULL
-  if("D" %in% which.plot){
-      sir_result_region_sub <- filter(sir_result_region, variable==paste0("D.",region_name))
+  if("D" %in% which.plot || "rD.Connecticut" %in% which.plot){
+      sir_result_region_sub <- filter(sir_result_region, variable==paste0(which.plot[1],".",region_name))
       count <- sir_result_region_sub$mean[sir_result_region_sub$time==tmax]
       region_summary = paste(region_summary, "On ", format(daymax, "%b %d, %Y"),
                        " projections show ", format(count, digits=2),
@@ -240,8 +245,8 @@ plot_ct_region = function(region_name, which.plot = "D", add=NULL) {
                        ".",
                        sep="")    
   }
-  if("H" %in% which.plot){
-      sir_result_region_sub <- filter(sir_result_region, variable==paste0("H.",region_name))
+  if("H" %in% which.plot || "rH.Connecticut" %in% which.plot){
+      sir_result_region_sub <- filter(sir_result_region, variable==paste0(which.plot[1],".",region_name))
       count <- max(sir_result_region_sub$mean)
       region_summary = paste(region_summary, "On ", format(daymax, "%b %d, %Y"),
                        " projections show a peak of ", format(count, digits=2),
@@ -329,10 +334,11 @@ plot_interventions = function() {
 # test plot multiple lines
 #plot_ct_region("Connecticut", c("H"), add = dat_ct_capacity)
 
-#for(i in region_names){
-  #summary <- plot_ct_region(i, c("H"), add = dat_ct_capacity)
-  #print(summary)
-#}
+# for(i in region_names){
+#   summary <- plot_ct_region(i, c("H"), add = dat_ct_capacity)
+#   print(summary)
+# }
+
 
 
 
