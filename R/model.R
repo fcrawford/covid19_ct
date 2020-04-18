@@ -6,8 +6,13 @@
 # need intervention coding 
 # hosp capacity
 
-run_sir_model = function(state0, params, region_adj, populations, tmax, 
-                         effect_intvx, intvx_time) {
+run_sir_model = function(state0, params, region_adj, populations, tmax, interventions) {
+
+  if(is.null(interventions$lockdown) || is.null(interventions$schools) || 
+     !is.function(interventions$lockdown) || !is.function(interventions$schools)) { 
+    stop("must specify intervention functions for lockdown and schools")
+  }
+
 
   nregions = nrow(region_adj) # number of counties or towns, whatever. 
 
@@ -26,22 +31,24 @@ run_sir_model = function(state0, params, region_adj, populations, tmax,
   D_idx    = (7*nregions+1):(8*nregions)
   R_idx    = (8*nregions+1):(9*nregions)
 
-
-  # construct region-specific betas 
-  # before/after
-
-  beta_pre = params$beta_pre
-  beta_post = (1-effect_intvx)*beta_pre 
-  
   # number of adjacent regions for each region: use to keep overall beta the same for each county
   region_adj_num <- rowSums(region_adj)
-  
-  beta_matrix_pre  = ( (1-params$k_n)*diag(1,nregions) + params$k_n*(1/region_adj_num)*region_adj ) * beta_pre
-  beta_matrix_post = ( (1-params$k_n)*diag(1,nregions) + params$k_n*(1/region_adj_num)*region_adj ) * beta_post
-  
+
+  beta_pre = params$beta_pre
+
+  # here we define the intervention function: 
+  # note that this function should be <= 1
+  # and the effect of different interventions is additive, so coefficients must sum to <= 1.  
+  intervention_fun = function(t_tmp) { 1 - (params$school_closure_effect*(1-interventions$schools(t_tmp)) + params$lockdown_effect*interventions$lockdown(t_tmp))}
+
+  # quick integrity check:
+  if(any(intervention_fun(1:(tmax+1))<0)) stop("intervention_fun returns negative values. Check that intervention prameters sum to <= 1")
+
+  # region-wise beta transmission matrix 
+  beta_matrix  = ( (1-params$k_n)*diag(1,nregions) + params$k_n*(1/region_adj_num)*region_adj ) * beta_pre 
+
   params$m_Hbar = params$m_H * params$m_Hbar_mult
 
-  intervention_switch <- approxfun(x=c(-20, -10, -1, 0, 1, 10, 20), y=c(1,1,1,0.5, 0,0,0), rule=2   )
 
   model <- function(time, state, parameters) {
     with(as.list(c(state, parameters)), {
@@ -55,22 +62,14 @@ run_sir_model = function(state0, params, region_adj, populations, tmax,
       D = state[D_idx]
       R = state[R_idx]
 
+      # now the overall "effective" beta matrix is a product of the pre-intervention beta matrix 
+      # and the intervention function evaluated at the current time
+      beta = beta_matrix * intervention_fun(time)
+      
+      # FIX this when we have hospital capacity information: 
 
-      #beta = beta_matrix_pre
-
-      beta = intervention_switch(time-intvx_time) * (beta_matrix_pre - beta_matrix_post) + beta_matrix_post
-      
-      # slope: parameter that sets how close the sigmoids are to a true 0-1 switch
-      
-      # beta = (1- 1/(1+exp(slope*(time - intervention))))*(beta_matrix_pre- beta_matrix_post)+beta_matrix_post_pre; 
-      
-      # ^ smooth switch of the contact matrix at the intervention time using a function call
-      
-      ### Soheil 4/10: capacity overflow takes into account capacity increase
-      
       Hospital_capacities_breached = 0 #(1- 1/(1+exp(slope*(H-(capacity * capacity_function(time)))))) 
       
-      # ^ 67*1 vector telling us if hospitals in the counties are full (~ 0-1 output)
       
       ##################
       
@@ -141,6 +140,7 @@ run_sir_model = function(state0, params, region_adj, populations, tmax,
   out$cum_modI.Connecticut <- cumsum(out$dailyI.Connecticut)
   out$cum_modH.Connecticut <- cumsum(out$dailyH.Connecticut)
 
+  out$intervention_pattern = intervention_fun(1:(tmax+1))
 
   return(out)
 }
