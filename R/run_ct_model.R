@@ -130,7 +130,7 @@ sir_results_summary <- sir_results_long %>% group_by(variable, time) %>%
 # plotting 
 # @param which.plot the prefix of the compartment to plot, e.g., S, E, I_s, I_m. If a vector of more than one specified, it plots multiple lines
 
-plot_ct_region = function(region_name, which.plot = "D") {
+plot_ct_region = function(region_name, which.plot = "D", add=NULL) {
   #compartment_plot_labels = c("D")
   #compartment_plot_names = c("Deaths")
   #compartment_plot_colors = rainbow(length(compartment_plot_labels))
@@ -154,10 +154,20 @@ plot_ct_region = function(region_name, which.plot = "D") {
     polygon(c(sir_result_region_sub$time, rev(sir_result_region_sub$time)), c(sir_result_region_sub$lower, rev(sir_result_region_sub$upper)), col=col.polygon, border=NA)
 
     lines(sir_result_region_sub$time, sir_result_region_sub$mean, col=col.line)
-    # label mean
-    text(sir_result_region_sub$time[tmax+1], sir_result_region_sub$mean[tmax+1], format(sir_result_region_sub$mean[tmax+1],digits=1), pos=4, col=col.line)
-    text(sir_result_region_sub$time[tmax+1], sir_result_region_sub$lower[tmax+1], format(sir_result_region_sub$lower[tmax+1],digits=1), pos=4, col=col.polygon)
-    text(sir_result_region_sub$time[tmax+1], sir_result_region_sub$upper[tmax+1], format(sir_result_region_sub$upper[tmax+1],digits=1), pos=4, col=col.polygon)
+    if(which.plot[i]=="D"){
+      # label mean
+      text(sir_result_region_sub$time[tmax+1], sir_result_region_sub$mean[tmax+1], format(sir_result_region_sub$mean[tmax+1],digits=1), pos=4, col=col.line)
+      text(sir_result_region_sub$time[tmax+1], sir_result_region_sub$lower[tmax+1], format(sir_result_region_sub$lower[tmax+1],digits=1), pos=4, col=col.polygon)
+      text(sir_result_region_sub$time[tmax+1], sir_result_region_sub$upper[tmax+1], format(sir_result_region_sub$upper[tmax+1],digits=1), pos=4, col=col.polygon)
+    }
+    if(!is.null(add)){
+      if(region_name != "Connecticut"){
+        sub.add <- subset(add, County == region_name)
+      }else{
+        sub.add <- aggregate(value~Date, data=add, FUN=function(x){sum(x)})
+      }
+      lines(as.numeric(as.Date(sub.add$Date) - day0), sub.add$value, col='gray30', lty  = 3,  lwd=1.2)
+    }
   }
 
   if(region_name == "Connecticut" && "D" %in% which.plot) {
@@ -235,9 +245,9 @@ sapply(region_names, plot_ct_region)
 
 
 # test plot multiple lines
-plot_ct_region("Connecticut", c("H", "Hbar", "cum_modH"))
+plot_ct_region("Connecticut", c("D", "H", "Hbar"), add = dat_ct_capacity)
 for(i in region_names){
-  plot_ct_region(i, c("H", "Hbar", "cum_modH"))
+  plot_ct_region(i, c("D", "H", "Hbar"), add = dat_ct_capacity)
 }
 
 
