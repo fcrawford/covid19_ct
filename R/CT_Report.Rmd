@@ -56,7 +56,7 @@ connecticut_summary_deaths = plot_ct_region("Connecticut", which.plot="D")
 
 
 ```{r echo=FALSE}
-connecticut_summary_hospitalization = plot_ct_region("Connecticut", which.plot="H")
+connecticut_summary_hospitalization = plot_ct_region("Connecticut", which.plot="H", add=dat_ct_capacity)
 ```
 
 `r connecticut_summary_hospitalization`

@@ -39,6 +39,7 @@ monthseq_lab = format(monthseq, "%b %Y")
 daymonthseq = difftime(monthseq, day0, units="days")
 
 
+
 ########################
 
 ##### get reported data from CT #####
@@ -105,7 +106,7 @@ schoolsfun = get_school_in_session_fun(state_schools_reopen=state_schools_reopen
 #######################
 # run the sims
 
-nsim = 100
+nsim = 10
 
 sir_results = lapply(1:nsim, function(i){
   res = run_sir_model(state0=state0, 
@@ -137,47 +138,62 @@ plot_ct_region = function(region_name, which.plot = "D", add=NULL) {
   #compartment_plot_labels = c("D")
   #compartment_plot_names = c("Deaths")
   #compartment_plot_colors = rainbow(length(compartment_plot_labels))
+  lab.table <- data.frame(compartment=c("D","H","Hbar","cum_modH","S","E","I_s","I_m","A"),
+                          color=c('#e41a1c','#377eb8','#4daf4a','#984ea3',
+                                  '#ff7f00','#ffff33','#a65628','#f781bf','#999999'),
+                          labels=c("Deaths","Hospitalizations","Hospital Overflow",
+                                    "Cumulative Hospitalizations",
+                                    "Susceptible Population","Exposed Population",
+                                    "Severe Infections","Mild Infections",
+                                    "Asymptomatic Infections"))
 
   par(mar=c(3,4,3,0), bty="n")
   toplot <- paste(rep(which.plot,each=length(region_name)),
                   rep(region_name, length(which.plot)),sep=".")
   sir_result_region= filter(sir_results_summary, variable%in%toplot)
 
-  plot(0, type="n", xlab="", ylab="People", main=region_name, col="black", 
-       ylim=c(0,max(sir_result_region$mean[sir_result_region$time <= tmax])), xlim=c(0,1.1*tmax), axes=FALSE)
+  title <- paste0(lab.table$labels[lab.table$compartment==which.plot[1]], " in ", region_name)
+  ymax <- max(sir_result_region$mean[sir_result_region$time <= tmax])
+  
+  if(!is.null(add)){
+    if(region_name != "Connecticut"){
+        sub.add <- subset(add, County == region_name)
+      }else{
+        sub.add <- aggregate(value~Date, data=add, FUN=function(x){sum(x)})
+      }
+      ymax <- max(ymax, sub.add$value)
+  }
+
+  plot(0, type="n", xlab="", ylab="People", main=title, col="black", 
+       ylim=c(0,ymax), xlim=c(0,1.1*tmax), axes=FALSE)
   axis(1,at=daymonthseq, lab=monthseq_lab)
   axis(2)
 
   abline(v=Sys.Date()-day0, col="gray", lty=2)
 
-  col.table <- data.frame(compartment=c("D","H","Hbar","cum_modH","S","E","I_s","I_m","A"),
-                          color=c('#e41a1c','#377eb8','#4daf4a','#984ea3','#ff7f00','#ffff33','#a65628','#f781bf','#999999'))
-  col.table$color <- as.character(col.table$color)
+
+  lab.table$color <- as.character(lab.table$color)
   for(i in 1:length(which.plot)){
-    col.line <- col.table$color[which(col.table$compartment==which.plot[i])]
+    col.line <- lab.table$color[which(lab.table$compartment==which.plot[i])]
     col.polygon <- adjustcolor(col.line, alpha.f = 0.5)
     sir_result_region_sub <- filter(sir_result_region, variable==paste0(which.plot[i],".",region_name))
     polygon(c(sir_result_region_sub$time, rev(sir_result_region_sub$time)), c(sir_result_region_sub$lower, rev(sir_result_region_sub$upper)), col=col.polygon, border=NA)
 
     lines(sir_result_region_sub$time, sir_result_region_sub$mean, col=col.line)
-    #if(which.plot[i]=="D"){
-      # label mean
     text(sir_result_region_sub$time[tmax+1], sir_result_region_sub$mean[tmax+1], format(sir_result_region_sub$mean[tmax+1],digits=1), pos=4, col=col.line)
-      #text(sir_result_region_sub$time[tmax+1], sir_result_region_sub$lower[tmax+1], format(sir_result_region_sub$lower[tmax+1],digits=1), pos=4, col=col.polygon)
-      #text(sir_result_region_sub$time[tmax+1], sir_result_region_sub$upper[tmax+1], format(sir_result_region_sub$upper[tmax+1],digits=1), pos=4, col=col.polygon)
-    #}
+    #text(sir_result_region_sub$time[tmax+1], sir_result_region_sub$lower[tmax+1], format(sir_result_region_sub$lower[tmax+1],digits=1), pos=4, col=col.polygon)
+    #text(sir_result_region_sub$time[tmax+1], sir_result_region_sub$upper[tmax+1], format(sir_result_region_sub$upper[tmax+1],digits=1), pos=4, col=col.polygon)
     if(!is.null(add)){
-      if(region_name != "Connecticut"){
-        sub.add <- subset(add, County == region_name)
-      }else{
-        sub.add <- aggregate(value~Date, data=add, FUN=function(x){sum(x)})
-      }
-      lines(as.numeric(as.Date(sub.add$Date) - day0), sub.add$value, col='gray30', lty  = 3,  lwd=1.2)
+      lines(as.numeric(as.Date(sub.add$Date) - day0), sub.add$value, col='gray30', lty  = 2,  lwd=1.2)
+      tmp1 = as.numeric(today() - day0)
+      tmp2 = as.numeric(daymax - day0)
+      capvalue = sub.add$value[length(sub.add$value)]
+      lines(c(tmp1,tmp2), rep(capvalue,2), col='gray30', lty  = 2,  lwd=1.2)
     }
   }
 
   # Add observed deaths
-  col.line <- col.table$color[which(col.table$compartment=="D")]
+  col.line <- lab.table$color[which(lab.table$compartment=="D")]
   if(region_name == "Connecticut" && "D" %in% which.plot) {
     points(dat_ct_state$time, dat_ct_state$deaths, pch=16, col=col.line) 
   } else if("D" %in% which.plot) {
@@ -190,7 +206,7 @@ plot_ct_region = function(region_name, which.plot = "D", add=NULL) {
   }
 
   # Add observed hospitalization
-  col.line <- col.table$color[which(col.table$compartment=="H")]
+  col.line <- lab.table$color[which(lab.table$compartment=="H")]
   if(region_name == "Connecticut" && "H" %in% which.plot) {
       points(dat_ct_state$time, dat_ct_state$cur_hosp, pch=16, col=col.line) 
     } else if("H" %in% which.plot) {
@@ -209,9 +225,19 @@ plot_ct_region = function(region_name, which.plot = "D", add=NULL) {
   # describe intvx
   region_summary <- NULL
   if("D" %in% which.plot){
+      sir_result_region_sub <- filter(sir_result_region, variable==paste0("D.",region_name))
+      count <- sir_result_region_sub$mean[sir_result_region_sub$time==tmax]
       region_summary = paste(region_summary, "On ", format(daymax, "%b %d, %Y"),
-                       " projections show ", format(sir_result_region$mean[tmax+1], digits=2),
+                       " projections show ", format(count, digits=2),
                        " deaths in ", region_name,
+                       sep="")    
+  }
+  if("H" %in% which.plot){
+      sir_result_region_sub <- filter(sir_result_region, variable==paste0("H.",region_name))
+      count <- sir_result_region_sub$mean[sir_result_region_sub$time==tmax]
+      region_summary = paste(region_summary, "On ", format(daymax, "%b %d, %Y"),
+                       " projections show ", format(count, digits=2),
+                       " hospitalizations in ", region_name,
                        sep="")    
   }
 
@@ -288,14 +314,17 @@ plot_interventions = function() {
 
 
 par(mfrow=c(3,3))
-
 plot_ct_region("Connecticut")
 sapply(region_names, plot_ct_region)
 
 # test plot multiple lines
-plot_ct_region("Connecticut", c("D", "H", "Hbar"), add = dat_ct_capacity)
+plot_ct_region("Connecticut", c("H"), add = dat_ct_capacity)
+
+stop("here")
+
 for(i in region_names){
-  plot_ct_region(i, c("D", "H", "Hbar"), add = dat_ct_capacity)
+  summary <- plot_ct_region(i, c("H"), add = dat_ct_capacity)
+  print(summary)
 }
 
 
