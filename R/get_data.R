@@ -57,6 +57,19 @@ dat_ct_state <- merge(dat_ct_state, ct.hosp, by='time', all=T)
 dat_ct_state$date.y <- NULL
 names(dat_ct_state)[names(dat_ct_state) == "date.x"] <- "date"
 
+## add county-level hospitalization (current counts): this csv file needs to be updated using get_data_capacity.R file ##
+ct.hosp.county <- read.csv('../data/ct_current_hosp.csv')
+ct.hosp.county$time <- round(as.numeric(difftime(ymd(ct.hosp.county$Date), day0, units="days")),0)
+ct.hosp.county$cur_hosp <- ct.hosp.county$value
+ct.hosp.county$county <- ct.hosp.county$County
+dat_ct_county$time <- round(as.numeric(difftime(ymd(dat_ct_county$date), day0, units="days")),0)
+dat_ct_county <- merge(dat_ct_county, ct.hosp.county[, c("time", "county", "cur_hosp")], by=c("time","county"), all=T)
+dat_ct_county$state <-  dat_ct_county$state[1]
+dat_ct_county$date <- day0 +  dat_ct_county$time
+dat_ct_county$cur_hosp[is.na(dat_ct_county$cur_hosp)] <- 0
+dat_ct_county$cases[is.na(dat_ct_county$cases)] <- dat_ct_county$cur_hosp[is.na(dat_ct_county$cases)]
+
+
 return(list(dat_ct_state=dat_ct_state, dat_ct_county=dat_ct_county))
 }
 

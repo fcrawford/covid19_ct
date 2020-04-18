@@ -1,6 +1,7 @@
 ##
 ##	Read and organize data from COVID Data Extract (4-17-20)
 ##	Write ct_hosp_cap.csv  (long format data frame)
+##  Write ct_hosp_county.csv 
 
 library(data.table)
 library(ggplot2)
@@ -29,3 +30,24 @@ ggplot(subset(dat.long, variable =="Total available beds"), aes(x = Date, y = va
 dat.long$value[is.na(dat.long$value)] <- 0
 write.csv(subset(dat.long, variable == "Total available beds"), 
 		  "../data/ct_hosp_cap.csv", row.names=FALSE, quote=FALSE)
+
+
+
+current <- subset(dat.long, variable == "Inpatient COVID-positive census")
+alldates <-  min(current$Date) + c(0:(max(current$Date)-min(current$Date)))
+for(i in 1:length(alldates)){
+	if(alldates[i] %in% current$Date==FALSE){
+		counties <- unique(current$County)
+		previous <- subset(current, Date==alldates[i] - 1)
+		values <- previous$value[match(counties, previous$County)]
+		current <- rbind(current, data.frame(Date=alldates[i], 
+											 County = counties,
+											 variable="Inpatient COVID-positive census",
+											 value = values))
+		message(alldates[i], " imputed from previous day")
+	}
+}
+write.csv(current, 
+		  "../data/ct_current_hosp.csv", row.names=FALSE, quote=FALSE)
+
+
