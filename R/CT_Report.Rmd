@@ -26,11 +26,14 @@ source("run_ct_model.R")
 
 # Introduction 
 
-This document presents projections of COVID-19 infections, hospitalizations, and deaths in Connecticut counties, and the state as a whole.  
+This document presents projections of COVID-19 hospitalizations and deaths in Connecticut as a whole, and by county. It was prepared for the Governor's Reopen Connecticut Advisory group. 
+
 
 ## Data sources
 
 Hospital capacity and occupancy
+
+map data
 
 Historical and actual interventions
 
@@ -50,7 +53,10 @@ percent reduction in contact due to stay-at-home order is `r params_init$effect_
 
 # Projections 
 
+We present projections of COVID-19 deaths and hospitalizations for Connecticut as a whole, followed by projections by county.  Projections are shown as lines with uncertainty intervals in lighter colors, and actual data (if available) overlaid. Horizontal axes extend to the time horizon for this analysis, `r format(daymax, "%b %d, %Y")`. 
+
 ## Connecticut State 
+
 
 ```{r echo=FALSE}
 connecticut_summary = plot_ct_region("Connecticut")
@@ -137,9 +143,17 @@ This document is generated from [Rmarkdown](https://rmarkdown.rstudio.com/) usin
 
 ## Authors
 
-Forrest W. Crawford is an Associate Professor of Biostatistics, Statistics & Data Science, Operations, and Ecology & Evolutionary Biology at Yale University. He is affiliated with the Center for Interdisciplinary Research on AIDS, the Institute for Network Science, the Computational Biology and Bioinformatics Program, and the Public Health Modeling Unit.  Olga Morozova, Zehang Richard Li, and Soheil Eshghi are Postdoctoral Associates in the Department of Biostatistics at the Yale School of Public Health. 
+Forrest W. Crawford is an Associate Professor of Biostatistics, Statistics & Data Science, Operations, and Ecology & Evolutionary Biology at Yale University. He is affiliated with the Center for Interdisciplinary Research on AIDS, the Institute for Network Science, the Computational Biology and Bioinformatics Program, and the Public Health Modeling Unit.  
 
-Lab website: <http://www.crawfordlab.io>
+Olga Morozova, Zehang Richard Li, and Soheil Eshghi are Postdoctoral Associates in the Department of Biostatistics at the Yale School of Public Health. 
+
+<http://www.crawfordlab.io>
+
+<http://campuspress.yale.edu/omorozova/>
+
+<https://zehangli.com/>
+
+<http://www.soheileshghi.com/>
 
 ## Citation
 
@@ -148,6 +162,11 @@ To cite this document:
 > Forrest W. Crawford, Olga Morozova, Zehang Richard Li, Soheil Eshghi.  COVID-19 Projections for Connecticut.  `r format(Sys.time(), '%B %d %Y')`. 
 
 Code version reference: `r system("git rev-parse HEAD", intern=TRUE)`
+
+```{r echo=FALSE}
+system("git status --porcelain", intern=TRUE)
+```
+
 
 
 

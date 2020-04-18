@@ -120,11 +120,11 @@ plot_ct_region = function(region_name) {
   #compartment_plot_names = c("Deaths")
   #compartment_plot_colors = rainbow(length(compartment_plot_labels))
 
-  par(mar=c(4,4,3,0), bty="n")
+  par(mar=c(3,4,3,0), bty="n")
 
   sir_result_region = filter(sir_results_summary, variable==paste("D.",region_name,sep=""))
 
-  plot(0, type="n", xlab="Time", ylab="People", main=region_name, col="black", 
+  plot(0, type="n", xlab="", ylab="People", main=region_name, col="black", 
        ylim=c(0,max(sir_result_region$mean)), xlim=c(0,1.1*tmax), axes=FALSE)
   axis(1,at=daymonthseq, lab=monthseq_lab)
   axis(2)
