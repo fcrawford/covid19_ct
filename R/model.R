@@ -140,6 +140,9 @@ run_sir_model = function(state0, params, region_adj, populations, tmax, interven
   out$cum_modI.Connecticut <- cumsum(out$dailyI.Connecticut)
   out$cum_modH.Connecticut <- cumsum(out$dailyH.Connecticut)
 
+  out$time_H_lag <- out$time + params$H_lag
+  out$time_D_lag <- out$time + params$D_lag
+  
   #  Add cumulative for counties
   for(i in region_names){
     dailyH <- params$alpha * out[[paste0("I_s.", i)]]

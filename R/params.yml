@@ -20,9 +20,8 @@ m_Hbar_mult: 2
 timeframe: 183
 
 # reporting lag (days): not user-defined
-rcase_lag: 4 
-rhosp_lag: 3 
-rdeath_lag: 1
+H_lag: 6 
+D_lag: 6
 
 # effectiveness of stay-at-home intervention: user-defined
 #effect_intvx: 0.5 # NOT USED
