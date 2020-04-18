@@ -179,14 +179,15 @@ middlesex_summary_hospitalization = plot_ct_region("Middlesex", which.plot="H")
 ## New Haven
 
 ```{r echo=FALSE}
-new_haven_summary = plot_ct_region("New Haven", which.plot="D")
+new_haven_summary_deaths = plot_ct_region("New Haven", which.plot="D")
 ```
-`r new_haven_summary`
+`r new_haven_summary_deaths`
 
 ```{r echo=FALSE}
-plot_ct_region("New Haven", which.plot="H")
+new_haven_summary_hospitalizations = plot_ct_region("New Haven", which.plot="H")
 ```
 
+`r new_haven_summary_hospitalizations`
 
 
 
