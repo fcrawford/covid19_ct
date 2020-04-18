@@ -193,7 +193,7 @@ plot_ct_region = function(region_name, which.plot = "D", add=NULL) {
   col.line <- col.table$color[which(col.table$compartment=="H")]
   if(region_name == "Connecticut" && "H" %in% which.plot) {
       points(dat_ct_state$time, dat_ct_state$cur_hosp, pch=16, col=col.line) 
-    } else if("D" %in% which.plot) {
+    } else if("H" %in% which.plot) {
       obs.region <- subset(dat_ct_county, county == region_name)
       obs.region$date <- ymd(obs.region$date)
       first.region.time <- round(as.numeric(difftime(obs.region$date[1], day0, units="days")),0)
@@ -292,8 +292,8 @@ par(mfrow=c(3,3))
 plot_ct_region("Connecticut")
 sapply(region_names, plot_ct_region)
 
-tmax=30
 # test plot multiple lines
+tmax=40
 plot_ct_region("Connecticut", c("D", "H", "Hbar"), add = dat_ct_capacity)
 for(i in region_names){
   plot_ct_region(i, c("D", "H", "Hbar"), add = dat_ct_capacity)
