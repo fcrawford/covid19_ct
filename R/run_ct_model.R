@@ -102,7 +102,7 @@ schoolsfun = get_school_in_session_fun(state_schools_reopen=dmy("01/09/2020"))
 #######################
 # run the sims
 
-nsim = 1
+nsim = 10
 
 sir_results = lapply(1:nsim, function(i){
   res = run_sir_model(state0=state0, 
@@ -263,6 +263,6 @@ print(death.map)
 
 # Cumulative hospitalization plot
 plot.new()
-hos.map = mapplot_ct_region("cum_modH",  "Cumulative Hospitalizations")  
+hos.map = mapplot_ct_region("cum_modH",  "Cumulative\nHospitalizations")  
 print(hos.map)
 
