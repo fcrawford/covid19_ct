@@ -6,7 +6,8 @@
 # need intervention coding 
 # hosp capacity
 
-run_sir_model = function(state0, params, region_adj, populations, tmax) {
+run_sir_model = function(state0, params, region_adj, populations, tmax, 
+                         effect_intvx, intvx_time) {
 
   nregions = nrow(region_adj) # number of counties or towns, whatever. 
 
@@ -30,17 +31,17 @@ run_sir_model = function(state0, params, region_adj, populations, tmax) {
   # before/after
 
   beta_pre = params$beta_pre
-  #beta_post = (1-params$effect_intvx)*beta_pre 
+  beta_post = (1-effect_intvx)*beta_pre 
   
   # number of adjacent regions for each region: use to keep overall beta the same for each county
   region_adj_num <- rowSums(region_adj)
   
   beta_matrix_pre  = ( (1-params$k_n)*diag(1,nregions) + params$k_n*(1/region_adj_num)*region_adj ) * beta_pre
-
+  beta_matrix_post = ( (1-params$k_n)*diag(1,nregions) + params$k_n*(1/region_adj_num)*region_adj ) * beta_post
+  
   params$m_Hbar = params$m_H * params$m_Hbar_mult
 
-  #beta_matrix_post = ( (1-params$k_n)*diag(1,nregions) + params$k_n*region_adj ) * beta_post;
-
+  intervention_switch <- approxfun(x=c(-20, -10, -1, 0, 1, 10, 20), y=c(1,1,1,0.5, 0,0,0), rule=2   )
 
   model <- function(time, state, parameters) {
     with(as.list(c(state, parameters)), {
@@ -55,9 +56,9 @@ run_sir_model = function(state0, params, region_adj, populations, tmax) {
       R = state[R_idx]
 
 
-      beta = beta_matrix_pre
+      #beta = beta_matrix_pre
 
-
+      beta = intervention_switch(time-intvx_time) * (beta_matrix_pre - beta_matrix_post) + beta_matrix_post
       
       # slope: parameter that sets how close the sigmoids are to a true 0-1 switch
       

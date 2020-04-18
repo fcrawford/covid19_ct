@@ -94,7 +94,8 @@ rparams = function() {
 nsim = 30
 
 sir_results = lapply(1:nsim, function(i){
-  res = run_sir_model(state0=state0, params=rparams(), region_adj=adj, populations=init$population, tmax=tmax)
+  res = run_sir_model(state0=state0, params=rparams(), region_adj=adj, populations=init$population, tmax=tmax,
+                      effect_intvx=0.5, intvx_time=25)
   res$sim_id = i
   res
 })
