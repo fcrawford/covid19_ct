@@ -28,4 +28,4 @@ ggplot(subset(dat.long, variable %in% subset[1:3]), aes(x = Date, y = value, col
 ggplot(subset(dat.long, variable =="Total available beds"), aes(x = Date, y = value, color =  variable)) + geom_line() + facet_wrap(~County, ncol =  4, scale='free') 
 dat.long$value[is.na(dat.long$value)] <- 0
 write.csv(subset(dat.long, variable == "Total available beds"), 
-		  "../data/ct_hosp_cap.csv")
+		  "../data/ct_hosp_cap.csv", row.names=FALSE, quote=FALSE)
