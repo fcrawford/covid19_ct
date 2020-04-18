@@ -12,6 +12,7 @@ library(mapproj)
 
 source("model.R")
 source("get_data.R")
+source("intervention_functions.R")
 
 ########################
 # Dates
@@ -89,14 +90,27 @@ rparams = function() {
   return(params_tmp)
 }
 
+
+#######################
+# set intervention patterns
+
+lockfun = get_state_lockdown_fun(offdate=dmy("01/06/2020"), post_off_effect=params_init$distancing_effect)
+
+schoolsfun = get_school_in_session_fun(state_schools_reopen=dmy("01/09/2020"))
+
+
 #######################
 # run the sims
 
-nsim = 30
+nsim = 1
 
 sir_results = lapply(1:nsim, function(i){
-  res = run_sir_model(state0=state0, params=rparams(), region_adj=adj, populations=init$population, tmax=tmax,
-                      effect_intvx=0.5, intvx_time=25)
+  res = run_sir_model(state0=state0, 
+                      params=rparams(),  # note: effect_intvx is in params, and is not passed to run_sir_model separately 
+                      region_adj=adj, 
+                      populations=init$population, 
+                      tmax=tmax, 
+                      interventions=list(lockdown=lockfun, schools=schoolsfun)) # intervention functions! 
   res$sim_id = i
   res
 })
@@ -200,6 +214,10 @@ plot_ct_region("Connecticut")
 sapply(region_names, plot_ct_region)
 
 plot.new()
-pmap = mapplot_ct_region() #map=CTmap, ncol=3)
-print(pmap)
+par(mfrow=c(1,1))
+plot(sir_results[[1]]$intervention_pattern, ylim=c(0,1), main="intervention pattern", type="l", bty="n")
+
+#plot.new()
+#pmap = mapplot_ct_region() #map=CTmap, ncol=3)
+#print(pmap)
 
