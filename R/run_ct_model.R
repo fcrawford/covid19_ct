@@ -132,8 +132,8 @@ sir_results_long <- melt(sir_results_all, id.vars = c("time", "sim_id"))
 sir_results_summary <- sir_results_long %>% group_by(variable, time) %>% 
 			                   summarise(
                            mean = mean(value),
-			                     lower = quantile(value, 0.05),
-			                     upper = quantile(value, 0.95))
+			                     lower = quantile(value, 0.05, na.rm=TRUE),
+			                     upper = quantile(value, 0.95, na.rm=TRUE))
 
 ####################
 # plotting 
@@ -143,8 +143,8 @@ plot_ct_region = function(region_name, which.plot = "D", add=NULL) {
   #compartment_plot_labels = c("D")
   #compartment_plot_names = c("Deaths")
   #compartment_plot_colors = rainbow(length(compartment_plot_labels))
-  lab.table <- data.frame(compartment=c("D","rD.Connecticut",
-                                        "H","rH.Connecticut",
+  lab.table <- data.frame(compartment=c("D","rD",
+                                        "H","rH",
                                         "Hbar","cum_modH","S","E","I_s","I_m","A"),
                           color=c('#e41a1c','#e41a1c','#377eb8','#377eb8',
                                   '#4daf4a','#984ea3','#ff7f00','#ffff33',
@@ -157,7 +157,7 @@ plot_ct_region = function(region_name, which.plot = "D", add=NULL) {
                                     "Severe Infections","Mild Infections",
                                     "Asymptomatic Infections"))
 
-  if("rH.Connecticut" %in% which.plot) add <- dat_ct_capacity
+  if("rH" %in% which.plot) add <- dat_ct_capacity
 
   par(mar=c(3,4,3,0), bty="n")
   toplot <- paste(rep(which.plot,each=length(region_name)),
@@ -165,7 +165,7 @@ plot_ct_region = function(region_name, which.plot = "D", add=NULL) {
   sir_result_region= filter(sir_results_summary, variable%in%toplot)
 
   title <- paste0(lab.table$labels[lab.table$compartment==which.plot[1]], " in ", region_name)
-  ymax <- max(sir_result_region$mean[sir_result_region$time <= tmax])
+  ymax <- max(sir_result_region$mean[sir_result_region$time <= tmax], na.rm=TRUE)
   
   if(!is.null(add)){
     if(region_name != "Connecticut"){
@@ -206,9 +206,9 @@ plot_ct_region = function(region_name, which.plot = "D", add=NULL) {
 
   # Add observed deaths
   col.line <- lab.table$color[which(lab.table$compartment=="D")]
-  if(region_name == "Connecticut" && "rD.Connecticut" %in% which.plot) {
+  if(region_name == "Connecticut" && "rD" %in% which.plot) {
     points(dat_ct_state$time, dat_ct_state$deaths, pch=16, col=col.line) 
-  } else if("rD.Connecticut" %in% which.plot) {
+  } else if("rD" %in% which.plot) {
     obs.region <- subset(dat_ct_county, county == region_name)
     obs.region$date <- ymd(obs.region$date)
     first.region.time <- round(as.numeric(difftime(obs.region$date[1], day0, units="days")),0)
@@ -219,9 +219,9 @@ plot_ct_region = function(region_name, which.plot = "D", add=NULL) {
 
   # Add observed hospitalization
   col.line <- lab.table$color[which(lab.table$compartment=="H")]
-  if(region_name == "Connecticut" && "rH.Connecticut" %in% which.plot) {
+  if(region_name == "Connecticut" && "rH" %in% which.plot) {
       points(dat_ct_state$time, dat_ct_state$cur_hosp, pch=16, col=col.line) 
-  } else if("rH.Connecticut" %in% which.plot) {
+  } else if("rH" %in% which.plot) {
     obs.region <- subset(dat_ct_county, county == region_name)
     obs.region$date <- ymd(obs.region$date)
     first.region.time <- round(as.numeric(difftime(obs.region$date[1], day0, units="days")),0)
@@ -236,7 +236,7 @@ plot_ct_region = function(region_name, which.plot = "D", add=NULL) {
   # capacity exceeded?
   # describe intvx
   region_summary <- NULL
-  if("D" %in% which.plot || "rD.Connecticut" %in% which.plot){
+  if("D" %in% which.plot || "rD" %in% which.plot){
       sir_result_region_sub <- filter(sir_result_region, variable==paste0(which.plot[1],".",region_name))
       count <- sir_result_region_sub$mean[sir_result_region_sub$time==tmax]
       region_summary = paste(region_summary, "On ", format(daymax, "%b %d, %Y"),
@@ -245,7 +245,7 @@ plot_ct_region = function(region_name, which.plot = "D", add=NULL) {
                        ".",
                        sep="")    
   }
-  if("H" %in% which.plot || "rH.Connecticut" %in% which.plot){
+  if("H" %in% which.plot || "rH" %in% which.plot){
       sir_result_region_sub <- filter(sir_result_region, variable==paste0(which.plot[1],".",region_name))
       count <- max(sir_result_region_sub$mean)
       region_summary = paste(region_summary, "On ", format(daymax, "%b %d, %Y"),

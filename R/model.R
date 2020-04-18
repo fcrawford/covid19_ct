@@ -140,9 +140,39 @@ run_sir_model = function(state0, params, region_adj, populations, tmax, interven
   out$cum_modI.Connecticut <- cumsum(out$dailyI.Connecticut)
   out$cum_modH.Connecticut <- cumsum(out$dailyH.Connecticut)
 
+  
+  # add variables to plot lagged deaths and hospitalizations 
   out$time_H_lag <- out$time + params$H_lag
   out$time_D_lag <- out$time + params$D_lag
+
+  H_lag <- params$H_lag
+  D_lag <- params$D_lag
   
+  idx_H_lag = 1:(nrow(out) - H_lag)
+  idx_D_lag = 1:(nrow(out) - D_lag)
+  
+  out$rH.Connecticut <- out$rD.Connecticut <- NA
+  for (k in idx_H_lag){
+    out$rH.Connecticut[k+H_lag] <- out$H.Connecticut[k]
+  }
+
+  for (k in idx_D_lag){
+    out$rD.Connecticut[k+D_lag] <- out$D.Connecticut[k]
+  }
+  
+  for(i in region_names){
+    out[[paste0("rH.", i)]] <- out[[paste0("rD.", i)]] <- NA
+    
+    for (k in idx_H_lag){
+      out[[paste0("rH.", i)]][k+H_lag] <- out[[paste0("H.", i)]][k]
+      }
+
+    for (k in idx_D_lag){
+      out[[paste0("rD.", i)]][k+D_lag] <- out[[paste0("D.", i)]][k]
+    }
+  }  
+  
+    
   #  Add cumulative for counties
   for(i in region_names){
     dailyH <- params$alpha * out[[paste0("I_s.", i)]]
