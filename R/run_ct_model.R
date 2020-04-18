@@ -123,7 +123,7 @@ plot_ct_region = function(region_name) {
   sir_result_region = filter(sir_results_summary, variable==paste("D.",region_name,sep=""))
 
   plot(0, type="n", xlab="Time", ylab="People", main=region_name, col="black", 
-       ylim=c(0,max(dat_ct_state$deaths)), xlim=c(0,1.1*tmax), axes=FALSE)
+       ylim=c(0,max(sir_result_region$mean)), xlim=c(0,1.1*tmax), axes=FALSE)
   axis(1,at=daymonthseq, lab=monthseq_lab)
   axis(2)
 
