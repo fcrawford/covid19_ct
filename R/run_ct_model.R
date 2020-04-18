@@ -228,6 +228,13 @@ plot.new()
 par(mfrow=c(1,1))
 plot(sir_results[[1]]$intervention_pattern, ylim=c(0,1), main="intervention pattern", type="l", bty="n")
 
+# Death plot
 plot.new()
 death.map = mapplot_ct_region() #map=CTmap, ncol=3)
 print(death.map)
+
+# Cumulative hospitalization plot
+plot.new()
+hos.map = mapplot_ct_region("cum_modH",  "Cumulative Hospitalizations")  
+print(hos.map)
+
