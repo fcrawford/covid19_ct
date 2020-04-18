@@ -21,7 +21,7 @@ source("intervention_functions.R")
 day0 = ymd("2020-03-01")
 
 # ending day
-daymax = ymd("2020-09-01")
+daymax = ymd("2020-11-01")
 
 # to use in the model
 tmax = as.numeric(difftime(daymax, day0, units="days"))
@@ -200,7 +200,32 @@ mapplot_ct_region = function(...) {
   return(g)
 }
 
-#obs.region <- subset(dat_ct_county, county == "New Haven")
+####################################
+
+plot_interventions = function() {
+
+  par(mar=c(3,3,3,0), bty="n")
+  layout(matrix(c(1,2,3),nrow=3), heights=c(2,2,3))
+
+  plot(sir_results[[1]]$intervention_schools, ylim=c(0,1), type="n", ylab="", xlab="", main="Schools in session", axes=FALSE)
+  axis(1, at=daymonthseq, lab=monthseq_lab)
+  axis(2)
+  polygon(c(1,1:(tmax+1), tmax+1), c(0,sir_results[[1]]$intervention_schools, 0), col="orange", border=NA)
+
+  plot(sir_results[[1]]$intervention_lockdown, ylim=c(0,1), type="n", ylab="", xlab="", main="Stay-at-home order in place", axes=FALSE)
+  axis(1, at=daymonthseq, lab=monthseq_lab)
+  axis(2)
+  polygon(c(1,1:(tmax+1), tmax+1), c(0,sir_results[[1]]$intervention_lockdown, 0), col="orange", border=NA)
+
+
+  plot(sir_results[[1]]$intervention_pattern, ylim=c(0,1),  type="n", ylab="", xlab="", main="Relative reduction in transmission", axes=FALSE)
+  axis(1, at=daymonthseq, lab=monthseq_lab)
+  axis(2)
+  polygon(c(1,1:(tmax+1), tmax+1), c(0,sir_results[[1]]$intervention_pattern, 0), col="orange", border=NA)
+
+}
+
+
 ########################
 
 # make correspondence with calendar dates
@@ -214,8 +239,7 @@ plot_ct_region("Connecticut")
 sapply(region_names, plot_ct_region)
 
 plot.new()
-par(mfrow=c(1,1))
-plot(sir_results[[1]]$intervention_pattern, ylim=c(0,1), main="intervention pattern", type="l", bty="n")
+plot_interventions()
 
 #plot.new()
 #pmap = mapplot_ct_region() #map=CTmap, ncol=3)

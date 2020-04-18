@@ -55,7 +55,18 @@ percent reduction in contact due to stay-at-home order is `r params_init$effect_
 
 We present projections of COVID-19 deaths and hospitalizations for Connecticut as a whole, followed by projections by county.  Projections are shown as lines with uncertainty intervals in lighter colors, and actual data (if available) overlaid. Horizontal axes extend to the time horizon for this analysis, `r format(daymax, "%b %d, %Y")`. 
 
+
+
+
 ## Connecticut State 
+
+
+Interventions assumed
+
+```{r echo=FALSE}
+plot_interventions()
+```
+
 
 
 ```{r echo=FALSE}

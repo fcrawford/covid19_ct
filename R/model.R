@@ -141,6 +141,8 @@ run_sir_model = function(state0, params, region_adj, populations, tmax, interven
   out$cum_modH.Connecticut <- cumsum(out$dailyH.Connecticut)
 
   out$intervention_pattern = intervention_fun(1:(tmax+1))
+  out$intervention_schools = interventions$schools(1:(tmax+1))
+  out$intervention_lockdown = interventions$lockdown(1:(tmax+1))
 
   return(out)
 }
