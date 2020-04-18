@@ -247,7 +247,7 @@ plot_ct_region = function(region_name, which.plot = "D", add=NULL) {
   }
   if("H" %in% which.plot || "rH" %in% which.plot){
       sir_result_region_sub <- filter(sir_result_region, variable==paste0(which.plot[1],".",region_name))
-      count <- max(sir_result_region_sub$mean)
+      count <- max(sir_result_region_sub$mean, na.rm=TRUE)
       region_summary = paste(region_summary, "On ", format(daymax, "%b %d, %Y"),
                        " projections show a peak of ", format(count, digits=2),
                        " hospitalizations in ", region_name,
