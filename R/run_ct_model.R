@@ -144,14 +144,17 @@ plot_ct_region = function(region_name, which.plot = "D", add=NULL) {
   sir_result_region= filter(sir_results_summary, variable%in%toplot)
 
   plot(0, type="n", xlab="", ylab="People", main=region_name, col="black", 
-       ylim=c(0,max(sir_result_region$mean)), xlim=c(0,1.1*tmax), axes=FALSE)
+       ylim=c(0,max(sir_result_region$mean[sir_result_region$time <= tmax])), xlim=c(0,1.1*tmax), axes=FALSE)
   axis(1,at=daymonthseq, lab=monthseq_lab)
   axis(2)
 
   abline(v=Sys.Date()-day0, col="gray", lty=2)
 
+  col.table <- data.frame(compartment=c("D","H","Hbar","cum_modH","S","E","I_s","I_m","A"),
+                          color=c('#e41a1c','#377eb8','#4daf4a','#984ea3','#ff7f00','#ffff33','#a65628','#f781bf','#999999'))
+  col.table$color <- as.character(col.table$color)
   for(i in 1:length(which.plot)){
-    col.line <- c('#e41a1c','#377eb8','#4daf4a','#984ea3','#ff7f00')[i]
+    col.line <- col.table$color[which(col.table$compartment==which.plot[i])]
     col.polygon <- adjustcolor(col.line, alpha.f = 0.5)
     sir_result_region_sub <- filter(sir_result_region, variable==paste0(which.plot[i],".",region_name))
     polygon(c(sir_result_region_sub$time, rev(sir_result_region_sub$time)), c(sir_result_region_sub$lower, rev(sir_result_region_sub$upper)), col=col.polygon, border=NA)
@@ -173,16 +176,31 @@ plot_ct_region = function(region_name, which.plot = "D", add=NULL) {
     }
   }
 
+  # Add observed deaths
+  col.line <- col.table$color[which(col.table$compartment=="D")]
   if(region_name == "Connecticut" && "D" %in% which.plot) {
-    points(dat_ct_state$time, dat_ct_state$deaths, pch=16, col=rgb(1,0,0,alpha=0.5)) 
+    points(dat_ct_state$time, dat_ct_state$deaths, pch=16, col=col.line) 
   } else if("D" %in% which.plot) {
     obs.region <- subset(dat_ct_county, county == region_name)
     obs.region$date <- ymd(obs.region$date)
     first.region.time <- round(as.numeric(difftime(obs.region$date[1], day0, units="days")),0)
     obs.region$time <- c(first.region.time:(nrow(obs.region)+first.region.time-1)) # add time variable that indexes time 
     #obs.region <- merge(obs.region, date.time, by='date')
-    points(obs.region$time, obs.region$deaths, pch=16, col=rgb(1,0,0,alpha=0.5))
+    points(obs.region$time, obs.region$deaths, pch=16, col=col.line)
   }
+
+  # Add observed hospitalization
+  col.line <- col.table$color[which(col.table$compartment=="H")]
+  if(region_name == "Connecticut" && "H" %in% which.plot) {
+      points(dat_ct_state$time, dat_ct_state$cur_hosp, pch=16, col=col.line) 
+    } else if("H" %in% which.plot) {
+      obs.region <- subset(dat_ct_county, county == region_name)
+      obs.region$date <- ymd(obs.region$date)
+      first.region.time <- round(as.numeric(difftime(obs.region$date[1], day0, units="days")),0)
+      obs.region$time <- c(first.region.time:(nrow(obs.region)+first.region.time-1)) # add time variable that indexes time 
+      #obs.region <- merge(obs.region, date.time, by='date')
+      points(obs.region$time, obs.region$cur_hosp, pch=16, col=col.line)
+    }
 
 	#legend(0, max(dat_ct_state$deaths), compartment_plot_names, lty=1, col=compartment_plot_colors, bty="n")
 
@@ -273,7 +291,6 @@ par(mfrow=c(3,3))
 
 plot_ct_region("Connecticut")
 sapply(region_names, plot_ct_region)
-
 
 # test plot multiple lines
 plot_ct_region("Connecticut", c("D", "H", "Hbar"), add = dat_ct_capacity)
