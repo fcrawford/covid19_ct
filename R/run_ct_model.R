@@ -128,35 +128,41 @@ sir_results_summary <- sir_results_long %>% group_by(variable, time) %>%
 
 ####################
 # plotting 
+# @param which.plot the prefix of the compartment to plot, e.g., S, E, I_s, I_m. If a vector of more than one specified, it plots multiple lines
 
-plot_ct_region = function(region_name) {
+plot_ct_region = function(region_name, which.plot = "D") {
   #compartment_plot_labels = c("D")
   #compartment_plot_names = c("Deaths")
   #compartment_plot_colors = rainbow(length(compartment_plot_labels))
 
   par(mar=c(3,4,3,0), bty="n")
-
-  sir_result_region = filter(sir_results_summary, variable==paste("D.",region_name,sep=""))
+  toplot <- paste(rep(which.plot,each=length(region_names)),
+                  rep(region_names, length(which.plot)),sep=".")
+  sir_result_region= filter(sir_results_summary, variable%in%toplot)
 
   plot(0, type="n", xlab="", ylab="People", main=region_name, col="black", 
        ylim=c(0,max(sir_result_region$mean)), xlim=c(0,1.1*tmax), axes=FALSE)
   axis(1,at=daymonthseq, lab=monthseq_lab)
   axis(2)
 
-
   abline(v=Sys.Date()-day0, col="gray", lty=2)
 
-  polygon(c(sir_result_region$time, rev(sir_result_region$time)), c(sir_result_region$lower, rev(sir_result_region$upper)), col=rgb(1,0,0,alpha=0.5), border=NA)
+  for(i in 1:length(which.plot)){
+    col.line <- c('#e41a1c','#377eb8','#4daf4a','#984ea3','#ff7f00')[i]
+    col.polygon <- adjustcolor(col.line, alpha.f = 0.5)
+    sir_result_region_sub <- filter(sir_result_region, variable==paste0(which.plot[i],".",region_name))
+    polygon(c(sir_result_region_sub$time, rev(sir_result_region_sub$time)), c(sir_result_region_sub$lower, rev(sir_result_region_sub$upper)), col=col.polygon, border=NA)
 
-  lines(sir_result_region$time, sir_result_region$mean, col="red")
-  # label mean
-  text(sir_result_region$time[tmax+1], sir_result_region$mean[tmax+1], format(sir_result_region$mean[tmax+1],digits=1), pos=4, col="red")
-  text(sir_result_region$time[tmax+1], sir_result_region$lower[tmax+1], format(sir_result_region$lower[tmax+1],digits=1), pos=4, col=rgb(1,0,0,alpha=0.5))
-  text(sir_result_region$time[tmax+1], sir_result_region$upper[tmax+1], format(sir_result_region$upper[tmax+1],digits=1), pos=4, col=rgb(1,0,0,alpha=0.5))
+    lines(sir_result_region_sub$time, sir_result_region_sub$mean, col=col.line)
+    # label mean
+    text(sir_result_region_sub$time[tmax+1], sir_result_region_sub$mean[tmax+1], format(sir_result_region_sub$mean[tmax+1],digits=1), pos=4, col=col.line)
+    text(sir_result_region_sub$time[tmax+1], sir_result_region_sub$lower[tmax+1], format(sir_result_region_sub$lower[tmax+1],digits=1), pos=4, col=col.polygon)
+    text(sir_result_region_sub$time[tmax+1], sir_result_region_sub$upper[tmax+1], format(sir_result_region_sub$upper[tmax+1],digits=1), pos=4, col=col.polygon)
+  }
 
-  if(region_name == "Connecticut") {
+  if(region_name == "Connecticut" && "D" %in% which.plot) {
     points(dat_ct_state$time, dat_ct_state$deaths, pch=16, col=rgb(1,0,0,alpha=0.5)) 
-  } else {
+  } else if("D" %in% which.plot) {
     obs.region <- subset(dat_ct_county, county == region_name)
     obs.region$date <- ymd(obs.region$date)
     first.region.time <- round(as.numeric(difftime(obs.region$date[1], day0, units="days")),0)
@@ -170,10 +176,13 @@ plot_ct_region = function(region_name) {
   # return some useful info
   # capacity exceeded?
   # describe intvx
-	region_summary = paste("On ", format(daymax, "%b %d, %Y"),
-											 " projections show ", format(sir_result_region$mean[tmax+1], digits=2),
-											 " deaths in ", region_name,
-                       sep="")
+  region_summary <- NULL
+  if("D" %in% which.plot){
+      region_summary = paste(region_summary, "On ", format(daymax, "%b %d, %Y"),
+                       " projections show ", format(sir_result_region$mean[tmax+1], digits=2),
+                       " deaths in ", region_name,
+                       sep="")    
+  }
 
   return(region_summary)
 }
@@ -223,6 +232,13 @@ par(mfrow=c(3,3))
 
 plot_ct_region("Connecticut")
 sapply(region_names, plot_ct_region)
+
+for(i in region_names){
+  debug(plot_ct_region)
+  plot_ct_region(i, c("H", "Hbar", "cum_modH"))
+}
+
+
 
 plot.new()
 par(mfrow=c(1,1))
