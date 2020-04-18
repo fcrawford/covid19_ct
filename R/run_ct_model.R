@@ -39,6 +39,7 @@ monthseq_lab = format(monthseq, "%b %Y")
 daymonthseq = difftime(monthseq, day0, units="days")
 
 
+
 ########################
 
 ##### get reported data from CT #####
@@ -179,14 +180,15 @@ plot_ct_region = function(region_name, which.plot = "D", add=NULL) {
     polygon(c(sir_result_region_sub$time, rev(sir_result_region_sub$time)), c(sir_result_region_sub$lower, rev(sir_result_region_sub$upper)), col=col.polygon, border=NA)
 
     lines(sir_result_region_sub$time, sir_result_region_sub$mean, col=col.line)
-    # if(which.plot[i]=="D"){
-      # label mean
-      text(sir_result_region_sub$time[tmax+1], sir_result_region_sub$mean[tmax+1], format(sir_result_region_sub$mean[tmax+1],digits=1), pos=4, col=col.line)
-      text(sir_result_region_sub$time[tmax+1], sir_result_region_sub$lower[tmax+1], format(sir_result_region_sub$lower[tmax+1],digits=1), pos=4, col=col.polygon)
-      text(sir_result_region_sub$time[tmax+1], sir_result_region_sub$upper[tmax+1], format(sir_result_region_sub$upper[tmax+1],digits=1), pos=4, col=col.polygon)
-    # }
+    text(sir_result_region_sub$time[tmax+1], sir_result_region_sub$mean[tmax+1], format(sir_result_region_sub$mean[tmax+1],digits=1), pos=4, col=col.line)
+    #text(sir_result_region_sub$time[tmax+1], sir_result_region_sub$lower[tmax+1], format(sir_result_region_sub$lower[tmax+1],digits=1), pos=4, col=col.polygon)
+    #text(sir_result_region_sub$time[tmax+1], sir_result_region_sub$upper[tmax+1], format(sir_result_region_sub$upper[tmax+1],digits=1), pos=4, col=col.polygon)
     if(!is.null(add)){
-      lines(as.numeric(as.Date(sub.add$Date) - day0), sub.add$value, col='gray30', lty  = 3,  lwd=1.2)
+      lines(as.numeric(as.Date(sub.add$Date) - day0), sub.add$value, col='gray30', lty  = 2,  lwd=1.2)
+      tmp1 = as.numeric(today() - day0)
+      tmp2 = as.numeric(daymax - day0)
+      capvalue = sub.add$value[length(sub.add$value)]
+      lines(c(tmp1,tmp2), rep(capvalue,2), col='gray30', lty  = 2,  lwd=1.2)
     }
   }
 
@@ -311,29 +313,30 @@ plot_interventions = function() {
 # plot state overall, and by region  
 
 
-par(mfrow=c(3,3))
-plot_ct_region("Connecticut")
-sapply(region_names, plot_ct_region)
+#par(mfrow=c(3,3))
+#plot_ct_region("Connecticut")
+#sapply(region_names, plot_ct_region)
 
 # test plot multiple lines
-plot_ct_region("Connecticut", c("H"), add = dat_ct_capacity)
-for(i in region_names){
-  summary <- plot_ct_region(i, c("H"), add = dat_ct_capacity)
-  print(summary)
-}
+#plot_ct_region("Connecticut", c("H"), add = dat_ct_capacity)
+
+#for(i in region_names){
+  #summary <- plot_ct_region(i, c("H"), add = dat_ct_capacity)
+  #print(summary)
+#}
 
 
 
-plot.new()
-plot_interventions()
+#plot.new()
+#plot_interventions()
 
 # Death plot
-plot.new()
-death.map = mapplot_ct_region() #map=CTmap, ncol=3)
-print(death.map)
+#plot.new()
+#death.map = mapplot_ct_region() #map=CTmap, ncol=3)
+#print(death.map)
 
 # Cumulative hospitalization plot
-plot.new()
-hos.map = mapplot_ct_region("cum_modH",  "Cumulative\nHospitalizations")  
-print(hos.map)
+#plot.new()
+#hos.map = mapplot_ct_region("cum_modH",  "Cumulative\nHospitalizations")  
+#print(hos.map)
 
