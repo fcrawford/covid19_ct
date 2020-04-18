@@ -61,3 +61,5 @@ return(list(dat_ct_state=dat_ct_state, dat_ct_county=dat_ct_county))
 }
 
 
+######### Get data on hospital capacity: updated daily #########
+dat_ct_capacity <- read.csv("../data/ct_hosp_cap.csv")
