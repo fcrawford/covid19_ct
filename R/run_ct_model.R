@@ -21,7 +21,7 @@ source("intervention_functions.R")
 day0 = ymd("2020-03-01")
 
 # ending day
-daymax = ymd("2020-09-01")
+daymax = ymd("2020-07-01")
 
 # to use in the model
 tmax = as.numeric(difftime(daymax, day0, units="days"))
@@ -38,6 +38,12 @@ monthseq = seq(day0, daymax, by="month")
 monthseq_lab = format(monthseq, "%b %Y")
 daymonthseq = difftime(monthseq, day0, units="days")
 
+
+
+#############################3
+# hypothetical end date of lockdown
+
+lockdown_end_date=dmy("01/06/2020") 
 
 
 ########################
@@ -95,7 +101,6 @@ rparams = function() {
 #######################
 # set intervention patterns
 
-lockdown_end_date=dmy("01/06/2020") 
 
 lockfun = get_state_lockdown_fun(offdate=lockdown_end_date, post_off_effect=params_init$distancing_effect)
 
@@ -106,7 +111,7 @@ schoolsfun = get_school_in_session_fun(state_schools_reopen=state_schools_reopen
 #######################
 # run the sims
 
-nsim = 10
+nsim = 100
 
 sir_results = lapply(1:nsim, function(i){
   res = run_sir_model(state0=state0, 
@@ -141,7 +146,7 @@ plot_ct_region = function(region_name, which.plot = "D", add=NULL) {
   lab.table <- data.frame(compartment=c("D","H","Hbar","cum_modH","S","E","I_s","I_m","A"),
                           color=c('#e41a1c','#377eb8','#4daf4a','#984ea3',
                                   '#ff7f00','#ffff33','#a65628','#f781bf','#999999'),
-                          labels=c("Deaths","Hospitalizations","Hospital Overflow",
+                          labels=c("Cumulative Deaths","Hospitalizations","Hospital Overflow",
                                     "Cumulative Hospitalizations",
                                     "Susceptible Population","Exposed Population",
                                     "Severe Infections","Mild Infections",
@@ -165,7 +170,7 @@ plot_ct_region = function(region_name, which.plot = "D", add=NULL) {
   }
 
   plot(0, type="n", xlab="", ylab="People", main=title, col="black", 
-       ylim=c(0,ymax), xlim=c(0,1.1*tmax), axes=FALSE)
+       ylim=c(0,1.1*ymax), xlim=c(0,1.1*tmax), axes=FALSE)
   axis(1,at=daymonthseq, lab=monthseq_lab)
   axis(2)
 
@@ -181,8 +186,8 @@ plot_ct_region = function(region_name, which.plot = "D", add=NULL) {
 
     lines(sir_result_region_sub$time, sir_result_region_sub$mean, col=col.line)
     text(sir_result_region_sub$time[tmax+1], sir_result_region_sub$mean[tmax+1], format(sir_result_region_sub$mean[tmax+1],digits=1), pos=4, col=col.line)
-    #text(sir_result_region_sub$time[tmax+1], sir_result_region_sub$lower[tmax+1], format(sir_result_region_sub$lower[tmax+1],digits=1), pos=4, col=col.polygon)
-    #text(sir_result_region_sub$time[tmax+1], sir_result_region_sub$upper[tmax+1], format(sir_result_region_sub$upper[tmax+1],digits=1), pos=4, col=col.polygon)
+    text(sir_result_region_sub$time[tmax+1], sir_result_region_sub$lower[tmax+1], format(sir_result_region_sub$lower[tmax+1],digits=1), pos=4, col=col.polygon)
+    text(sir_result_region_sub$time[tmax+1], sir_result_region_sub$upper[tmax+1], format(sir_result_region_sub$upper[tmax+1],digits=1), pos=4, col=col.polygon)
     if(!is.null(add)){
       lines(as.numeric(as.Date(sub.add$Date) - day0), sub.add$value, col='gray30', lty  = 2,  lwd=1.2)
       tmp1 = as.numeric(today() - day0)
@@ -229,15 +234,17 @@ plot_ct_region = function(region_name, which.plot = "D", add=NULL) {
       count <- sir_result_region_sub$mean[sir_result_region_sub$time==tmax]
       region_summary = paste(region_summary, "On ", format(daymax, "%b %d, %Y"),
                        " projections show ", format(count, digits=2),
-                       " deaths in ", region_name,
+                       " cumulative deaths in ", region_name,
+                       ".",
                        sep="")    
   }
   if("H" %in% which.plot){
       sir_result_region_sub <- filter(sir_result_region, variable==paste0("H.",region_name))
-      count <- sir_result_region_sub$mean[sir_result_region_sub$time==tmax]
+      count <- max(sir_result_region_sub$mean)
       region_summary = paste(region_summary, "On ", format(daymax, "%b %d, %Y"),
-                       " projections show ", format(count, digits=2),
+                       " projections show a peak of ", format(count, digits=2),
                        " hospitalizations in ", region_name,
+                       ". The dashed line shows historical and current hospital capacity. ",
                        sep="")    
   }
 
@@ -249,7 +256,7 @@ plot_ct_region = function(region_name, which.plot = "D", add=NULL) {
 # @param which.plot the prefix of the compartment to plot, e.g., S, E, I_s, I_m. If a vector of more than one specified, it takes the sum of the compartment (only the mean!)
 mapplot_ct_region = function(which.plot = "D", label = "Cumulative Deaths", palette="Reds", ...) {
   map = CTmap
-  ncol=3 # customize based on date range? 
+  #ncol=4 # customize based on date range? 
   region_names <- as.character(map$NAME10)
   toplot <- paste(rep(which.plot,each=length(region_names)),
                   rep(region_names, length(which.plot)),sep=".")
