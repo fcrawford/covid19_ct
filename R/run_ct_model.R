@@ -160,12 +160,12 @@ plot_ct_region = function(region_name, which.plot = "D", add=NULL) {
     polygon(c(sir_result_region_sub$time, rev(sir_result_region_sub$time)), c(sir_result_region_sub$lower, rev(sir_result_region_sub$upper)), col=col.polygon, border=NA)
 
     lines(sir_result_region_sub$time, sir_result_region_sub$mean, col=col.line)
-    if(which.plot[i]=="D"){
+    #if(which.plot[i]=="D"){
       # label mean
-      text(sir_result_region_sub$time[tmax+1], sir_result_region_sub$mean[tmax+1], format(sir_result_region_sub$mean[tmax+1],digits=1), pos=4, col=col.line)
-      text(sir_result_region_sub$time[tmax+1], sir_result_region_sub$lower[tmax+1], format(sir_result_region_sub$lower[tmax+1],digits=1), pos=4, col=col.polygon)
-      text(sir_result_region_sub$time[tmax+1], sir_result_region_sub$upper[tmax+1], format(sir_result_region_sub$upper[tmax+1],digits=1), pos=4, col=col.polygon)
-    }
+    text(sir_result_region_sub$time[tmax+1], sir_result_region_sub$mean[tmax+1], format(sir_result_region_sub$mean[tmax+1],digits=1), pos=4, col=col.line)
+      #text(sir_result_region_sub$time[tmax+1], sir_result_region_sub$lower[tmax+1], format(sir_result_region_sub$lower[tmax+1],digits=1), pos=4, col=col.polygon)
+      #text(sir_result_region_sub$time[tmax+1], sir_result_region_sub$upper[tmax+1], format(sir_result_region_sub$upper[tmax+1],digits=1), pos=4, col=col.polygon)
+    #}
     if(!is.null(add)){
       if(region_name != "Connecticut"){
         sub.add <- subset(add, County == region_name)
