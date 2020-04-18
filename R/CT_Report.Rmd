@@ -29,16 +29,21 @@ source("run_ct_model.R")
 
 This report presents projections of COVID-19 hospitalizations and deaths in Connecticut as a whole, and by county. Projections are shown as lines with uncertainty intervals in lighter colors, and actual data (if available) overlaid. Horizontal axes extend to the time horizon for this analysis, `r format(daymax, "%b %d, %Y")`.  The report was prepared for the Governor's Reopen Connecticut Advisory group. 
 
-## Connecticut State 
-
 The projections take into account historical and hypothetical future state-level interventions, including closing of schools on `r format(state_schools_close,"%b %d, %Y")` and the state-level stay-at-home order issued on `r format(state_lockdown_start,"%b %d, %Y")` which took effect on `r format(state_lockdown_order, "%b %d, %Y")`.  School closure is assumed to reduce transmission by `r params_init$school_closure_effect * 100`%, and the state-level stay-at-home order reduces transmission by `r params_init$lockdown_effect * 100`%.  
-
-
 ```{r echo=FALSE, fig.height = 5}
 plot_interventions()
 ```
+The projections evaluate the effect of a hypothetical lifting of the stay-at-home order on **`r format(lockdown_end_date, "%b %d, %Y")`** and re-opening of schools on `r format(state_schools_reopen_date, "%b %d, %Y")`.  When the stay-at-home order is lifted, the projections assume an ongoing `r params_init$distancing_effect * 100`% reduction in transmission. 
 
-These projections evaluate the effect of a hypothetical lifting of the stay-at-home order on **`r format(lockdown_end_date, "%b %d, %Y")`** and re-opening of schools on `r format(state_schools_reopen_date, "%b %d, %Y")`.  When the stay-at-home order is lifted, the projections assume an ongoing `r params_init$distancing_effect * 100`% reduction in transmission. 
+
+
+# Projections 
+
+
+## Connecticut State 
+
+
+
 
 The following figures show projected cumulative deaths and hospitalizations for Connecticut over time. 
 
@@ -189,6 +194,10 @@ new_haven_summary_hospitalizations = plot_ct_region("New Haven", which.plot="H")
 
 `r new_haven_summary_hospitalizations`
 
+
+# Version
+
+Code version reference: `r system("git rev-parse HEAD", intern=TRUE)`
 
 
 
