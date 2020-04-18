@@ -31,6 +31,8 @@ This report presents projections of COVID-19 hospitalizations and deaths in Conn
 
 ## Data sources
 
+We use death and hospitalization from ...
+
 Hospital capacity and occupancy
 
 map data
@@ -60,13 +62,9 @@ We present projections of COVID-19 deaths and hospitalizations for Connecticut a
 
 ## Connecticut State 
 
-The projections take into account historical and hypothetical future state-level interventions, including closing of schools on `r format(state_schools_close,"%b %d, %Y")` and the state-level stay-at-home order issued on `r format(state_lockdown_start,"%b %d, %Y")` which took effect on `r format(state_lockdown_order, "%b %d, %Y")`.  
+The projections take into account historical and hypothetical future state-level interventions, including closing of schools on `r format(state_schools_close,"%b %d, %Y")` and the state-level stay-at-home order issued on `r format(state_lockdown_start,"%b %d, %Y")` which took effect on `r format(state_lockdown_order, "%b %d, %Y")`.  School closure is assumed to reduce transmission by `r params_init$school_closure_effect * 100`%, and the state-level stay-at-home order reduces transmission by `r params_init$lockdown_effect * 100`%.  
 
-School closure is assumed to reduce transmission by `r params_init$school_closure_effect * 100`%, and the state-level stay-at-home order reduces transmission by `r params_init$lockdown_effect * 100`%.  
-
-These projections evaluate the effect of a hypothetical lifting of the stay-at-home order on `r format(lockdown_end_date, "%b %d, %Y")` and re-opening of schhols on `r format(state_schools_reopen_date, "%b %d, %Y")`. 
-
-When the stay-at-home order is lifted, the projections assume an ongoing `r params_init$distancing_effect * 100`% reduction in transmission. 
+These projections evaluate the effect of a hypothetical lifting of the stay-at-home order on **`r format(lockdown_end_date, "%b %d, %Y")`** and re-opening of schhols on `r format(state_schools_reopen_date, "%b %d, %Y")`.  When the stay-at-home order is lifted, the projections assume an ongoing `r params_init$distancing_effect * 100`% reduction in transmission. 
 
 
 ```{r echo=FALSE}
@@ -75,12 +73,18 @@ plot_interventions()
 
 
 ```{r echo=FALSE}
-connecticut_summary = plot_ct_region("Connecticut")
-mapplot_ct_region()
+mapplot_ct_region(which.plot="D", label="Cumulative Deaths", palette="Reds")
+mapplot_ct_region(which.plot="cum_modH",  label="Cumulative Hospitalizations", palette="Blues")  
+connecticut_summary_deaths = plot_ct_region("Connecticut", which.plot="D")
+```
+`r connecticut_summary_deaths`
+
+
+```{r echo=FALSE}
+connecticut_summary_hospitalization = plot_ct_region("Connecticut", which.plot="H")
 ```
 
-
-`r connecticut_summary`
+`r connecticut_summary_hospitalization`
 
 
 
@@ -89,7 +93,7 @@ mapplot_ct_region()
 ## Fairfield 
 
 ```{r echo=FALSE}
-fairfield_summary = plot_ct_region("Fairfield")
+fairfield_summary = plot_ct_region("Fairfield", which.plot="D")
 ```
 
 `r fairfield_summary`
@@ -99,22 +103,22 @@ fairfield_summary = plot_ct_region("Fairfield")
 ## New London
 
 ```{r echo=FALSE}
-new_london_summary = plot_ct_region("New London")
+new_london_summary = plot_ct_region("New London", which.plot="D")
 ```
 `r new_london_summary`
 
 
 ## Litchfield
 ```{r echo=FALSE}
-plot_ct_region("Litchfield")
+litchfield_summary = plot_ct_region("Litchfield", which.plot="D")
 ```
-`r connecticut_summary`
+`r litchfield_summary`
 
 
 
 ## Windham
 ```{r echo=FALSE}
-windham_summary = plot_ct_region("Windham")
+windham_summary = plot_ct_region("Windham", which.plot="D")
 ```
 `r windham_summary`
 
@@ -122,7 +126,7 @@ windham_summary = plot_ct_region("Windham")
 
 ## Tolland
 ```{r echo=FALSE}
-tolland_summary = plot_ct_region("Tolland")
+tolland_summary = plot_ct_region("Tolland", which.plot="D")
 ```
 `r tolland_summary`
 
@@ -130,15 +134,15 @@ tolland_summary = plot_ct_region("Tolland")
 
 ## Hartford
 ```{r echo=FALSE}
-hartford_summary = plot_ct_region("Hartford")
+hartford_summary = plot_ct_region("Hartford", which.plot="D")
 ```
-`r connecticut_summary`
+`r hartford_summary`
 
 
 
 ## Middlesex
 ```{r echo=FALSE}
-middlesex_summary = plot_ct_region("Middlesex")
+middlesex_summary = plot_ct_region("Middlesex", which.plot="D")
 ```
 `r middlesex_summary`
 
@@ -147,7 +151,7 @@ middlesex_summary = plot_ct_region("Middlesex")
 ## New Haven
 
 ```{r echo=FALSE}
-new_haven_summary = plot_ct_region("New Haven")
+new_haven_summary = plot_ct_region("New Haven", which.plot="D")
 ```
 `r new_haven_summary`
 
@@ -176,6 +180,8 @@ Olga Morozova, Zehang Richard Li, and Soheil Eshghi are Postdoctoral Associates 
 To cite this document: 
 
 > Forrest W. Crawford, Olga Morozova, Zehang Richard Li, Soheil Eshghi.  COVID-19 Projections for Connecticut.  `r format(Sys.time(), '%B %d %Y')`. 
+
+## Version
 
 Code version reference: `r system("git rev-parse HEAD", intern=TRUE)`
 

@@ -203,7 +203,7 @@ plot_ct_region = function(region_name, which.plot = "D", add=NULL) {
 #####################################
 #
 # @param which.plot the prefix of the compartment to plot, e.g., S, E, I_s, I_m. If a vector of more than one specified, it takes the sum of the compartment (only the mean!)
-mapplot_ct_region = function(which.plot = "D", label = "Cumulative Deaths", ...) {
+mapplot_ct_region = function(which.plot = "D", label = "Cumulative Deaths", palette="Reds", ...) {
   map = CTmap
   ncol=3 # customize based on date range? 
   region_names <- as.character(map$NAME10)
@@ -228,7 +228,7 @@ mapplot_ct_region = function(which.plot = "D", label = "Cumulative Deaths", ...)
     variables = "Date", values = "mean", is.long=TRUE, 
     legend.label = label, ...) #, direction=-1,  ...) 
   suppressMessages(
-    g <- g + scale_fill_distiller(label,  palette = "Reds", direction=1) + ggtitle(paste("Projected", tolower(gsub("\n"," ",label)), "in Connecticut counties by month"))
+    g <- g + scale_fill_distiller(label,  palette=palette, direction=1) + ggtitle(paste("Projected", tolower(gsub("\n"," ",label)), "in Connecticut counties by month"))
   )
   return(g)
 }
