@@ -313,32 +313,30 @@ plot_interventions = function() {
 # plot state overall, and by region  
 
 
-par(mfrow=c(3,3))
-plot_ct_region("Connecticut")
-sapply(region_names, plot_ct_region)
+#par(mfrow=c(3,3))
+#plot_ct_region("Connecticut")
+#sapply(region_names, plot_ct_region)
 
 # test plot multiple lines
-plot_ct_region("Connecticut", c("H"), add = dat_ct_capacity)
+#plot_ct_region("Connecticut", c("H"), add = dat_ct_capacity)
 
-stop("here")
-
-for(i in region_names){
-  summary <- plot_ct_region(i, c("H"), add = dat_ct_capacity)
-  print(summary)
-}
+#for(i in region_names){
+  #summary <- plot_ct_region(i, c("H"), add = dat_ct_capacity)
+  #print(summary)
+#}
 
 
 
-plot.new()
-plot_interventions()
+#plot.new()
+#plot_interventions()
 
 # Death plot
-plot.new()
-death.map = mapplot_ct_region() #map=CTmap, ncol=3)
-print(death.map)
+#plot.new()
+#death.map = mapplot_ct_region() #map=CTmap, ncol=3)
+#print(death.map)
 
 # Cumulative hospitalization plot
-plot.new()
-hos.map = mapplot_ct_region("cum_modH",  "Cumulative\nHospitalizations")  
-print(hos.map)
+#plot.new()
+#hos.map = mapplot_ct_region("cum_modH",  "Cumulative\nHospitalizations")  
+#print(hos.map)
 
