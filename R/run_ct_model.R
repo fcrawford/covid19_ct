@@ -4,8 +4,9 @@ library(lubridate)
 library(plyr)
 library(reshape2)
 library(dplyr)
-
-
+library(rgdal)
+library(SUMMER)
+library(ggplot2)
 #####################
 
 source("model.R")
@@ -158,7 +159,23 @@ plot_ct_region = function(region_name) {
   return(region_summary)
 }
 
+mapplot_ct_region = function(map, ...) {
+  region_names <- as.character(map$NAME10)
+  sir_result_internal = data.frame(filter(sir_results_summary, variable%in%paste("D.",region_names,sep="")))
+  sir_result_internal$County <- gsub("D.", "", sir_result_internal$variable)
+  sir_result_internal$Date <- format(sir_result_internal$time + day0, "%B")
+  sir_result_internal$Date <- factor(sir_result_internal$Date, unique(sir_result_internal$Date))
+  # Plot last day cumulative at each month? Or take diff?
+  t.index <- unique(sir_result_internal$time[format(sir_result_internal$time + day0, "%d")=="01"]) 
+  t.index <- (t.index - 1)[-1]
 
+  g <- mapPlot(data=subset(sir_result_internal, time %in% t.index), geo=map,
+    by.data="County", by.geo = "NAME10",
+    variables = "Date", values = "mean", is.long=TRUE, 
+    legend.label = "Deaths", direction=-1,  ...) 
+  g <- g + scale_fill_distiller("Deaths",  palette = "Blues", direction=1)
+  return(g)
+}
 
 #obs.region <- subset(dat_ct_county, county == "New Haven")
 ########################
@@ -173,4 +190,6 @@ par(mfrow=c(3,3))
 plot_ct_region("Connecticut")
 sapply(region_names, plot_ct_region)
 
+CTmap <- readOGR("../map/wgs84/countyct_37800_0000_2010_s100_census_1_shp_wgs84.shp")
+mapplot_ct_region(map=CTmap, ncol=3)
 
