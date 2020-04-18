@@ -1,6 +1,10 @@
 library(deSolve)
 library(yaml)
 library(lubridate)
+library(plyr)
+library(reshape2)
+library(dplyr)
+
 
 #####################
 
@@ -8,6 +12,7 @@ source("model.R")
 source("get_data.R")
 
 ########################
+# Dates
 
 # starting day
 day0 = ymd("2020-03-01")
@@ -56,10 +61,6 @@ nregions = nrow(adj)
 init <- read.csv('../data/ct_init.csv', stringsAsFactors=FALSE) 
 region_names = init$county
 
-
-#pop.prop <- init$population/sum(init$population) # proportion of state populaiton in each county
-
-
 #########################
 # set up initial state0
 
@@ -75,35 +76,62 @@ S_init = init$population - (E_init + I_s_init + I_m_init + A_init + H_init + Hba
 
 state0 = c(S=S_init, E=E_init, I_s=I_s_init, I_m=I_m_init, A=A_init, H=H_init, Hbar=Hbar_init, D=D_init, R=R_init)
 
-#################
-# run the model 
+########################
+# draw random params
 
-sir_result = run_sir_model(state0=state0, params=params_init, region_adj=adj, populations=init$population, tmax=tmax)
+rparams = function() {
+  params_tmp = params_init
+  # sample new param values, and initial conditions!
+  params_tmp$beta_pre = rnorm(1,mean=params_init$beta_pre,sd=0.1)
+  # add more here
+  return(params_tmp)
+}
 
+#######################
+# run the sims
 
+nsim = 30
 
-compartment_plot_labels = c("D")
-compartment_plot_names = c("Deaths")
-compartment_plot_colors = rainbow(length(compartment_plot_labels))
+sir_results = lapply(1:nsim, function(i){
+  res = run_sir_model(state0=state0, params=rparams(), region_adj=adj, populations=init$population, tmax=tmax)
+  res$sim_id = i
+  res
+})
 
+#######################
+# aggregate and summarize results across sims
+
+sir_results_all = ldply(sir_results, rbind)
+sir_results_long <- melt(sir_results_all, id.vars = c("time", "sim_id"))
+sir_results_summary <- sir_results_long %>% group_by(variable, time) %>% 
+			                   summarise(
+                           mean = mean(value),
+			                     lower = quantile(value, 0.05),
+			                     upper = quantile(value, 0.95))
+
+####################
+# plotting 
 
 plot_ct_region = function(region_name) {
+  #compartment_plot_labels = c("D")
+  #compartment_plot_names = c("Deaths")
+  #compartment_plot_colors = rainbow(length(compartment_plot_labels))
 
   par(mar=c(4,4,3,4), bty="n")
 
-  plot(sir_result$time, sir_result[,paste("I_s",region_name,sep=".")], type="n", 
-       xlab="Time", ylab="People", main=region_name, col="black", 
-       ylim=c(0,max(dat_ct_state$deaths)), xlim=c(0,1.1*tmax), 
-       axes=FALSE)
+  sir_result_region = filter(sir_results_summary, variable==paste("D.",region_name,sep=""))
+
+  plot(0, type="n", xlab="Time", ylab="People", main=region_name, col="black", 
+       ylim=c(0,max(dat_ct_state$deaths)), xlim=c(0,1.1*tmax), axes=FALSE)
   axis(1,at=daymonthseq, lab=monthseq_lab)
   axis(2)
 
-	for(j in 1:length(compartment_plot_labels)) {
-    cidx = paste(compartment_plot_labels[j], region_name, sep=".")
-    lines(sir_result$time, sir_result[,cidx], col=compartment_plot_colors[j])
-	  text(sir_result$time[tmax+1], sir_result[tmax+1,cidx], format(sir_result[tmax+1,cidx],digits=1), pos=4, 
-	       col=compartment_plot_colors[j])
-	}
+
+  abline(v=Sys.Date()-day0, col="gray", lty=2)
+
+  polygon(c(sir_result_region$time, rev(sir_result_region$time)), c(sir_result_region$lower, rev(sir_result_region$upper)), col=rgb(1,0,0,alpha=0.5), border=NA)
+  lines(sir_result_region$time, sir_result_region$mean, col="red")
+  text(sir_result_region$time[tmax+1], sir_result_region$mean[tmax+1], format(sir_result_region$mean[tmax+1],digits=1), pos=4, col="red")
 
   if(region_name == "Connecticut") {
     points(dat_ct_state$time, dat_ct_state$deaths, pch=16, col=rgb(1,0,0,alpha=0.5)) 
@@ -116,13 +144,13 @@ plot_ct_region = function(region_name) {
     points(obs.region$time, obs.region$deaths, pch=16, col=rgb(1,0,0,alpha=0.5))
   }
 
-	legend(0, max(dat_ct_state$deaths), compartment_plot_names, lty=1, col=compartment_plot_colors, bty="n")
+	#legend(0, max(dat_ct_state$deaths), compartment_plot_names, lty=1, col=compartment_plot_colors, bty="n")
 
   # return some useful info
   # capacity exceeded?
   # describe intvx
 	region_summary = paste("On ", format(daymax, "%b %d, %Y"),
-											 " projections show ", format(sir_result[tmax,paste("D",region_name,sep=".")], digits=2),
+											 " projections show ", format(sir_result_region$mean[tmax+1], digits=2),
 											 " deaths in ", region_name,
                        sep="")
 

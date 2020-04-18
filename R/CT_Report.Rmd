@@ -29,38 +29,29 @@ This document presents projections of COVID-19 infections, hospitalizations, and
 
 ## Data sources
 
+Hospital capacity and occupancy
+
+Historical and actual interventions
+
 ## Model assumptions
 
 
-This transmission model uses the SEIR framework with asymptomatic ...
+The projections in this document were created using a customized SEIR infectious disease transmission model, augmented with asymptomatic, moderate, and severe infection categories, hospitalization, and death.  The model includes time-varying hospital capacities for each county; when occupancy reaches capacity, unhospitalized patients with severe disease are assumed to be `r params_init$m_Hbar_mult` times more likely to die.  
 
+The model incorporates features of the public health information and recordkeeping during covid-19 outbreak, including a case reporting lag of `r params_init$rcase_lag` days, hospital reporting lag of `r params_init$rhosp_lag` days, and a death reporting lag of `r params_init$rdeath_lag` days. 
 
+The model also accommodates past and potential future interventions, including stay-at-home orders, school and business closures, and social distancing measures targeting specific demographic groups.   
 
-The case reporting lag is `r params_init$rcase_lag` days 
-
-hospital reporting lag is `r params_init$rhosp_lag` days
-
-death reporting lag is `r params_init$rdeath_lag` days 
+[Describe these features and parameters]
 
 percent reduction in contact due to stay-at-home order is `r params_init$effect_intvx`
-
-
-## Hospital capacity and occupancy 
-
-
-## Historical and actual interventions
-
-
-## Future intervention scenarios
-
-
 
 
 # Projections 
 
 ## Connecticut State 
 
-```{r, echo=FALSE}
+```{r echo=FALSE}
 connecticut_summary = plot_ct_region("Connecticut")
 ```
 `r connecticut_summary`
