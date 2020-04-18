@@ -147,6 +147,8 @@ plot_ct_region = function(region_name, which.plot = "D", add=NULL) {
                                     "Severe Infections","Mild Infections",
                                     "Asymptomatic Infections"))
 
+  if("H" %in% which.plot) add <- dat_ct_capacity
+
   par(mar=c(3,4,3,0), bty="n")
   toplot <- paste(rep(which.plot,each=length(region_name)),
                   rep(region_name, length(which.plot)),sep=".")
