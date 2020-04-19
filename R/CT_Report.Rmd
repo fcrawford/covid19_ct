@@ -43,14 +43,14 @@ The projections presented below evaluate the effect of a hypothetical lifting of
 We first show the projected cumulative deaths and hospitalizations for Connecticut counties over time under the two scenarios. 
 
 
-```{r echo=FALSE, fig.width=8,  fig.height=3.5}
+```{r echo=FALSE, fig.width=9,  fig.height=3.5}
 g <- mapplot_ct_region_list(data = res$summary, which.plot="rD", label="Cumulative\nDeaths", palette="Reds", ncol=3, subtitle=res$titles)
 g[[1]]
 g[[2]]
 ```
 
-```{r echo=FALSE, fig.width=8,  fig.height=3.5}
-g <- mapplot_ct_region_list(data = res1$summary, which.plot="cum_modH",  label="Cumulative\nHospitalizations", palette="Blues", ncol=3, subtitle=res$titles)  
+```{r echo=FALSE, fig.width=9,  fig.height=3.5}
+g <- mapplot_ct_region_list(data = res$summary, which.plot="cum_modH",  label="Cumulative\nHospitalizations", palette="Blues", ncol=3, subtitle=res$titles)  
 g[[1]]
 g[[2]]
 ```

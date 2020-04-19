@@ -422,7 +422,7 @@ mapplot_ct_region = function(data=sir_results_summary, which.plot = "D", label =
     legend.label = label, ...) #, direction=-1,  ...) 
   if(is.null(subtitle)) subtitle<-waiver()
   suppressMessages(
-    g <- g + scale_fill_distiller(label,  palette=palette, direction=1) + ggtitle(paste("Projected", tolower(gsub("\n"," ",label)), "in Connecticut counties by month"), subtitle=subtitle)
+    g <- g + scale_fill_distiller(label, palette=palette, direction=1) + ggtitle(paste("Projected", tolower(gsub("\n"," ",label)), "in Connecticut counties by month"), subtitle=subtitle)
   )
   return(g)
 }
@@ -442,7 +442,10 @@ mapplot_ct_region_list =  function(data, which.plot = "D", label = "Cumulative D
   }
   g <- NULL
   for(i in 1:length(data)){
-    g[[i]] <- mapplot_ct_region(data=data[[i]], which.plot=which.plot, label=label, palette=palette, subtitle = subtitle[[i]], ylim=ylim, ...)
+    g[[i]] <- mapplot_ct_region(data=data[[i]], which.plot=which.plot, label=label, palette=palette, subtitle = subtitle[[i]], ...)
+    suppressMessages(
+      g[[i]] <- g[[i]] + scale_fill_distiller(label, palette=palette, direction=1, limits=ylim)
+     )
   }
   return(g)
 }
