@@ -117,9 +117,24 @@ schoolsfun = get_school_in_session_fun(state_schools_reopen=state_schools_reopen
 
 
 #######################
+
+# set county level capacities 
+
+county_capacities = list()
+for(nm in region_names) {
+  county_cap = filter(dat_ct_capacity, County==nm)
+  county_days = as.numeric(ymd(county_cap$Date) - day0)
+  county_cap_fun = approxfun(county_days, county_cap$Capacity, rule=2)
+  county_capacities[[nm]] = county_cap_fun
+}
+
+
+
+
+#######################
 # run the sims
 
-nsim = 500
+nsim = 100
 
 sir_results = lapply(1:nsim, function(i){
   res = run_sir_model(state0=state0, 
