@@ -45,8 +45,8 @@ We first show the projected cumulative deaths and hospitalizations for Connectic
 
 
 ```{r echo=FALSE, fig.width=8,  fig.height=3.5}
-mapplot_ct_region(which.plot="rD", label="Cumulative\nDeaths", palette="Reds", ncol=4)
-mapplot_ct_region(which.plot="cum_modH",  label="Cumulative\nHospitalizations", palette="Blues", ncol=4)  
+mapplot_ct_region(data = sir_results_summary, which.plot="rD", label="Cumulative\nDeaths", palette="Reds", ncol=4)
+mapplot_ct_region(data = sir_results_summary, which.plot="cum_modH",  label="Cumulative\nHospitalizations", palette="Blues", ncol=4)  
 ```
 Projections of deaths and hospitalization for the state and each county are shown below, along with 90% prediction uncertainly intervals.  Hospitalization projections show historical and projected hospital capacity.  
 
@@ -58,14 +58,14 @@ At the county level, hospitalization projections are based on the place of resid
 ## Connecticut State 
 
 ```{r echo=FALSE}
-connecticut_summary_deaths = plot_ct_region("Connecticut", which.plot="rD")
+connecticut_summary_deaths = plot_ct_region(data = sir_results_summary, region_name="Connecticut", which.plot="rD")
 ```
 
 `r connecticut_summary_deaths`
 
 
 ```{r echo=FALSE}
-connecticut_summary_hospitalization = plot_ct_region("Connecticut", which.plot="rHsum")
+connecticut_summary_hospitalization = plot_ct_region(data = sir_results_summary, region_name="Connecticut", which.plot="rHsum")
 ```
 
 `r connecticut_summary_hospitalization`
@@ -76,13 +76,13 @@ connecticut_summary_hospitalization = plot_ct_region("Connecticut", which.plot="
 ## Fairfield 
 
 ```{r echo=FALSE}
-fairfield_summary_deaths = plot_ct_region("Fairfield", which.plot="rD")
+fairfield_summary_deaths = plot_ct_region(data = sir_results_summary, region_name="Fairfield", which.plot="rD")
 ```
 
 `r fairfield_summary_deaths`
 
 ```{r echo=FALSE}
-fairfield_summary_hospitalization = plot_ct_region("Fairfield", which.plot="rHsum")
+fairfield_summary_hospitalization = plot_ct_region(data = sir_results_summary, region_name="Fairfield", which.plot="rHsum")
 ```
 
 `r fairfield_summary_hospitalization`
@@ -94,12 +94,12 @@ fairfield_summary_hospitalization = plot_ct_region("Fairfield", which.plot="rHsu
 ## New London
 
 ```{r echo=FALSE}
-new_london_summary_deaths = plot_ct_region("New London", which.plot="rD")
+new_london_summary_deaths = plot_ct_region(data = sir_results_summary, region_name="New London", which.plot="rD")
 ```
 `r new_london_summary_deaths`
 
 ```{r echo=FALSE}
-new_london_summary_hospitalization = plot_ct_region("New London", which.plot="rHsum")
+new_london_summary_hospitalization = plot_ct_region(data = sir_results_summary, region_name="New London", which.plot="rHsum")
 ```
 
 `r new_london_summary_hospitalization`
@@ -111,12 +111,12 @@ new_london_summary_hospitalization = plot_ct_region("New London", which.plot="rH
 
 ## Litchfield
 ```{r echo=FALSE}
-litchfield_summary_deaths = plot_ct_region("Litchfield", which.plot="rD")
+litchfield_summary_deaths = plot_ct_region(data = sir_results_summary, region_name="Litchfield", which.plot="rD")
 ```
 `r litchfield_summary_deaths`
 
 ```{r echo=FALSE}
-litchfield_summary_hospitalization = plot_ct_region("Litchfield", which.plot="rHsum")
+litchfield_summary_hospitalization = plot_ct_region(data = sir_results_summary, region_name="Litchfield", which.plot="rHsum")
 ```
 
 `r litchfield_summary_hospitalization`
@@ -126,12 +126,12 @@ litchfield_summary_hospitalization = plot_ct_region("Litchfield", which.plot="rH
 
 ## Windham
 ```{r echo=FALSE}
-windham_summary_deaths = plot_ct_region("Windham", which.plot="rD")
+windham_summary_deaths = plot_ct_region(data = sir_results_summary, region_name="Windham", which.plot="rD")
 ```
 `r windham_summary_deaths`
 
 ```{r echo=FALSE}
-windham_summary_hospitalization = plot_ct_region("Windham", which.plot="rHsum")
+windham_summary_hospitalization = plot_ct_region(data = sir_results_summary, region_name="Windham", which.plot="rHsum")
 ```
 
 `r windham_summary_hospitalization`
@@ -143,12 +143,12 @@ windham_summary_hospitalization = plot_ct_region("Windham", which.plot="rHsum")
 
 ## Tolland
 ```{r echo=FALSE}
-tolland_summary_deaths = plot_ct_region("Tolland", which.plot="rD")
+tolland_summary_deaths = plot_ct_region(data = sir_results_summary, region_name="Tolland", which.plot="rD")
 ```
 `r tolland_summary_deaths`
 
 ```{r echo=FALSE}
-tolland_summary_hospitalization = plot_ct_region("Tolland", which.plot="rHsum")
+tolland_summary_hospitalization = plot_ct_region(data = sir_results_summary, region_name="Tolland", which.plot="rHsum")
 ```
 
 
@@ -157,12 +157,12 @@ tolland_summary_hospitalization = plot_ct_region("Tolland", which.plot="rHsum")
 
 ## Hartford
 ```{r echo=FALSE}
-hartford_summary_deaths = plot_ct_region("Hartford", which.plot="rD")
+hartford_summary_deaths = plot_ct_region(data = sir_results_summary, region_name="Hartford", which.plot="rD")
 ```
 `r hartford_summary_deaths`
 
 ```{r echo=FALSE}
-hartford_summary_hospitalization = plot_ct_region("Hartford", which.plot="rHsum")
+hartford_summary_hospitalization = plot_ct_region(data = sir_results_summary, region_name="Hartford", which.plot="rHsum")
 ```
 
 `r hartford_summary_hospitalization`
@@ -171,12 +171,12 @@ hartford_summary_hospitalization = plot_ct_region("Hartford", which.plot="rHsum"
 
 ## Middlesex
 ```{r echo=FALSE}
-middlesex_summary_deaths = plot_ct_region("Middlesex", which.plot="rD")
+middlesex_summary_deaths = plot_ct_region(data = sir_results_summary, region_name="Middlesex", which.plot="rD")
 ```
 `r middlesex_summary_deaths`
 
 ```{r echo=FALSE}
-middlesex_summary_hospitalization = plot_ct_region("Middlesex", which.plot="rHsum")
+middlesex_summary_hospitalization = plot_ct_region(data = sir_results_summary, region_name="Middlesex", which.plot="rHsum")
 ```
 
 `r middlesex_summary_hospitalization`
@@ -187,12 +187,12 @@ middlesex_summary_hospitalization = plot_ct_region("Middlesex", which.plot="rHsu
 ## New Haven
 
 ```{r echo=FALSE}
-new_haven_summary_deaths = plot_ct_region("New Haven", which.plot="rD")
+new_haven_summary_deaths = plot_ct_region(data = sir_results_summary, region_name="New Haven", which.plot="rD")
 ```
 `r new_haven_summary_deaths`
 
 ```{r echo=FALSE}
-new_haven_summary_hospitalizations = plot_ct_region("New Haven", which.plot="rHsum")
+new_haven_summary_hospitalizations = plot_ct_region(data = sir_results_summary, region_name="New Haven", which.plot="rHsum")
 ```
 
 `r new_haven_summary_hospitalizations`
