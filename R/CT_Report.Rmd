@@ -38,7 +38,7 @@ The projections evaluate the effect of a hypothetical lifting of the stay-at-hom
 
 
 # Projections 
-We first show the projected cumulative deaths and hospitalizations for Connecticut counties over time. The projections are based on parameters calibrated on [...]. By the end of April and May, we project `r get_Cumulative(c("2020-04-30","2020-05-31"), "rD.Connecticut")` deaths respectively; and `r get_Cumulative(c("2020-04-30","2020-05-31"), "cum_modH.Connecticut")` cumulative hospitalizations respectively.
+We first show the projected cumulative deaths and hospitalizations for Connecticut counties over time. The projections are based on parameters calibrated on [...]. By the end of April, May, and June, we project `r get_Cumulative(c("2020-04-30","2020-05-31"), "rD.Connecticut")`, and `r get_Cumulative("2020-06-30", "rD.Connecticut")` deaths; and `r get_Cumulative(c("2020-04-30","2020-05-31"), "cum_modH.Connecticut")`; and `r get_Cumulative("2020-06-30", "cum_modH.Connecticut")` cumulative hospitalizations.
 
 
 ```{r echo=FALSE, fig.width=8,  fig.height=3.5}
