@@ -21,7 +21,7 @@ source("intervention_functions.R")
 day0 = ymd("2020-03-01")
 
 # ending day
-daymax = ymd("2020-07-01")
+daymax = ymd("2020-06-01")
 
 # to use in the model
 tmax = as.numeric(difftime(daymax, day0, units="days"))
@@ -98,8 +98,9 @@ rparams = function() {
   params_tmp$m_H = max(0,rnorm(1,mean=params_init$m_H,  sd=params_init$sd_m_H))
   params_tmp$m_H = min(1,params_tmp$m_H)
   params_tmp$m_Hbar_mult <- max(0,rnorm(1,mean=params_init$m_Hbar_mult,  sd=params_init$sd_m_Hbar_mult))
-  params_tmp$lockdown_effect <- min(1, rnorm(1,mean=params_init$lockdown_effect,  sd=params_init$sd_lockdown_effect))
-  params_tmp$lockdown_effect <- max(0, params_tmp$lockdown_effect)
+  #params_tmp$lockdown_effect <- min(1, rnorm(1,mean=params_init$lockdown_effect,  sd=params_init$sd_lockdown_effect))
+  params_tmp$lockdown_effect <- rnorm(1,mean=params_init$lockdown_effect,  sd=params_init$sd_lockdown_effect)
+  #params_tmp$lockdown_effect <- max(0, params_tmp$lockdown_effect)
   # add sampling of initial conditions
   return(params_tmp)
 }
@@ -184,7 +185,7 @@ plot_ct_region = function(region_name, which.plot = "D", add=NULL) {
   }
 
   plot(0, type="n", xlab="", ylab="People", main=title, col="black", 
-       ylim=c(0,1.1*ymax), xlim=c(0,1.1*tmax), axes=FALSE)
+       ylim=c(0,1.05*ymax), xlim=c(0,1.1*tmax), axes=FALSE)
   axis(1,at=daymonthseq, lab=monthseq_lab)
   axis(2)
 
@@ -199,9 +200,9 @@ plot_ct_region = function(region_name, which.plot = "D", add=NULL) {
     polygon(c(sir_result_region_sub$time, rev(sir_result_region_sub$time)), c(sir_result_region_sub$lower, rev(sir_result_region_sub$upper)), col=col.polygon, border=NA)
 
     lines(sir_result_region_sub$time, sir_result_region_sub$mean, col=col.line)
-    text(sir_result_region_sub$time[tmax+1], sir_result_region_sub$mean[tmax+1], format(sir_result_region_sub$mean[tmax+1],digits=1), pos=4, col=col.line)
-    text(sir_result_region_sub$time[tmax+1], sir_result_region_sub$lower[tmax+1], format(sir_result_region_sub$lower[tmax+1],digits=1), pos=4, col=col.polygon)
-    text(sir_result_region_sub$time[tmax+1], sir_result_region_sub$upper[tmax+1], format(sir_result_region_sub$upper[tmax+1],digits=1), pos=4, col=col.polygon)
+    text(sir_result_region_sub$time[tmax+1], sir_result_region_sub$mean[tmax+1], format(sir_result_region_sub$mean[tmax+1],digits=2, big.mark=","), pos=4, col=col.line)
+    text(sir_result_region_sub$time[tmax+1], sir_result_region_sub$lower[tmax+1], format(sir_result_region_sub$lower[tmax+1],digits=2, big.mark=","), pos=4, col=col.polygon)
+    text(sir_result_region_sub$time[tmax+1], sir_result_region_sub$upper[tmax+1], format(sir_result_region_sub$upper[tmax+1],digits=2, big.mark=","), pos=4, col=col.polygon)
     if(!is.null(add)){
       lines(as.numeric(as.Date(sub.add$Date) - day0), sub.add$value, col='gray30', lty  = 2,  lwd=1.2)
       tmp1 = as.numeric(today() - day0)
@@ -214,27 +215,27 @@ plot_ct_region = function(region_name, which.plot = "D", add=NULL) {
   # Add observed deaths
   col.line <- lab.table$color[which(lab.table$compartment=="D")]
   if(region_name == "Connecticut" && "rD" %in% which.plot) {
-    points(dat_ct_state$time, dat_ct_state$deaths, pch=16, col=col.line) 
+    points(dat_ct_state$time, dat_ct_state$deaths, pch=16, cex=0.6, col=col.line) 
   } else if("rD" %in% which.plot) {
     obs.region <- subset(dat_ct_county, county == region_name)
     obs.region$date <- ymd(obs.region$date)
     first.region.time <- round(as.numeric(difftime(obs.region$date[1], day0, units="days")),0)
     obs.region$time <- c(first.region.time:(nrow(obs.region)+first.region.time-1)) # add time variable that indexes time 
     #obs.region <- merge(obs.region, date.time, by='date')
-    points(obs.region$time, obs.region$deaths, pch=16, col=col.line)
+    points(obs.region$time, obs.region$deaths, pch=16, cex=0.6, col=col.line)
   }
 
   # Add observed hospitalization
   col.line <- lab.table$color[which(lab.table$compartment=="H")]
   if(region_name == "Connecticut" && "rH" %in% which.plot) {
-      points(dat_ct_state$time, dat_ct_state$cur_hosp, pch=16, col=col.line) 
+      points(dat_ct_state$time, dat_ct_state$cur_hosp, pch=16, cex=0.6, col=col.line) 
   } else if("rH" %in% which.plot) {
     obs.region <- subset(dat_ct_county, county == region_name)
     obs.region$date <- ymd(obs.region$date)
     first.region.time <- round(as.numeric(difftime(obs.region$date[1], day0, units="days")),0)
     obs.region$time <- c(first.region.time:(nrow(obs.region)+first.region.time-1)) # add time variable that indexes time 
     #obs.region <- merge(obs.region, date.time, by='date')
-    points(obs.region$time, obs.region$cur_hosp, pch=16, col=col.line)
+    points(obs.region$time, obs.region$cur_hosp, pch=16, cex=0.6, col=col.line)
   }
 
 	#legend(0, max(dat_ct_state$deaths), compartment_plot_names, lty=1, col=compartment_plot_colors, bty="n")
@@ -247,7 +248,7 @@ plot_ct_region = function(region_name, which.plot = "D", add=NULL) {
       sir_result_region_sub <- filter(sir_result_region, variable==paste0(which.plot[1],".",region_name))
       count <- sir_result_region_sub$mean[sir_result_region_sub$time==tmax]
       region_summary = paste(region_summary, "On ", format(daymax, "%b %d, %Y"),
-                       " projections show ", format(count, digits=2),
+                       " projections show ", format(count, digits=2, big.mark=","),
                        " cumulative deaths in ", region_name,
                        ".",
                        sep="")    
@@ -256,9 +257,9 @@ plot_ct_region = function(region_name, which.plot = "D", add=NULL) {
       sir_result_region_sub <- filter(sir_result_region, variable==paste0(which.plot[1],".",region_name))
       count <- max(sir_result_region_sub$mean, na.rm=TRUE)
       region_summary = paste(region_summary, "On ", format(daymax, "%b %d, %Y"),
-                       " projections show a peak of ", format(count, digits=2),
+                       " projections show a peak of ", format(count, digits=2, big.mark=","),
                        " hospitalizations in ", region_name,
-                       ". The dashed line shows historical and current hospital capacity. ",
+                       ". The dashed line shows historical and projected hospital capacity. ",
                        sep="")    
   }
 
