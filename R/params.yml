@@ -14,7 +14,15 @@ slope: 500
 k_A: 0.375
 k_n: 0.05
 # user-defined
-m_Hbar_mult: 2
+m_Hbar_mult: 1.5
+
+# standard deviations of model parameters for uncertainty in projections
+sd_beta_pre: 0.1
+sd_recip_delta: 0.5
+sd_recip_gamma_H: 1
+sd_m_H: 0.025
+sd_m_Hbar_mult: 0.1
+sd_lockdown_effect: 0.05
 
 # model timeframe
 timeframe: 183

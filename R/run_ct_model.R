@@ -91,9 +91,16 @@ state0 = c(S=S_init, E=E_init, I_s=I_s_init, I_m=I_m_init, A=A_init, H=H_init, H
 
 rparams = function() {
   params_tmp = params_init
-  # sample new param values, and initial conditions!
-  params_tmp$beta_pre = rnorm(1,mean=params_init$beta_pre,sd=0.1)
-  # add more here
+  # sample new param values, 
+  params_tmp$beta_pre = max(0,rnorm(1,mean=params_init$beta_pre,  sd=params_init$sd_beta_pre))
+  params_tmp$delta = 1/max(0.001,rnorm(1,mean=1/params_init$delta,  sd=params_init$sd_recip_delta))
+  params_tmp$gamma_H = 1/max(0.001,rnorm(1,mean=1/params_init$gamma_H,  sd=params_init$sd_recip_gamma_H))
+  params_tmp$m_H = max(0,rnorm(1,mean=params_init$m_H,  sd=params_init$sd_m_H))
+  params_tmp$m_H = min(1,params_tmp$m_H)
+  params_tmp$m_Hbar_mult <- max(0,rnorm(1,mean=params_init$m_Hbar_mult,  sd=params_init$sd_m_Hbar_mult))
+  params_tmp$lockdown_effect <- min(1, rnorm(1,mean=params_init$lockdown_effect,  sd=params_init$sd_lockdown_effect))
+  params_tmp$lockdown_effect <- max(0, params_tmp$lockdown_effect)
+  # add sampling of initial conditions
   return(params_tmp)
 }
 
