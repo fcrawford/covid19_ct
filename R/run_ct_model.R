@@ -195,7 +195,7 @@ plot_ct_region_list = function(data=NULL,
   # run multiple models
   out <- NULL
   for(i in 1:length(data)){
-    out[[i]] <- plot_ct_region(data=data[[i]], region_name=region_name, which.plot = which.plot, color=color, title=title[[i]], xlab=xlab, ylab=ylab, end_day=end_day, capacity_fun=capacity_func, obs_state=obs_state, obs_county=obs_county, ymax=ymax, sentence=sentence)
+    out[[i]] <- plot_ct_region(data=data[[i]], region_name=region_name, which.plot = which.plot, color=color, title=paste0("\n",title[[i]]), xlab=xlab, ylab=ylab, end_day=end_day, capacity_fun=capacity_func, obs_state=obs_state, obs_county=obs_county, ymax=ymax, sentence=sentence)
   }
   
   # form a sentence
@@ -397,9 +397,8 @@ plot_ct_region = function(data=NULL,
 #####################################
 #
 # @param which.plot the prefix of the compartment to plot, e.g., S, E, I_s, I_m. If a vector of more than one specified, it takes the sum of the compartment (only the mean!)
-mapplot_ct_region = function(data=sir_results_summary, which.plot = "D", label = "Cumulative Deaths", palette="Reds", ...) {
+mapplot_ct_region = function(data=sir_results_summary, which.plot = "D", label = "Cumulative Deaths", palette="Reds", subtitle=NULL, ...) {
   map = CTmap
-  #ncol=4 # customize based on date range? 
   region_names <- as.character(map$NAME10)
   toplot <- paste(rep(which.plot,each=length(region_names)),
                   rep(region_names, length(which.plot)),sep=".")
@@ -421,9 +420,30 @@ mapplot_ct_region = function(data=sir_results_summary, which.plot = "D", label =
     by.data="County", by.geo = "NAME10",
     variables = "Date", values = "mean", is.long=TRUE, 
     legend.label = label, ...) #, direction=-1,  ...) 
+  if(is.null(subtitle)) subtitle<-waiver()
   suppressMessages(
-    g <- g + scale_fill_distiller(label,  palette=palette, direction=1) + ggtitle(paste("Projected", tolower(gsub("\n"," ",label)), "in Connecticut counties by month"))
+    g <- g + scale_fill_distiller(label,  palette=palette, direction=1) + ggtitle(paste("Projected", tolower(gsub("\n"," ",label)), "in Connecticut counties by month"), subtitle=subtitle)
   )
+  return(g)
+}
+
+
+mapplot_ct_region_list =  function(data, which.plot = "D", label = "Cumulative Deaths", palette="Reds", subtitle=NULL, ...) {
+  ylim <- NULL
+  map = CTmap
+  region_names <- as.character(map$NAME10)
+  for(i in 1:length(data)){
+      toplot <- paste(rep(which.plot,each=length(region_names)),
+                  rep(region_names, length(which.plot)),sep=".")
+      sir_result_internal = data.frame(filter(data[[i]], variable%in%toplot))
+      t.index <- unique(sir_result_internal$time[format(sir_result_internal$time + day0, "%d")=="01"]) 
+      t.index <- (t.index - 1)[-1]
+      ylim <- range(c(ylim, subset(sir_result_internal, time %in% t.index)$mean))
+  }
+  g <- NULL
+  for(i in 1:length(data)){
+    g[[i]] <- mapplot_ct_region(data=data[[i]], which.plot=which.plot, label=label, palette=palette, subtitle = subtitle[[i]], ylim=ylim, ...)
+  }
   return(g)
 }
 
@@ -515,14 +535,19 @@ res2 = get_sir_results(daymax=mydaymax,
                       nsim=10)
 
 # Put into one list
+mytitles <- list("Stay-at-home order in place until 6/1", 
+               "Stay-at-home order in place until 7/1")
+mytitles_long <- list("When the stay-at-home order is in place until June 01", 
+                    "When the stay-at-home order is in place until July 01")
 res <- list(
             summary = list(res1$summary, res2$summary), 
-            title =  list("\nStay-at-home order in place until 6/1", 
-                          "\nStay-at-home order in place until 7/1"),
-            description = list("When the stay-at-home order is in place until June 01", 
-                          "When the stay-at-home order is in place until July 01")
+            titles = mytitles,
+            descriptions = mytitles_long,
       ) 
-# plot_ct_region_list(data=res$summary, end_day=mydaymax, title=res$title, description=res$description, region_name="Connecticut", which.plot="rD")
+# plot_ct_region_list(data=res$summary, end_day=mydaymax, title=res$titles, description=res$descriptions, region_name="Connecticut", which.plot="rD")
+
+# mapplot_ct_region_list(data = res$summary, which.plot="rD", label="Cumulative\nDeaths", palette="Reds", ncol=3, subtitle=res$titles)
+
 
 # plot_ct_region_list(data=res$summary, end_day=mydaymax, title=res$title)
 # plot_ct_region_list(data=res$summary, end_day=mydaymax, title=res$title, which.plot="rHsum")
