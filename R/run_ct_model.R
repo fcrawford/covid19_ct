@@ -163,6 +163,7 @@ get_sir_results = function(daymax=ymd("2020-09-01"),
                              mean = mean(value),
 			                       lower = quantile(value, 0.05, na.rm=TRUE),
 			                       upper = quantile(value, 0.95, na.rm=TRUE))
+  return(list(raw_results=sir_results, summary=sir_results_summary))
 }
 
 ####################
@@ -175,18 +176,19 @@ get_sir_results = function(daymax=ymd("2020-09-01"),
 # @param color the color of the line
 
 
-plot_ct_region = function(data = sir_results_summary, 
+plot_ct_region = function(data=NULL, 
                           region_name = "Connecticut", 
                           which.plot = "D", 
                           color =  NULL,
                           title=NULL, xlab=NULL, ylab=NULL,
-                          tmax.plot = tmax,
-                          start_day = day0,
-                          end_day = daymax,
+                          #tmax.plot = tmax,
+                          #start_day = day0,
+                          end_day=NULL, # pass in daymax
                           capacity_func = county_capacities,
                           obs_state = dat_ct_state,
                           obs_county = dat_ct_county) {
 
+ 
 
   lab.table <- data.frame(compartment=c("D","rD",
                                         "H","rH",
@@ -204,6 +206,10 @@ plot_ct_region = function(data = sir_results_summary,
                                     "Severe Infections","Mild Infections",
                                     "Asymptomatic Infections"))
   
+ #dayseq = seq(day0, daymax, by="day")
+  start_day = day0
+  tmax.plot = as.numeric(difftime(daymax, day0, units="days"))
+
   monthseq = seq(start_day, end_day, by="month")
   lab_show = format(monthseq, "%b %Y")
   lab_where = difftime(monthseq, start_day, units="days")
@@ -379,10 +385,24 @@ mapplot_ct_region = function(data=sir_results_summary, which.plot = "D", label =
 
 ####################################
 
-plot_interventions = function() {
+plot_interventions = function(sir_results, daymax) {
+
+  dayseq = seq(day0, daymax, by="day")
+  tmax = as.numeric(difftime(daymax, day0, units="days"))
+
+  monthseq = seq(day0, daymax, by="month")
+  monthseq_lab = format(monthseq, "%b %Y")
+  daymonthseq = difftime(monthseq, day0, units="days")
+
+  #print(monthseq)
+  #lockfun = get_state_lockdown_fun(dayseq, offdate=lockdown_end_date)
+  #schoolsfun = get_school_in_session_fun(dayseq, schools_reopen_date=schools_reopen_date)
+  #testingfun = get_testing_on_fun(dayseq, testing_on_date=testing_on_date)
+  #interventions = list(lockdown=lockfun, schools=schoolsfun, testing=testingfun) 
+  #stop("here")
 
   par(mar=c(3,3,3,0), bty="n")
-  layout(matrix(c(1,2,3),nrow=3), heights=c(2,2,3))
+  layout(matrix(c(1,2,3,4),nrow=,4), heights=c(2,2,2,2))
 
   plot(sir_results[[1]]$intervention_schools, ylim=c(0,1), type="n", ylab="", xlab="", main="Schools in session", axes=FALSE)
   axis(1, at=daymonthseq, lab=monthseq_lab)
@@ -396,17 +416,25 @@ plot_interventions = function() {
   polygon(c(1,1:(tmax+1), tmax+1), c(0,sir_results[[1]]$intervention_lockdown, 0), col="orange", border=NA)
   abline(v=Sys.Date()-day0, col="gray", lty=2)
 
-
   plot(sir_results[[1]]$intervention_pattern, ylim=c(0,1),  type="n", ylab="", xlab="", main="Relative reduction in transmission", axes=FALSE)
   axis(1, at=daymonthseq, lab=monthseq_lab)
   axis(2)
   polygon(c(1,1:(tmax+1), tmax+1), c(0,sir_results[[1]]$intervention_pattern, 0), col="orange", border=NA)
   abline(v=Sys.Date()-day0, col="gray", lty=2)
 
+  plot(sir_results[[1]]$intervention_testing, ylim=c(0,1), type="n", ylab="", xlab="", main="Expanded testing", axes=FALSE)
+  axis(1, at=daymonthseq, lab=monthseq_lab)
+  axis(2)
+  polygon(c(1,1:(tmax+1), tmax+1), c(0,sir_results[[1]]$intervention_testing, 0), col="orange", border=NA)
+  abline(v=Sys.Date()-day0, col="gray", lty=2)
 }
 
 ####################################
 # get_Cumulative("2020-07-01", "rD.Connecticut")
+
+# Richard, do can you fix this function? 
+
+
 get_Cumulative <- function(date, tosum){
   sir_result_internal = data.frame(filter(sir_results_summary, variable%in%tosum))
   t = as.numeric(difftime(as.Date(date), day0, unit='days'))
@@ -424,53 +452,27 @@ get_Cumulative <- function(date, tosum){
 
 
 
-########################
+#######################
 
-res = get_sir_results(daymax=ymd("2020-09-01"), 
-                      lockdown_end_date=ymd("2020-06-01"), 
-                      schools_reopen_date=ymd("2020-09-01"),
-                      testing_on_date=ymd("2020-05-15"),
+mydaymax              = ymd("2020-09-01") 
+mylockdown_end_date   = ymd("2020-06-01") 
+myschools_reopen_date = ymd("2020-09-01")
+mytesting_on_date     = ymd("2020-05-15")
+
+res = get_sir_results(daymax=mydaymax,
+                      lockdown_end_date=mylockdown_end_date,
+                      schools_reopen_date=myschools_reopen_date,
+                      testing_on_date=mytesting_on_date,
                       nsim=1)
 
+plot_ct_region(res$summary, end_day=mydaymax)
 
+g = mapplot_ct_region(res$summary)
+print(g)
 
-
-# make correspondence with calendar dates
-
-# plot state overall, and by region  
-
-
-#par(mfrow=c(3,3))
-#plot_ct_region("Connecticut")
-#sapply(region_names, plot_ct_region)
-
-# test plot multiple lines
-
-# plot_ct_region(data = sir_results_summary, 
-#                region_name = "Connecticut", 
-#                which.plot = "rD", 
-#                title=NULL, xlab=NULL, ylab=NULL)
-
-
-
-# for(i in region_names){
-#   summary <- plot_ct_region(i, c("H"), add = dat_ct_capacity)
-#   print(summary)
-# }
+plot_interventions(res$raw_results, mydaymax)
 
 
 
 
-#plot.new()
-#plot_interventions()
-
-# Death plot
-#plot.new()
-#death.map = mapplot_ct_region() #map=CTmap, ncol=3)
-#print(death.map)
-
-# Cumulative hospitalization plot
-#plot.new()
-#hos.map = mapplot_ct_region("cum_modH",  "Cumulative\nHospitalizations")  
-#print(hos.map)
 
