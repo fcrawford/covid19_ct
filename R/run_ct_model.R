@@ -179,9 +179,9 @@ plot_ct_region = function(region_name, which.plot = "D", add=NULL) {
     if(region_name != "Connecticut"){
         sub.add <- subset(add, County == region_name)
       }else{
-        sub.add <- aggregate(value~Date, data=add, FUN=function(x){sum(x)})
+        sub.add <- aggregate(Capacity~Date, data=add, FUN=function(x){sum(x)})
       }
-      ymax <- max(ymax, sub.add$value)
+      ymax <- max(ymax, sub.add$Capacity)
   }
 
   plot(0, type="n", xlab="", ylab="People", main=title, col="black", 
@@ -204,10 +204,10 @@ plot_ct_region = function(region_name, which.plot = "D", add=NULL) {
     text(sir_result_region_sub$time[tmax+1], sir_result_region_sub$lower[tmax+1], format(sir_result_region_sub$lower[tmax+1],digits=2, big.mark=","), pos=4, col=col.polygon)
     text(sir_result_region_sub$time[tmax+1], sir_result_region_sub$upper[tmax+1], format(sir_result_region_sub$upper[tmax+1],digits=2, big.mark=","), pos=4, col=col.polygon)
     if(!is.null(add)){
-      lines(as.numeric(as.Date(sub.add$Date) - day0), sub.add$value, col='gray30', lty  = 2,  lwd=1.2)
+      lines(as.numeric(as.Date(sub.add$Date) - day0), sub.add$Capacity, col='gray30', lty  = 2,  lwd=1.2)
       tmp1 = as.numeric(today() - day0)
       tmp2 = as.numeric(daymax - day0)
-      capvalue = sub.add$value[length(sub.add$value)]
+      capvalue = sub.add$Capacity[length(sub.add$Capacity)]
       lines(c(tmp1,tmp2), rep(capvalue,2), col='gray30', lty  = 2,  lwd=1.2)
     }
   }
