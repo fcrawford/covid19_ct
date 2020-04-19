@@ -100,9 +100,9 @@ run_sir_model = function(state0, params, region_adj, populations, tmax, interven
       
       dI_s  <- (1 - q_Im - q_A)*delta*E - alpha*I_s
       
-      dI_m  <- q_Im*delta*E - (1-a_t)*gamma_Im*I_m
+      dI_m  <- q_Im*delta*E - (1+a_t)*gamma_Im*I_m
       
-      dA    <- q_A*delta*E - (1-a_t)*gamma_A*A
+      dA    <- q_A*delta*E - (1+a_t)*gamma_A*A
       
       dH    <- alpha*I_s*(1-Hospital_capacities_breached) - gamma_H*H
       
