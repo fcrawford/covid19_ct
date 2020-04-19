@@ -173,26 +173,29 @@ sir_results_summary <- sir_results_long %>% group_by(variable, time) %>%
 # @param which.plot the prefix of the compartment to plot, e.g., S, E, I_s, I_m. If a vector of more than one specified, it plots multiple lines
 # @param add logical, if adding capacity line                         
 
-
 plot_ct_region = function(region_name, which.plot = "D", add=FALSE) {
   #compartment_plot_labels = c("D")
   #compartment_plot_names = c("Deaths")
   #compartment_plot_colors = rainbow(length(compartment_plot_labels))
   lab.table <- data.frame(compartment=c("D","rD",
                                         "H","rH",
-                                        "Hbar","cum_modH","S","E","I_s","I_m","A"),
-                          color=c('#e41a1c','#e41a1c','#377eb8','#377eb8',
-                                  '#4daf4a','#984ea3','#ff7f00','#ffff33',
+                                        "Hbar", "rHbar", "rHsum",
+                                        "cum_modH","S","E","I_s","I_m","A"),
+                          color=c('#e41a1c','#e41a1c','#377eb8','#377eb8', 
+                                  '#4daf4a','#4daf4a','#377eb8', #'#cab2d6',
+                                  '#984ea3','#ff7f00','#ffff33',
                                   '#a65628','#f781bf','#999999'),
                           labels=c("Cumulative Deaths","Cumulative Deaths",
                                     "Hospitalizations","Hospitalizations",
-                                    "Hospital Overflow",
+                                    "Hospital Overflow","Hospital Overflow","Required Hospitalizations",
                                     "Cumulative Hospitalizations",
                                     "Susceptible Population","Exposed Population",
                                     "Severe Infections","Mild Infections",
                                     "Asymptomatic Infections"))
 
+  which.plot.ci <- which.plot
   if("rH" %in% which.plot) add <- TRUE
+  if("rHsum" %in% which.plot) add <- TRUE
 
   par(mar=c(3,4,3,0), bty="n")
   toplot <- paste(rep(which.plot,each=length(region_name)),
@@ -231,15 +234,22 @@ plot_ct_region = function(region_name, which.plot = "D", add=FALSE) {
     col.line <- lab.table$color[which(lab.table$compartment==which.plot[i])]
     col.polygon <- adjustcolor(col.line, alpha.f = 0.5)
     sir_result_region_sub <- filter(sir_result_region, variable==paste0(which.plot[i],".",region_name))
-    polygon(c(sir_result_region_sub$time, rev(sir_result_region_sub$time)), c(sir_result_region_sub$lower, rev(sir_result_region_sub$upper)), col=col.polygon, border=NA)
-
-    lines(sir_result_region_sub$time, sir_result_region_sub$mean, col=col.line)
-    text(sir_result_region_sub$time[tmax+1], sir_result_region_sub$mean[tmax+1], format(sir_result_region_sub$mean[tmax+1],digits=2, big.mark=","), pos=4, col=col.line)
-    text(sir_result_region_sub$time[tmax+1], sir_result_region_sub$lower[tmax+1], format(sir_result_region_sub$lower[tmax+1],digits=2, big.mark=","), pos=4, col=col.polygon)
-    text(sir_result_region_sub$time[tmax+1], sir_result_region_sub$upper[tmax+1], format(sir_result_region_sub$upper[tmax+1],digits=2, big.mark=","), pos=4, col=col.polygon)
-    if(add){
-      lines(sub.add$time, sub.add$Capacity, col='gray30', lty  = 2,  lwd=1.2)
+    if(which.plot[i] %in% which.plot.ci){
+      if(which.plot[i] %in% c("rH", "rHbar", "rHsum")){
+        time.print <- which.max(sir_result_region_sub$mean)
+      }else{
+        time.print <- tmax + 1
+      }
+      polygon(c(sir_result_region_sub$time, rev(sir_result_region_sub$time)), c(sir_result_region_sub$lower, rev(sir_result_region_sub$upper)), col=col.polygon, border=NA)
+      text(sir_result_region_sub$time[tmax+1], sir_result_region_sub$mean[time.print], format(sir_result_region_sub$mean[time.print],digits=2, big.mark=","), pos=4, col=col.line)
+      text(sir_result_region_sub$time[tmax+1], sir_result_region_sub$lower[time.print], format(sir_result_region_sub$lower[time.print],digits=2, big.mark=","), pos=4, col=col.polygon)
+      text(sir_result_region_sub$time[tmax+1], sir_result_region_sub$upper[time.print], format(sir_result_region_sub$upper[time.print],digits=2, big.mark=","), pos=4, col=col.polygon)
     }
+    lines(sir_result_region_sub$time, sir_result_region_sub$mean, col=col.line)
+  }
+
+  if(add){
+    lines(sub.add$time, sub.add$Capacity, col='gray30', lty  = 2,  lwd=1.2)
   }
 
   # Add observed deaths
@@ -268,7 +278,7 @@ plot_ct_region = function(region_name, which.plot = "D", add=FALSE) {
     points(obs.region$time, obs.region$cur_hosp, pch=16, cex=0.6, col=col.line)
   }
 
-	#legend(0, max(dat_ct_state$deaths), compartment_plot_names, lty=1, col=compartment_plot_colors, bty="n")
+  #legend(0, max(dat_ct_state$deaths), compartment_plot_names, lty=1, col=compartment_plot_colors, bty="n")
 
   # return some useful info
   # capacity exceeded?
@@ -296,6 +306,20 @@ plot_ct_region = function(region_name, which.plot = "D", add=FALSE) {
       region_summary = paste(region_summary, "On ", format(daymax, "%B %d"),
                        " projections show a peak of ", format(count, digits=2, big.mark=","),
                        " hospitalizations reported in ", region_name,
+                       " with 90% uncertainty interval between ", format(count.min, digits=2, big.mark=","), 
+                       " and ", format(count.max, digits=2, big.mark=","),
+                       ". The dashed line shows historical and projected hospital capacity. ",
+                       sep="")    
+  }
+  if("rHsum" %in% which.plot){
+      sir_result_region_sub <- filter(sir_result_region, variable==paste0(which.plot[1],".",region_name))
+      count <- max(sir_result_region_sub$mean, na.rm=TRUE)
+      peak <- which.max(sir_result_region_sub$mean)
+      count.min <- sir_result_region_sub$lower[peak]
+      count.max <- sir_result_region_sub$upper[peak]
+      region_summary = paste(region_summary, "On ", format(daymax, "%B %d"),
+                       " projections show a peak of ", format(count, digits=2, big.mark=","),
+                       " required hospitalizations reported in ", region_name,
                        " with 90% uncertainty interval between ", format(count.min, digits=2, big.mark=","), 
                        " and ", format(count.max, digits=2, big.mark=","),
                        ". The dashed line shows historical and projected hospital capacity. ",
