@@ -142,7 +142,7 @@ for(nm in region_names) {
 #######################
 # run the sims
 
-nsim = 100
+nsim = 1
 
 sir_results = lapply(1:nsim, function(i){
   res = run_sir_model(state0=state0, 
@@ -395,7 +395,7 @@ get_Cumulative <- function(date, tosum){
 #sapply(region_names, plot_ct_region)
 
 # test plot multiple lines
-#plot_ct_region("Connecticut", c("H"), add = dat_ct_capacity)
+plot_ct_region("Connecticut", c("rH"))
 
 # for(i in region_names){
 #   summary <- plot_ct_region(i, c("H"), add = dat_ct_capacity)

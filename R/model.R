@@ -64,9 +64,12 @@ run_sir_model = function(state0, params, region_adj, populations, tmax, interven
       # and the intervention function evaluated at the current time
       beta = beta_matrix * intervention_fun(time)
       
-      # FIX this when we have hospital capacity information: 
 
-      Hospital_capacities_breached = lapply(
+      # Hospital capacities
+      actual_capacities = as.numeric(lapply(county_capacities, function(cap)cap(time)))
+
+      smoothstep = function(x) 1/(1+exp(-0.5*x))
+      Hospital_capacities_breached = smoothstep(H-actual_capacities)
       
       
       ##################
