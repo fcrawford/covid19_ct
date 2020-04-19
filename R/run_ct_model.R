@@ -249,7 +249,7 @@ plot_ct_region = function(region_name, which.plot = "D", add=NULL) {
       count <- sir_result_region_sub$mean[sir_result_region_sub$time==tmax]
       count.min <- sir_result_region_sub$lower[sir_result_region_sub$time==tmax]
       count.max <- sir_result_region_sub$upper[sir_result_region_sub$time==tmax]
-      region_summary = paste(region_summary, "On ", format(daymax, "%b %d"),
+      region_summary = paste(region_summary, "On ", format(daymax, "%B %d"),
                        " projections show ", format(count, digits=2, big.mark=","),
                        " cumulative deaths reported in ", region_name,
                        " with 90% uncertainty interval between ", format(count.min, digits=2, big.mark=","),
@@ -263,7 +263,7 @@ plot_ct_region = function(region_name, which.plot = "D", add=NULL) {
       peak <- which.max(sir_result_region_sub$mean)
       count.min <- sir_result_region_sub$lower[peak]
       count.max <- sir_result_region_sub$upper[peak]
-      region_summary = paste(region_summary, "On ", format(daymax, "%b %d"),
+      region_summary = paste(region_summary, "On ", format(daymax, "%B %d"),
                        " projections show a peak of ", format(count, digits=2, big.mark=","),
                        " hospitalizations reported in ", region_name,
                        " with 90% uncertainty interval between ", format(count.min, digits=2, big.mark=","), 
