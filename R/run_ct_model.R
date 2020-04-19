@@ -542,7 +542,7 @@ mytitles_long <- list("When the stay-at-home order is in place until June 01",
 res <- list(
             summary = list(res1$summary, res2$summary), 
             titles = mytitles,
-            descriptions = mytitles_long,
+            descriptions = mytitles_long
       ) 
 # plot_ct_region_list(data=res$summary, end_day=mydaymax, title=res$titles, description=res$descriptions, region_name="Connecticut", which.plot="rD")
 
