@@ -342,10 +342,16 @@ get_Cumulative <- function(date, tosum){
   sir_result_internal = data.frame(filter(sir_results_summary, variable%in%tosum))
   t = as.numeric(difftime(as.Date(date), day0, unit='days'))
   sir_result_internal = subset(sir_result_internal, time%in%t)
-  sir_result_internal$mean  <- as.character(round(sir_result_internal$mean, 0))
-  if(length(date)==1) return(sir_result_internal$mean)
-  if(length(date)>1) return(paste(sir_result_internal$mean, collapse=", "))
+  out  <- as.character(format(sir_result_internal$mean, digits=2, big.mark=","))
+  if(length(date)>2){
+    out <-  paste0(paste(out[-length(out)], collapse=", "), ", and ", out[length(out)])
+  }else if(length(date)==2){
+    out <-  paste0(out[1], " and ", out[2])
+  }
+
+  return(out)
 }
+
 
 
 ########################
