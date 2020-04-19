@@ -186,8 +186,6 @@ plot_ct_region = function(data = sir_results_summary,
                           tmax.plot = tmax,
                           start_day = day0,
                           end_day = daymax,
-                          lab_where = daymonthseq, 
-                          lab_show = monthseq_lab,
                           capacity_func = county_capacities,
                           obs_state = dat_ct_state,
                           obs_county = dat_ct_county) {
@@ -208,6 +206,11 @@ plot_ct_region = function(data = sir_results_summary,
                                     "Susceptible Population","Exposed Population",
                                     "Severe Infections","Mild Infections",
                                     "Asymptomatic Infections"))
+  
+  monthseq = seq(start_day, end_day, by="month")
+  lab_show = format(monthseq, "%b %Y")
+  lab_where = difftime(monthseq, start_day, units="days")
+
 
   which.plot.ci <- which.plot
   add <- FALSE
