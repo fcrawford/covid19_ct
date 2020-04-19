@@ -121,6 +121,7 @@ lockfun = get_state_lockdown_fun(offdate=lockdown_end_date, post_off_effect=para
 state_schools_reopen_date = dmy("01/09/2020")
 schoolsfun = get_school_in_session_fun(state_schools_reopen=state_schools_reopen_date)
 
+interventions_default = list(lockdown=lockfun, schools=schoolsfun), # for testing
 
 #######################
 
@@ -138,35 +139,33 @@ for(nm in region_names) {
 
 
 #######################
-# run the sims
+# Run the model 
 
-nsim = 100
+get_sir_results = function(interventions, tmax, nsim=1) {
 
-sir_results = lapply(1:nsim, function(i){
-  res = run_sir_model(state0=state0, 
-                      params=rparams(),  # note: effect_intvx is in params, and is not passed to run_sir_model separately 
-                      region_adj=adj, 
-                      populations=as.numeric(populations), 
-                      tmax=tmax, 
-                      interventions=list(lockdown=lockfun, schools=schoolsfun), # intervention functions! 
-                      capacities=county_capacities)
-  res$sim_id = i
-  res
-})
+  sir_results = lapply(1:nsim, function(i){
+    res = run_sir_model(state0=state0, 
+                        params=rparams(),  # note: effect_intvx is in params, and is not passed to run_sir_model separately 
+                        region_adj=adj, 
+                        populations=as.numeric(populations), 
+                        tmax=tmax, 
+                        interventions=interventions,
+                        capacities=county_capacities)
+    res$sim_id = i
+    res
+  })
 
-#######################
-# aggregate and summarize results across sims
-
-sir_results_all = ldply(sir_results, rbind)
-for(nm in c("Connecticut", region_names)){
-  sir_results_all[, paste0("rHsum.", nm)] <-  sir_results_all[,paste0("rH.", nm)]+sir_results_all[,paste0("rHbar.", nm)]
+  sir_results_all = ldply(sir_results, rbind)
+  for(nm in c("Connecticut", region_names)){
+    sir_results_all[, paste0("rHsum.", nm)] <-  sir_results_all[,paste0("rH.", nm)]+sir_results_all[,paste0("rHbar.", nm)]
+  }
+  sir_results_long <- melt(sir_results_all, id.vars = c("time", "sim_id"))
+  sir_results_summary <- sir_results_long %>% group_by(variable, time) %>% 
+			                     summarise(
+                             mean = mean(value),
+			                       lower = quantile(value, 0.05, na.rm=TRUE),
+			                       upper = quantile(value, 0.95, na.rm=TRUE))
 }
-sir_results_long <- melt(sir_results_all, id.vars = c("time", "sim_id"))
-sir_results_summary <- sir_results_long %>% group_by(variable, time) %>% 
-			                   summarise(
-                           mean = mean(value),
-			                     lower = quantile(value, 0.05, na.rm=TRUE),
-			                     upper = quantile(value, 0.95, na.rm=TRUE))
 
 ####################
 # plotting 
