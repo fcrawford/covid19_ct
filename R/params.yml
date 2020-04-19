@@ -54,9 +54,13 @@ D_lag: 6
 # the following effects are ADDITIVE and must sum to a number <= 1
 # e.g. an effect of 0.1 reduces the intervention from 1 (full effect) to 0.9. 
 
+# intervention effects on contact: 
 school_closure_effect: 0.28
 lockdown_effect: 0.48
-distancing_effect: 0.3
+
+# intervention effect on isolation/recovery for A and I_m
+# this is percent increase
+testing_effect: 0.3 
 
 # hospital beds occupancy: user-defined
 bed_occup: 0.65 #default

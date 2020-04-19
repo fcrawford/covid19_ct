@@ -21,35 +21,22 @@ source("truncated_distributions.R")
 # starting day
 day0 = ymd("2020-03-01")
 
-# ending day
-daymax = ymd("2020-09-01")
-
-# to use in the model
-tmax = as.numeric(difftime(daymax, day0, units="days"))
-
-# dayseq is the calendar day sequence we want to model
-dayseq = seq(day0, daymax, by="day")
-
-# match dayseq to time in the model and data
-date.time <- as.data.frame(cbind(format(as.Date(dayseq)),c(0:(length(dayseq)-1))))
-colnames(date.time) <- c("date", 'time')
-
-# the month sequences are for display only
-monthseq = seq(day0, daymax, by="month")
-monthseq_lab = format(monthseq, "%b %Y")
-daymonthseq = difftime(monthseq, day0, units="days")
-
+# actual dates: do not change
+state_schools_close = dmy("13/03/2020")
+state_lockdown_order = dmy("20/03/2020") # order date
+state_lockdown_start = dmy("23/03/2020") # actual start date
 
 
 #############################
 # hypothetical end date of lockdown
 
-lockdown_end_date=dmy("01/06/2020") 
+# lockdown_end_date=dmy("01/06/2020") 
 
 
 ########################
 
 ##### get reported data from CT #####
+
 data <- get_ct_data(day0=day0)
 dat_ct_state <- data$dat_ct_state
 dat_ct_county <- data$dat_ct_county
@@ -113,17 +100,6 @@ rparams = function() {
 
 
 #######################
-# set intervention patterns
-
-
-lockfun = get_state_lockdown_fun(offdate=lockdown_end_date, post_off_effect=params_init$distancing_effect)
-
-state_schools_reopen_date = dmy("01/09/2020")
-schoolsfun = get_school_in_session_fun(state_schools_reopen=state_schools_reopen_date)
-
-interventions_default = list(lockdown=lockfun, schools=schoolsfun), # for testing
-
-#######################
 
 # set county level capacities 
 
@@ -141,7 +117,29 @@ for(nm in region_names) {
 #######################
 # Run the model 
 
-get_sir_results = function(interventions, tmax, nsim=1) {
+
+get_sir_results = function(daymax=ymd("2020-09-01"), 
+                           lockdown_end_date, 
+                           schools_reopen_date,
+                           testing_on_date,
+                           nsim=1) {
+
+  dayseq = seq(day0, daymax, by="day")
+  tmax = as.numeric(difftime(daymax, day0, units="days"))
+
+  #date.time <- as.data.frame(cbind(format(as.Date(dayseq)),c(0:(length(dayseq)-1))))
+  #colnames(date.time) <- c("date", 'time')
+
+  # the month sequences are for display only
+  #monthseq = seq(day0, daymax, by="month")
+  #monthseq_lab = format(monthseq, "%b %Y")
+  #daymonthseq = difftime(monthseq, day0, units="days")
+
+  lockfun = get_state_lockdown_fun(dayseq, offdate=lockdown_end_date)
+  schoolsfun = get_school_in_session_fun(dayseq, schools_reopen_date=schools_reopen_date)
+  testingfun = get_testing_on_fun(dayseq, testing_on_date=testing_on_date)
+
+  interventions = list(lockdown=lockfun, schools=schoolsfun, testing=testingfun) 
 
   sir_results = lapply(1:nsim, function(i){
     res = run_sir_model(state0=state0, 
@@ -422,7 +420,17 @@ get_Cumulative <- function(date, tosum){
 
 
 
+
 ########################
+
+res = get_sir_results(daymax=ymd("2020-09-01"), 
+                      lockdown_end_date=ymd("2020-06-01"), 
+                      schools_reopen_date=ymd("2020-09-01"),
+                      testing_on_date=ymd("2020-05-15"),
+                      nsim=1)
+
+
+
 
 # make correspondence with calendar dates
 

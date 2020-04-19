@@ -37,10 +37,12 @@ run_sir_model = function(state0, params, region_adj, populations, tmax, interven
   # here we define the intervention function: 
   # note that this function should be <= 1
   # and the effect of different interventions is additive, so coefficients must sum to <= 1.  
-  intervention_fun = function(t_tmp) { 1 - (params$school_closure_effect*(1-interventions$schools(t_tmp)) + params$lockdown_effect*interventions$lockdown(t_tmp))}
+  contact_intervention_fun = function(t_tmp) { 1 - (params$school_closure_effect*(1-interventions$schools(t_tmp)) + params$lockdown_effect*interventions$lockdown(t_tmp))}
+
+  
 
   # quick integrity check:
-  if(any(intervention_fun(1:(tmax+1))<0)) stop("intervention_fun returns negative values. Check that intervention prameters sum to <= 1")
+  if(any(contact_intervention_fun(1:(tmax+1))<0)) stop("intervention_fun returns negative values. Check that intervention prameters sum to <= 1")
 
   # region-wise beta transmission matrix 
   beta_matrix  = ( (1-params$k_n)*diag(1,nregions) + params$k_n*(1/region_adj_num)*region_adj ) * beta_pre 
@@ -62,7 +64,11 @@ run_sir_model = function(state0, params, region_adj, populations, tmax, interven
 
       # now the overall "effective" beta matrix is a product of the pre-intervention beta matrix 
       # and the intervention function evaluated at the current time
-      beta = beta_matrix * intervention_fun(time)
+      beta = beta_matrix * contact_intervention_fun(time)
+
+      # effect of testing on recovery for mild  and asymptomatic 
+      # should this instead be a reduction on infectiousness?  Does it matter? 
+      a_t = interventions$testing(time)*params$testing_effect
       
 
       # Hospital capacities
@@ -88,9 +94,9 @@ run_sir_model = function(state0, params, region_adj, populations, tmax, interven
       #################
   
       
-      dS    <-            -S*( beta %*% (I_s + I_m + k_A*A)/populations )    # populations normalized contact rates
+      dS    <-            -S*( beta %*% ( (1-a_t)*(I_s + I_m) + k_A*A)/populations )    # populations normalized contact rates
       
-      dE    <-  -delta*E + S*( beta %*% (I_s + I_m + k_A*A)/populations )
+      dE    <-  -delta*E + S*( beta %*% ( (1-a_t)*(I_s + I_m) + k_A*A)/populations )
       
       dI_s  <- (1 - q_Im - q_A)*delta*E - alpha*I_s
       
@@ -183,9 +189,10 @@ run_sir_model = function(state0, params, region_adj, populations, tmax, interven
     out[[paste0("cum_modH.", i)]] <- cumsum(dailyH)
   }
 
-  out$intervention_pattern = intervention_fun(1:(tmax+1))
+  out$intervention_pattern = contact_intervention_fun(1:(tmax+1))
   out$intervention_schools = interventions$schools(1:(tmax+1))
   out$intervention_lockdown = interventions$lockdown(1:(tmax+1))
+  out$intervention_testing = interventions$testing(1:(tmax+1))
 
   return(out)
 }
