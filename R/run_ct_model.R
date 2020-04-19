@@ -158,6 +158,9 @@ sir_results = lapply(1:nsim, function(i){
 # aggregate and summarize results across sims
 
 sir_results_all = ldply(sir_results, rbind)
+for(nm in c("Connecticut", region_names)){
+  sir_results_all[, paste0("rHsum.", nm)] <-  sir_results_all[,paste0("rH.", nm)]+sir_results_all[,paste0("rHbar.", nm)]
+}
 sir_results_long <- melt(sir_results_all, id.vars = c("time", "sim_id"))
 sir_results_summary <- sir_results_long %>% group_by(variable, time) %>% 
 			                   summarise(
