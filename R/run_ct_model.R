@@ -178,8 +178,10 @@ plot_ct_region_list = function(data=NULL,
                           end_day=NULL, # pass in daymax
                           capacity_func = county_capacities,
                           obs_state = dat_ct_state,
-                          obs_county = dat_ct_county){
-
+                          obs_county = dat_ct_county, 
+                          sentence=FALSE,
+                          description=NULL){
+  #  Get common y axis
   start_day = day0
   tmax.plot = as.numeric(difftime(end_day, day0, units="days"))
 
@@ -190,11 +192,26 @@ plot_ct_region_list = function(data=NULL,
     sir_result_region= filter(data[[i]], variable%in%toplot)
     ymax <- max(c(ymax, sir_result_region$mean[sir_result_region$time <= tmax.plot]), na.rm=TRUE)
   }
+  # run multiple models
   out <- NULL
   for(i in 1:length(data)){
-    out[[i]] <- plot_ct_region(data=data[[i]], region_name=region_name, which.plot = which.plot, color=color, title=title[[i]], xlab=xlab, ylab=ylab, end_day=end_day, capacity_fun=capacity_func, obs_state=obs_state, obs_county=obs_county, ymax=ymax)
+    out[[i]] <- plot_ct_region(data=data[[i]], region_name=region_name, which.plot = which.plot, color=color, title=title[[i]], xlab=xlab, ylab=ylab, end_day=end_day, capacity_fun=capacity_func, obs_state=obs_state, obs_county=obs_county, ymax=ymax, sentence=sentence)
   }
-  return(out)
+  
+  # form a sentence
+  unit <- "reported deaths"
+  if(which.plot=="rHsum") unit <- "reported hospitalization required"
+
+  out.print=NULL
+
+  for(i in 1:length(data)){
+    out.print[[i]] <- paste0(description[[i]], ", ")
+    out.print[[i]] <- paste0(out.print[[i]], "projections show ", out[[i]]$count, " ", unit, 
+                            " in ", out[[i]]$region_name, " on ", out[[i]]$date, 
+                            ", with 90% uncertainty interval between ",
+                            out[[i]]$lower, " and ", out[[i]]$upper, ".")
+  }  
+  return(out.print)
 }
 
 ####################
@@ -218,7 +235,8 @@ plot_ct_region = function(data=NULL,
                           capacity_func = county_capacities,
                           obs_state = dat_ct_state,
                           obs_county = dat_ct_county, 
-                          ymax = NULL) {
+                          ymax = NULL,
+                          sentence=TRUE) {
 
  
 
@@ -367,7 +385,13 @@ plot_ct_region = function(data=NULL,
                        ". The dashed line shows historical and projected hospital capacity. ",
                        sep="")    
   }
-
+  if(!sentence){
+    region_summary <- list(date=format(end_day, "%B %d"), 
+                           count=format(count, digits=2, big.mark=","),
+                           region_name=region_name, 
+                           lower=format(count.min, digits=2, big.mark=","),
+                           upper=format(count.max, digits=2, big.mark=","))
+  }
   return(region_summary)
 }
 #####################################
@@ -493,10 +517,13 @@ res2 = get_sir_results(daymax=mydaymax,
 # Put into one list
 res <- list(
             summary = list(res1$summary, res2$summary), 
-            title =  list("\nStay-at-home Order in place until 6/1", 
-                          "\nStay-at-home Order in place until 7/1")
+            title =  list("\nStay-at-home order in place until 6/1", 
+                          "\nStay-at-home order in place until 7/1"),
+            description = list("When the stay-at-home order is in place until June 01", 
+                          "When the stay-at-home order is in place until July 01")
       ) 
-par(mfrow = c(1,2))
+# plot_ct_region_list(data=res$summary, end_day=mydaymax, title=res$title, description=res$description, region_name="Connecticut", which.plot="rD")
+
 # plot_ct_region_list(data=res$summary, end_day=mydaymax, title=res$title)
 # plot_ct_region_list(data=res$summary, end_day=mydaymax, title=res$title, which.plot="rHsum")
 

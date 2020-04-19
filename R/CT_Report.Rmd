@@ -59,21 +59,22 @@ At the county level, hospitalization projections are based on the place of resid
 
 ```{r echo=FALSE, fig.width=10, fig.height=5}
 par(mfrow=c(1,2))
-connecticut_summary_deaths = plot_ct_region_list(data=res$summary, end_day=mydaymax, title=res$title, region_name="Connecticut", which.plot="rD")
+connecticut_summary_deaths = plot_ct_region_list(data=res$summary, end_day=mydaymax, title=res$title, description=res$description, region_name="Connecticut", which.plot="rD")
+out = connecticut_summary_deaths
 ```
 
 `r connecticut_summary_deaths[[1]]`
-
 `r connecticut_summary_deaths[[2]]`
+
 
 
 ```{r echo=FALSE, fig.width=10, fig.height=5}
 par(mfrow=c(1,2))
-connecticut_summary_hospitalization = plot_ct_region_list(data=res$summary, end_day=mydaymax, title=res$title, region_name="Connecticut", which.plot="rHsum")
+connecticut_summary_hospitalizations = plot_ct_region_list(data=res$summary, end_day=mydaymax, title=res$title, description=res$description, region_name="Connecticut", which.plot="rHsum")
 ```
 
-`r connecticut_summary_hospitalization[[1]]`
-`r connecticut_summary_hospitalization[[2]]`
+`r connecticut_summary_hospitalizations[[1]]`
+`r connecticut_summary_hospitalizations[[2]]`
 
 
 
@@ -82,17 +83,19 @@ connecticut_summary_hospitalization = plot_ct_region_list(data=res$summary, end_
 
 ```{r echo=FALSE, fig.width=10, fig.height=5}
 par(mfrow=c(1,2))
-fairfield_summary_deaths = plot_ct_region_list(data=res$summary, end_day=mydaymax, title=res$title, region_name="Fairfield", which.plot="rD")
+fairfield_summary_deaths = plot_ct_region_list(data=res$summary, end_day=mydaymax, title=res$title, description=res$description, region_name="Fairfield", which.plot="rD")
 ```
 
-`r fairfield_summary_deaths`
+`r fairfield_summary_deaths[[1]]`
+`r fairfield_summary_deaths[[2]]`
 
 ```{r echo=FALSE, fig.width=10, fig.height=5}
 par(mfrow=c(1,2))
-fairfield_summary_hospitalization = plot_ct_region_list(data=res$summary, end_day=mydaymax, title=res$title, region_name="Fairfield", which.plot="rHsum")
+fairfield_summary_hospitalizations = plot_ct_region_list(data=res$summary, end_day=mydaymax, title=res$title, description=res$description, region_name="Fairfield", which.plot="rHsum")
 ```
 
-`r fairfield_summary_hospitalization`
+`r fairfield_summary_hospitalizations[[1]]`
+`r fairfield_summary_hospitalizations[[2]]`
 
 
 
@@ -102,16 +105,18 @@ fairfield_summary_hospitalization = plot_ct_region_list(data=res$summary, end_da
 
 ```{r echo=FALSE, fig.width=10, fig.height=5}
 par(mfrow=c(1,2))
-new_london_summary_deaths = plot_ct_region_list(data=res$summary, end_day=mydaymax, title=res$title, region_name="New London", which.plot="rD")
+new_london_summary_deaths = plot_ct_region_list(data=res$summary, end_day=mydaymax, title=res$title, description=res$description, region_name="New London", which.plot="rD")
 ```
-`r new_london_summary_deaths`
+`r new_london_summary_deaths[[1]]`
+`r new_london_summary_deaths[[2]]`
 
 ```{r echo=FALSE, fig.width=10, fig.height=5}
 par(mfrow=c(1,2))
-new_london_summary_hospitalization = plot_ct_region_list(data=res$summary, end_day=mydaymax, title=res$title, region_name="New London", which.plot="rHsum")
+new_london_summary_hospitalizations = plot_ct_region_list(data=res$summary, end_day=mydaymax, title=res$title, description=res$description, region_name="New London", which.plot="rHsum")
 ```
 
-`r new_london_summary_hospitalization`
+`r new_london_summary_hospitalizations[[1]]`
+`r new_london_summary_hospitalizations[[2]]`
 
 
 
@@ -121,16 +126,18 @@ new_london_summary_hospitalization = plot_ct_region_list(data=res$summary, end_d
 ## Litchfield
 ```{r echo=FALSE, fig.width=10, fig.height=5}
 par(mfrow=c(1,2))
-litchfield_summary_deaths = plot_ct_region_list(data=res$summary, end_day=mydaymax, title=res$title, region_name="Litchfield", which.plot="rD")
+litchfield_summary_deaths = plot_ct_region_list(data=res$summary, end_day=mydaymax, title=res$title, description=res$description, region_name="Litchfield", which.plot="rD")
 ```
-`r litchfield_summary_deaths`
+`r litchfield_summary_deaths[[1]]`
+`r litchfield_summary_deaths[[2]]`
 
 ```{r echo=FALSE, fig.width=10, fig.height=5}
 par(mfrow=c(1,2))
-litchfield_summary_hospitalization = plot_ct_region_list(data=res$summary, end_day=mydaymax, title=res$title, region_name="Litchfield", which.plot="rHsum")
+litchfield_summary_hospitalizations = plot_ct_region_list(data=res$summary, end_day=mydaymax, title=res$title, description=res$description, region_name="Litchfield", which.plot="rHsum")
 ```
 
-`r litchfield_summary_hospitalization`
+`r litchfield_summary_hospitalizations[[1]]`
+`r litchfield_summary_hospitalizations[[2]]`
 
 
 
@@ -138,16 +145,18 @@ litchfield_summary_hospitalization = plot_ct_region_list(data=res$summary, end_d
 ## Windham
 ```{r echo=FALSE, fig.width=10, fig.height=5}
 par(mfrow=c(1,2))
-windham_summary_deaths = plot_ct_region_list(data=res$summary, end_day=mydaymax, title=res$title, region_name="Windham", which.plot="rD")
+windham_summary_deaths = plot_ct_region_list(data=res$summary, end_day=mydaymax, title=res$title, description=res$description, region_name="Windham", which.plot="rD")
 ```
-`r windham_summary_deaths`
+`r windham_summary_deaths[[1]]`
+`r windham_summary_deaths[[2]]`
 
 ```{r echo=FALSE, fig.width=10, fig.height=5}
 par(mfrow=c(1,2))
-windham_summary_hospitalization = plot_ct_region_list(data=res$summary, end_day=mydaymax, title=res$title, region_name="Windham", which.plot="rHsum")
+windham_summary_hospitalizations = plot_ct_region_list(data=res$summary, end_day=mydaymax, title=res$title, description=res$description, region_name="Windham", which.plot="rHsum")
 ```
 
-`r windham_summary_hospitalization`
+`r windham_summary_hospitalizations[[1]]`
+`r windham_summary_hospitalizations[[2]]`
 
 
 
@@ -157,14 +166,18 @@ windham_summary_hospitalization = plot_ct_region_list(data=res$summary, end_day=
 ## Tolland
 ```{r echo=FALSE, fig.width=10, fig.height=5}
 par(mfrow=c(1,2))
-tolland_summary_deaths = plot_ct_region_list(data=res$summary, end_day=mydaymax, title=res$title, region_name="Tolland", which.plot="rD")
+tolland_summary_deaths = plot_ct_region_list(data=res$summary, end_day=mydaymax, title=res$title, description=res$description, region_name="Tolland", which.plot="rD")
 ```
-`r tolland_summary_deaths`
+`r tolland_summary_deaths[[1]]`
+`r tolland_summary_deaths[[1]]`
+
 
 ```{r echo=FALSE, fig.width=10, fig.height=5}
 par(mfrow=c(1,2))
-tolland_summary_hospitalization = plot_ct_region_list(data=res$summary, end_day=mydaymax, title=res$title, region_name="Tolland", which.plot="rHsum")
+tolland_summary_hospitalizations = plot_ct_region_list(data=res$summary, end_day=mydaymax, title=res$title, description=res$description, region_name="Tolland", which.plot="rHsum")
 ```
+`r tolland_summary_hospitalizations[[1]]`
+`r tolland_summary_hospitalizations[[2]]`
 
 
 
@@ -173,32 +186,36 @@ tolland_summary_hospitalization = plot_ct_region_list(data=res$summary, end_day=
 ## Hartford
 ```{r echo=FALSE, fig.width=10, fig.height=5}
 par(mfrow=c(1,2))
-hartford_summary_deaths = plot_ct_region_list(data=res$summary, end_day=mydaymax, title=res$title, region_name="Hartford", which.plot="rD")
+hartford_summary_deaths = plot_ct_region_list(data=res$summary, end_day=mydaymax, title=res$title, description=res$description, region_name="Hartford", which.plot="rD")
 ```
-`r hartford_summary_deaths`
+`r hartford_summary_deaths[[1]]`
+`r hartford_summary_deaths[[2]]`
 
 ```{r echo=FALSE, fig.width=10, fig.height=5}
 par(mfrow=c(1,2))
-hartford_summary_hospitalization = plot_ct_region_list(data=res$summary, end_day=mydaymax, title=res$title, region_name="Hartford", which.plot="rHsum")
+hartford_summary_hospitalizations = plot_ct_region_list(data=res$summary, end_day=mydaymax, title=res$title, description=res$description, region_name="Hartford", which.plot="rHsum")
 ```
 
-`r hartford_summary_hospitalization`
+`r hartford_summary_hospitalizations[[1]]`
+`r hartford_summary_hospitalizations[[2]]`
 
 
 
 ## Middlesex
 ```{r echo=FALSE, fig.width=10, fig.height=5}
 par(mfrow=c(1,2))
-middlesex_summary_deaths = plot_ct_region_list(data=res$summary, end_day=mydaymax, title=res$title, region_name="Middlesex", which.plot="rD")
+middlesex_summary_deaths = plot_ct_region_list(data=res$summary, end_day=mydaymax, title=res$title, description=res$description, region_name="Middlesex", which.plot="rD")
 ```
-`r middlesex_summary_deaths`
+`r middlesex_summary_deaths[[1]]`
+`r middlesex_summary_deaths[[1]]`
 
 ```{r echo=FALSE, fig.width=10, fig.height=5}
 par(mfrow=c(1,2))
-middlesex_summary_hospitalization = plot_ct_region_list(data=res$summary, end_day=mydaymax, title=res$title, region_name="Middlesex", which.plot="rHsum")
+middlesex_summary_hospitalizations = plot_ct_region_list(data=res$summary, end_day=mydaymax, title=res$title, description=res$description, region_name="Middlesex", which.plot="rHsum")
 ```
 
-`r middlesex_summary_hospitalization`
+`r middlesex_summary_hospitalizations[[1]]`
+`r middlesex_summary_hospitalizations[[2]]`
 
 
 
@@ -207,16 +224,18 @@ middlesex_summary_hospitalization = plot_ct_region_list(data=res$summary, end_da
 
 ```{r echo=FALSE, fig.width=10, fig.height=5}
 par(mfrow=c(1,2))
-new_haven_summary_deaths = plot_ct_region_list(data=res$summary, end_day=mydaymax, title=res$title, region_name="New Haven", which.plot="rD")
+new_haven_summary_deaths = plot_ct_region_list(data=res$summary, end_day=mydaymax, title=res$title, description=res$description, region_name="New Haven", which.plot="rD")
 ```
-`r new_haven_summary_deaths`
+`r new_haven_summary_deaths[[1]]`
+`r new_haven_summary_deaths[[2]]`
 
 ```{r echo=FALSE, fig.width=10, fig.height=5}
 par(mfrow=c(1,2))
-new_haven_summary_hospitalizations = plot_ct_region_list(data=res$summary, end_day=mydaymax, title=res$title, region_name="New Haven", which.plot="rHsum")
+new_haven_summary_hospitalizations = plot_ct_region_list(data=res$summary, end_day=mydaymax, title=res$title, description=res$description, region_name="New Haven", which.plot="rHsum")
 ```
 
-`r new_haven_summary_hospitalizations`
+`r new_haven_summary_hospitalizations[[1]]`
+`r new_haven_summary_hospitalizations[[2]]`
 
 
 # Version
