@@ -166,6 +166,37 @@ get_sir_results = function(daymax=ymd("2020-09-01"),
   return(list(raw_results=sir_results, summary=sir_results_summary))
 }
 
+
+
+plot_ct_region_list = function(data=NULL, 
+                          region_name = "Connecticut", 
+                          which.plot = "D", 
+                          color =  NULL,
+                          title=NULL, xlab=NULL, ylab=NULL,
+                          #tmax.plot = tmax,
+                          #start_day = day0,
+                          end_day=NULL, # pass in daymax
+                          capacity_func = county_capacities,
+                          obs_state = dat_ct_state,
+                          obs_county = dat_ct_county){
+
+  start_day = day0
+  tmax.plot = as.numeric(difftime(end_day, day0, units="days"))
+
+  toplot <- paste(rep(which.plot,each=length(region_name)),
+                  rep(region_name, length(which.plot)),sep=".")
+  ymax <- 0
+  for(i in 1:length(data)){
+    sir_result_region= filter(data[[i]], variable%in%toplot)
+    ymax <- max(c(ymax, sir_result_region$mean[sir_result_region$time <= tmax.plot]), na.rm=TRUE)
+  }
+  out <- NULL
+  for(i in 1:length(data)){
+    out[[i]] <- plot_ct_region(data=data[[i]], region_name=region_name, which.plot = which.plot, color=color, title=title[[i]], xlab=xlab, ylab=ylab, end_day=end_day, capacity_fun=capacity_func, obs_state=obs_state, obs_county=obs_county, ymax=ymax)
+  }
+  return(out)
+}
+
 ####################
 # plotting 
 # @param data column include [variable, time, mean, lower, upper]
@@ -186,7 +217,8 @@ plot_ct_region = function(data=NULL,
                           end_day=NULL, # pass in daymax
                           capacity_func = county_capacities,
                           obs_state = dat_ct_state,
-                          obs_county = dat_ct_county) {
+                          obs_county = dat_ct_county, 
+                          ymax = NULL) {
 
  
 
@@ -198,13 +230,13 @@ plot_ct_region = function(data=NULL,
                                   '#4daf4a','#4daf4a','#377eb8', #'#cab2d6',
                                   '#984ea3','#ff7f00','#ffff33',
                                   '#a65628','#f781bf','#999999'),
-                          labels=c("Cumulative Deaths","Cumulative Deaths",
+                          labels=c("Cumulative deaths","Cumulative deaths",
                                     "Hospitalizations","Hospitalizations",
-                                    "Hospital Overflow","Hospital Overflow","Required Hospitalizations",
-                                    "Cumulative Hospitalizations",
-                                    "Susceptible Population","Exposed Population",
-                                    "Severe Infections","Mild Infections",
-                                    "Asymptomatic Infections"))
+                                    "Hospital overflow","Hospital overflow","Required hospitalizations",
+                                    "Cumulative hospitalizations",
+                                    "Susceptible population","Exposed population",
+                                    "Severe infections","Mild infections",
+                                    "Asymptomatic infections"))
   
  #dayseq = seq(day0, daymax, by="day")
   start_day = day0
@@ -227,8 +259,10 @@ plot_ct_region = function(data=NULL,
 
   if(is.null(title)){
     title <- paste0(lab.table$labels[lab.table$compartment==which.plot[1]], " in ", region_name)
+  }else{
+    title <- paste0(lab.table$labels[lab.table$compartment==which.plot[1]], " in ", region_name, " ", title)
   }
-  ymax <- max(sir_result_region$mean[sir_result_region$time <= tmax.plot], na.rm=TRUE)
+  if(is.null(ymax)) ymax <- max(sir_result_region$mean[sir_result_region$time <= tmax.plot], na.rm=TRUE)
   
   if(add){
     if(region_name %in% names(capacity_func)){
@@ -248,7 +282,7 @@ plot_ct_region = function(data=NULL,
   if(is.null(xlab)) xlab <- ""
   if(is.null(ylab)) ylab <- "People"
   plot(0, type="n", xlab=xlab, ylab=ylab, main=title, col="black", 
-       ylim=c(0,1.05*ymax), xlim=c(0,1.1*tmax.plot), axes=FALSE)
+       ylim=c(0,1.05*ymax), xlim=c(0,1.15*tmax.plot), axes=FALSE)
   axis(1,at=lab_where, lab=lab_show)
   axis(2)
 
@@ -317,20 +351,6 @@ plot_ct_region = function(data=NULL,
                        " with 90% uncertainty interval between ", format(count.min, digits=2, big.mark=","),
                        " and ", format(count.max, digits=2, big.mark=","),
                        ".",
-                       sep="")    
-  }
-  if("H" %in% which.plot || "rH" %in% which.plot){
-      sir_result_region_sub <- filter(sir_result_region, variable==paste0(which.plot[1],".",region_name))
-      count <- max(sir_result_region_sub$mean, na.rm=TRUE)
-      peak <- which.max(sir_result_region_sub$mean)
-      count.min <- sir_result_region_sub$lower[peak]
-      count.max <- sir_result_region_sub$upper[peak]
-      region_summary = paste(region_summary, "On ", format(end_day, "%B %d"),
-                       " projections show a peak of ", format(count, digits=2, big.mark=","),
-                       " hospitalizations reported in ", region_name,
-                       " with 90% uncertainty interval between ", format(count.min, digits=2, big.mark=","), 
-                       " and ", format(count.max, digits=2, big.mark=","),
-                       ". The dashed line shows historical and projected hospital capacity. ",
                        sep="")    
   }
   if("rHsum" %in% which.plot){
@@ -430,14 +450,11 @@ plot_interventions = function(sir_results, daymax) {
 }
 
 ####################################
-# get_Cumulative("2020-07-01", "rD.Connecticut")
-
-# Richard, do can you fix this function? 
-
-
-get_Cumulative <- function(date, tosum){
-  sir_result_internal = data.frame(filter(sir_results_summary, variable%in%tosum))
-  t = as.numeric(difftime(as.Date(date), day0, unit='days'))
+# Print a vector of counts in the RMD file
+# get_compartment(date="2020-07-01", toprint="rD.Connecticut")
+get_compartment <- function(data=sir_results_summary, date, toprint, start_day = day0){
+  sir_result_internal = data.frame(filter(data, variable%in%toprint))
+  t = as.numeric(difftime(as.Date(date), start_day, unit='days'))
   sir_result_internal = subset(sir_result_internal, time%in%t)
   out  <- as.character(format(sir_result_internal$mean, digits=2, big.mark=","))
   if(length(date)>2){
@@ -445,9 +462,9 @@ get_Cumulative <- function(date, tosum){
   }else if(length(date)==2){
     out <-  paste0(out[1], " and ", out[2])
   }
-
   return(out)
 }
+
 
 
 
@@ -455,22 +472,40 @@ get_Cumulative <- function(date, tosum){
 #######################
 
 mydaymax              = ymd("2020-09-01") 
-mylockdown_end_date   = ymd("2020-06-01") 
+mylockdown_end_date1   = ymd("2020-06-01") 
 myschools_reopen_date = ymd("2020-09-01")
 mytesting_on_date     = ymd("2020-05-15")
 
-res = get_sir_results(daymax=mydaymax,
-                      lockdown_end_date=mylockdown_end_date,
+res1 = get_sir_results(daymax=mydaymax,
+                      lockdown_end_date=mylockdown_end_date1,
                       schools_reopen_date=myschools_reopen_date,
                       testing_on_date=mytesting_on_date,
-                      nsim=1)
+                      nsim=10)
 
-plot_ct_region(res$summary, end_day=mydaymax)
+# Scenario 2
+mylockdown_end_date2   = ymd("2020-07-01") 
+res2 = get_sir_results(daymax=mydaymax,
+                      lockdown_end_date=mylockdown_end_date2,
+                      schools_reopen_date=myschools_reopen_date,
+                      testing_on_date=mytesting_on_date,
+                      nsim=10)
 
-g = mapplot_ct_region(res$summary)
-print(g)
+# Put into one list
+res <- list(
+            summary = list(res1$summary, res2$summary), 
+            title =  list("\nStay-at-home Order in place until 6/1", 
+                          "\nStay-at-home Order in place until 7/1")
+      ) 
+par(mfrow = c(1,2))
+# plot_ct_region_list(data=res$summary, end_day=mydaymax, title=res$title)
+# plot_ct_region_list(data=res$summary, end_day=mydaymax, title=res$title, which.plot="rHsum")
 
-plot_interventions(res$raw_results, mydaymax)
+# plot_ct_region(res1$summary, end_day=mydaymax, title="Test")
+
+# g = mapplot_ct_region(res$summary)
+# print(g)
+
+# plot_interventions(res$raw_results, mydaymax)
 
 
 

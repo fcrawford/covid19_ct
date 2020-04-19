@@ -26,14 +26,14 @@ source("run_ct_model.R")
 
 # Introduction 
 
-This report presents projections of COVID-19 hospitalizations and deaths in Connecticut as a whole, and by county. Projections are shown as lines with uncertainty intervals in lighter colors, and actual data (if available) overlaid. Horizontal axes extend to the time horizon for this analysis, `r format(daymax, "%b %d, %Y")`.  The report was prepared for the Governor's Reopen Connecticut Advisory group. 
+This report presents projections of COVID-19 hospitalizations and deaths in Connecticut as a whole, and by county. Projections are shown as lines with uncertainty intervals in lighter colors, and actual data (if available) overlaid. Horizontal axes extend to the time horizon for this analysis, `r format(mydaymax, "%b %d, %Y")`.  The report was prepared for the Governor's Reopen Connecticut Advisory group. 
 
 An intervention scenario is described below. Projections under this scenario take into account historical and hypothetical future state-level interventions, including closing of schools on `r format(state_schools_close,"%b %d, %Y")` and the state-level stay-at-home order issued on `r format(state_lockdown_order, "%b %d, %Y")` which took effect on `r format(state_lockdown_start,"%b %d, %Y")`.  School closure is assumed to reduce transmission by `r params_init$school_closure_effect * 100`%, and the state-level stay-at-home order reduces transmission by `r params_init$lockdown_effect * 100`%.  
 
 ```{r echo=FALSE, fig.height = 5}
-plot_interventions()
+plot_interventions(res1$raw_results, mydaymax)
 ```
-The projections presented below evaluate the effect of a hypothetical lifting of the stay-at-home order on **`r format(lockdown_end_date, "%b %d, %Y")`** and re-opening of schools on `r format(state_schools_reopen_date, "%b %d, %Y")`.  When the stay-at-home order is lifted, the projections assume an ongoing `r params_init$distancing_effect * 100`% reduction in transmission. 
+The projections presented below evaluate the effect of a hypothetical lifting of the stay-at-home order on **`r format(mylockdown_end_date1, "%b %d, %Y")`** and **`r format(mylockdown_end_date2, "%b %d, %Y")`**. Re-opening of schools is set to be on `r format(myschools_reopen_date, "%b %d, %Y")`.  When the stay-at-home order is lifted, the projections assume an ongoing `r params_init$distancing_effect * 100`% reduction in transmission. 
 
 
 
@@ -45,8 +45,8 @@ We first show the projected cumulative deaths and hospitalizations for Connectic
 
 
 ```{r echo=FALSE, fig.width=8,  fig.height=3.5}
-mapplot_ct_region(data = sir_results_summary, which.plot="rD", label="Cumulative\nDeaths", palette="Reds", ncol=4)
-mapplot_ct_region(data = sir_results_summary, which.plot="cum_modH",  label="Cumulative\nHospitalizations", palette="Blues", ncol=4)  
+mapplot_ct_region(data = res1$summary, which.plot="rD", label="Cumulative\nDeaths", palette="Reds", ncol=4)
+mapplot_ct_region(data = res1$summary, which.plot="cum_modH",  label="Cumulative\nHospitalizations", palette="Blues", ncol=4)  
 ```
 Projections of deaths and hospitalization for the state and each county are shown below, along with 90% prediction uncertainly intervals.  Hospitalization projections show historical and projected hospital capacity.  
 
@@ -57,32 +57,39 @@ At the county level, hospitalization projections are based on the place of resid
 
 ## Connecticut State 
 
-```{r echo=FALSE}
-connecticut_summary_deaths = plot_ct_region(data = sir_results_summary, region_name="Connecticut", which.plot="rD")
+```{r echo=FALSE, fig.width=10, fig.height=5}
+par(mfrow=c(1,2))
+connecticut_summary_deaths = plot_ct_region_list(data=res$summary, end_day=mydaymax, title=res$title, region_name="Connecticut", which.plot="rD")
 ```
 
-`r connecticut_summary_deaths`
+`r connecticut_summary_deaths[[1]]`
+
+`r connecticut_summary_deaths[[2]]`
 
 
-```{r echo=FALSE}
-connecticut_summary_hospitalization = plot_ct_region(data = sir_results_summary, region_name="Connecticut", which.plot="rHsum")
+```{r echo=FALSE, fig.width=10, fig.height=5}
+par(mfrow=c(1,2))
+connecticut_summary_hospitalization = plot_ct_region_list(data=res$summary, end_day=mydaymax, title=res$title, region_name="Connecticut", which.plot="rHsum")
 ```
 
-`r connecticut_summary_hospitalization`
+`r connecticut_summary_hospitalization[[1]]`
+`r connecticut_summary_hospitalization[[2]]`
 
 
 
 
 ## Fairfield 
 
-```{r echo=FALSE}
-fairfield_summary_deaths = plot_ct_region(data = sir_results_summary, region_name="Fairfield", which.plot="rD")
+```{r echo=FALSE, fig.width=10, fig.height=5}
+par(mfrow=c(1,2))
+fairfield_summary_deaths = plot_ct_region_list(data=res$summary, end_day=mydaymax, title=res$title, region_name="Fairfield", which.plot="rD")
 ```
 
 `r fairfield_summary_deaths`
 
-```{r echo=FALSE}
-fairfield_summary_hospitalization = plot_ct_region(data = sir_results_summary, region_name="Fairfield", which.plot="rHsum")
+```{r echo=FALSE, fig.width=10, fig.height=5}
+par(mfrow=c(1,2))
+fairfield_summary_hospitalization = plot_ct_region_list(data=res$summary, end_day=mydaymax, title=res$title, region_name="Fairfield", which.plot="rHsum")
 ```
 
 `r fairfield_summary_hospitalization`
@@ -93,13 +100,15 @@ fairfield_summary_hospitalization = plot_ct_region(data = sir_results_summary, r
 
 ## New London
 
-```{r echo=FALSE}
-new_london_summary_deaths = plot_ct_region(data = sir_results_summary, region_name="New London", which.plot="rD")
+```{r echo=FALSE, fig.width=10, fig.height=5}
+par(mfrow=c(1,2))
+new_london_summary_deaths = plot_ct_region_list(data=res$summary, end_day=mydaymax, title=res$title, region_name="New London", which.plot="rD")
 ```
 `r new_london_summary_deaths`
 
-```{r echo=FALSE}
-new_london_summary_hospitalization = plot_ct_region(data = sir_results_summary, region_name="New London", which.plot="rHsum")
+```{r echo=FALSE, fig.width=10, fig.height=5}
+par(mfrow=c(1,2))
+new_london_summary_hospitalization = plot_ct_region_list(data=res$summary, end_day=mydaymax, title=res$title, region_name="New London", which.plot="rHsum")
 ```
 
 `r new_london_summary_hospitalization`
@@ -110,13 +119,15 @@ new_london_summary_hospitalization = plot_ct_region(data = sir_results_summary, 
 
 
 ## Litchfield
-```{r echo=FALSE}
-litchfield_summary_deaths = plot_ct_region(data = sir_results_summary, region_name="Litchfield", which.plot="rD")
+```{r echo=FALSE, fig.width=10, fig.height=5}
+par(mfrow=c(1,2))
+litchfield_summary_deaths = plot_ct_region_list(data=res$summary, end_day=mydaymax, title=res$title, region_name="Litchfield", which.plot="rD")
 ```
 `r litchfield_summary_deaths`
 
-```{r echo=FALSE}
-litchfield_summary_hospitalization = plot_ct_region(data = sir_results_summary, region_name="Litchfield", which.plot="rHsum")
+```{r echo=FALSE, fig.width=10, fig.height=5}
+par(mfrow=c(1,2))
+litchfield_summary_hospitalization = plot_ct_region_list(data=res$summary, end_day=mydaymax, title=res$title, region_name="Litchfield", which.plot="rHsum")
 ```
 
 `r litchfield_summary_hospitalization`
@@ -125,13 +136,15 @@ litchfield_summary_hospitalization = plot_ct_region(data = sir_results_summary, 
 
 
 ## Windham
-```{r echo=FALSE}
-windham_summary_deaths = plot_ct_region(data = sir_results_summary, region_name="Windham", which.plot="rD")
+```{r echo=FALSE, fig.width=10, fig.height=5}
+par(mfrow=c(1,2))
+windham_summary_deaths = plot_ct_region_list(data=res$summary, end_day=mydaymax, title=res$title, region_name="Windham", which.plot="rD")
 ```
 `r windham_summary_deaths`
 
-```{r echo=FALSE}
-windham_summary_hospitalization = plot_ct_region(data = sir_results_summary, region_name="Windham", which.plot="rHsum")
+```{r echo=FALSE, fig.width=10, fig.height=5}
+par(mfrow=c(1,2))
+windham_summary_hospitalization = plot_ct_region_list(data=res$summary, end_day=mydaymax, title=res$title, region_name="Windham", which.plot="rHsum")
 ```
 
 `r windham_summary_hospitalization`
@@ -142,13 +155,15 @@ windham_summary_hospitalization = plot_ct_region(data = sir_results_summary, reg
 
 
 ## Tolland
-```{r echo=FALSE}
-tolland_summary_deaths = plot_ct_region(data = sir_results_summary, region_name="Tolland", which.plot="rD")
+```{r echo=FALSE, fig.width=10, fig.height=5}
+par(mfrow=c(1,2))
+tolland_summary_deaths = plot_ct_region_list(data=res$summary, end_day=mydaymax, title=res$title, region_name="Tolland", which.plot="rD")
 ```
 `r tolland_summary_deaths`
 
-```{r echo=FALSE}
-tolland_summary_hospitalization = plot_ct_region(data = sir_results_summary, region_name="Tolland", which.plot="rHsum")
+```{r echo=FALSE, fig.width=10, fig.height=5}
+par(mfrow=c(1,2))
+tolland_summary_hospitalization = plot_ct_region_list(data=res$summary, end_day=mydaymax, title=res$title, region_name="Tolland", which.plot="rHsum")
 ```
 
 
@@ -156,13 +171,15 @@ tolland_summary_hospitalization = plot_ct_region(data = sir_results_summary, reg
 
 
 ## Hartford
-```{r echo=FALSE}
-hartford_summary_deaths = plot_ct_region(data = sir_results_summary, region_name="Hartford", which.plot="rD")
+```{r echo=FALSE, fig.width=10, fig.height=5}
+par(mfrow=c(1,2))
+hartford_summary_deaths = plot_ct_region_list(data=res$summary, end_day=mydaymax, title=res$title, region_name="Hartford", which.plot="rD")
 ```
 `r hartford_summary_deaths`
 
-```{r echo=FALSE}
-hartford_summary_hospitalization = plot_ct_region(data = sir_results_summary, region_name="Hartford", which.plot="rHsum")
+```{r echo=FALSE, fig.width=10, fig.height=5}
+par(mfrow=c(1,2))
+hartford_summary_hospitalization = plot_ct_region_list(data=res$summary, end_day=mydaymax, title=res$title, region_name="Hartford", which.plot="rHsum")
 ```
 
 `r hartford_summary_hospitalization`
@@ -170,13 +187,15 @@ hartford_summary_hospitalization = plot_ct_region(data = sir_results_summary, re
 
 
 ## Middlesex
-```{r echo=FALSE}
-middlesex_summary_deaths = plot_ct_region(data = sir_results_summary, region_name="Middlesex", which.plot="rD")
+```{r echo=FALSE, fig.width=10, fig.height=5}
+par(mfrow=c(1,2))
+middlesex_summary_deaths = plot_ct_region_list(data=res$summary, end_day=mydaymax, title=res$title, region_name="Middlesex", which.plot="rD")
 ```
 `r middlesex_summary_deaths`
 
-```{r echo=FALSE}
-middlesex_summary_hospitalization = plot_ct_region(data = sir_results_summary, region_name="Middlesex", which.plot="rHsum")
+```{r echo=FALSE, fig.width=10, fig.height=5}
+par(mfrow=c(1,2))
+middlesex_summary_hospitalization = plot_ct_region_list(data=res$summary, end_day=mydaymax, title=res$title, region_name="Middlesex", which.plot="rHsum")
 ```
 
 `r middlesex_summary_hospitalization`
@@ -186,13 +205,15 @@ middlesex_summary_hospitalization = plot_ct_region(data = sir_results_summary, r
 
 ## New Haven
 
-```{r echo=FALSE}
-new_haven_summary_deaths = plot_ct_region(data = sir_results_summary, region_name="New Haven", which.plot="rD")
+```{r echo=FALSE, fig.width=10, fig.height=5}
+par(mfrow=c(1,2))
+new_haven_summary_deaths = plot_ct_region_list(data=res$summary, end_day=mydaymax, title=res$title, region_name="New Haven", which.plot="rD")
 ```
 `r new_haven_summary_deaths`
 
-```{r echo=FALSE}
-new_haven_summary_hospitalizations = plot_ct_region(data = sir_results_summary, region_name="New Haven", which.plot="rHsum")
+```{r echo=FALSE, fig.width=10, fig.height=5}
+par(mfrow=c(1,2))
+new_haven_summary_hospitalizations = plot_ct_region_list(data=res$summary, end_day=mydaymax, title=res$title, region_name="New Haven", which.plot="rHsum")
 ```
 
 `r new_haven_summary_hospitalizations`
