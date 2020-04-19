@@ -152,9 +152,11 @@ run_sir_model = function(state0, params, region_adj, populations, tmax, interven
   idx_H_lag = 1:(nrow(out) - H_lag)
   idx_D_lag = 1:(nrow(out) - D_lag)
   
-  out$rH.Connecticut <- out$rD.Connecticut <- 0
+  out$rH.Connecticut <- out$rHbar.Connecticut <- out$rD.Connecticut <- 0
+  
   for (k in idx_H_lag){
-    out$rH.Connecticut[k+H_lag] <- out$H.Connecticut[k]
+    out$rH.Connecticut[k+H_lag]    <- out$H.Connecticut[k]
+    out$rHbar.Connecticut[k+H_lag] <- out$Hbar.Connecticut[k]
   }
 
   for (k in idx_D_lag){
@@ -162,10 +164,11 @@ run_sir_model = function(state0, params, region_adj, populations, tmax, interven
   }
   
   for(i in region_names){
-    out[[paste0("rH.", i)]] <- out[[paste0("rD.", i)]] <- 0
+    out[[paste0("rH.", i)]] <- out[[paste0("rHbar.", i)]] <- out[[paste0("rD.", i)]] <- 0
     
     for (k in idx_H_lag){
-      out[[paste0("rH.", i)]][k+H_lag] <- out[[paste0("H.", i)]][k]
+      out[[paste0("rH.", i)]][k+H_lag]    <- out[[paste0("H.", i)]][k]
+      out[[paste0("rHbar.", i)]][k+H_lag] <- out[[paste0("Hbar.", i)]][k]
       }
 
     for (k in idx_D_lag){
