@@ -21,7 +21,7 @@ source("intervention_functions.R")
 day0 = ymd("2020-03-01")
 
 # ending day
-daymax = ymd("2020-06-01")
+daymax = ymd("2020-09-01")
 
 # to use in the model
 tmax = as.numeric(difftime(daymax, day0, units="days"))
@@ -119,7 +119,7 @@ schoolsfun = get_school_in_session_fun(state_schools_reopen=state_schools_reopen
 #######################
 # run the sims
 
-nsim = 100
+nsim = 500
 
 sir_results = lapply(1:nsim, function(i){
   res = run_sir_model(state0=state0, 

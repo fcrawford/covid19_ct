@@ -28,25 +28,30 @@ source("run_ct_model.R")
 
 This report presents projections of COVID-19 hospitalizations and deaths in Connecticut as a whole, and by county. Projections are shown as lines with uncertainty intervals in lighter colors, and actual data (if available) overlaid. Horizontal axes extend to the time horizon for this analysis, `r format(daymax, "%b %d, %Y")`.  The report was prepared for the Governor's Reopen Connecticut Advisory group. 
 
-The projections take into account historical and hypothetical future state-level interventions, including closing of schools on `r format(state_schools_close,"%b %d, %Y")` and the state-level stay-at-home order issued on `r format(state_lockdown_start,"%b %d, %Y")` which took effect on `r format(state_lockdown_order, "%b %d, %Y")`.  School closure is assumed to reduce transmission by `r params_init$school_closure_effect * 100`%, and the state-level stay-at-home order reduces transmission by `r params_init$lockdown_effect * 100`%.  
+An intervention scenario is described below. Projections under this scenario take into account historical and hypothetical future state-level interventions, including closing of schools on `r format(state_schools_close,"%b %d, %Y")` and the state-level stay-at-home order issued on `r format(state_lockdown_start,"%b %d, %Y")` which took effect on `r format(state_lockdown_order, "%b %d, %Y")`.  School closure is assumed to reduce transmission by `r params_init$school_closure_effect * 100`%, and the state-level stay-at-home order reduces transmission by `r params_init$lockdown_effect * 100`%.  
+
 ```{r echo=FALSE, fig.height = 5}
 plot_interventions()
 ```
-The projections evaluate the effect of a hypothetical lifting of the stay-at-home order on **`r format(lockdown_end_date, "%b %d, %Y")`** and re-opening of schools on `r format(state_schools_reopen_date, "%b %d, %Y")`.  When the stay-at-home order is lifted, the projections assume an ongoing `r params_init$distancing_effect * 100`% reduction in transmission. 
+The projections presented below evaluate the effect of a hypothetical lifting of the stay-at-home order on **`r format(lockdown_end_date, "%b %d, %Y")`** and re-opening of schools on `r format(state_schools_reopen_date, "%b %d, %Y")`.  When the stay-at-home order is lifted, the projections assume an ongoing `r params_init$distancing_effect * 100`% reduction in transmission. 
 
 
 
 
 # Projections 
-We first show the projected cumulative deaths and hospitalizations for Connecticut counties over time. The projections are based on parameters calibrated on [...]. By the end of April, May, and June, we project `r get_Cumulative(c("2020-04-30","2020-05-31"), "rD.Connecticut")`, and `r get_Cumulative("2020-06-30", "rD.Connecticut")` deaths; and `r get_Cumulative(c("2020-04-30","2020-05-31"), "cum_modH.Connecticut")`; and `r get_Cumulative("2020-06-30", "cum_modH.Connecticut")` cumulative hospitalizations.
+
+We first show the projected cumulative deaths and hospitalizations for Connecticut counties over time. 
+
 
 
 ```{r echo=FALSE, fig.width=8,  fig.height=3.5}
 mapplot_ct_region(which.plot="rD", label="Cumulative\nDeaths", palette="Reds", ncol=4)
 mapplot_ct_region(which.plot="cum_modH",  label="Cumulative\nHospitalizations", palette="Blues", ncol=4)  
 ```
-We then show the projected trajectories for the state and each counties. In addition to the main projection, 90% uncertainty intervals are also shown ...
-[Describe sensitivity analysis, source of uncertainty coming from both parameter values and effect of lock down, acknowledge limitations?]
+Projections of deaths and hospitalization for the state and each county are shown below, along with 90% prediction uncertainly intervals.  Hospitalization projections show historical and projected hospital capacity.  
+
+
+
 
 \clearpage
 
