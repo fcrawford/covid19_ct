@@ -267,9 +267,9 @@ plot_ct_region = function(region_name, which.plot = "D", add=FALSE) {
 
   # Add observed hospitalization
   col.line <- lab.table$color[which(lab.table$compartment=="H")]
-  if(region_name == "Connecticut" && "rH" %in% which.plot) {
+  if(region_name == "Connecticut" && ("rH" %in% which.plot || "rHsum" %in% which.plot))  {
       points(dat_ct_state$time, dat_ct_state$cur_hosp, pch=16, cex=0.6, col=col.line) 
-  } else if("rH" %in% which.plot) {
+  } else if("rH" %in% which.plot || "rHsum" %in% which.plot) {
     obs.region <- subset(dat_ct_county, county == region_name)
     obs.region$date <- ymd(obs.region$date)
     first.region.time <- round(as.numeric(difftime(obs.region$date[1], day0, units="days")),0)
