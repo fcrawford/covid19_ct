@@ -69,7 +69,14 @@ adj = as.matrix(adj)
 nregions = nrow(adj)
 
 init <- read.csv('../data/ct_init.csv', stringsAsFactors=FALSE) 
+populations = list()
+populations[1:nregions] = init$population
+names(populations) = init$county
+
 region_names = init$county
+
+# the ordering of counties in init is the standard throughout the code
+# make sure adj has the same ordering! 
 
 #########################
 # set up initial state0
@@ -82,9 +89,10 @@ H_init = init$H
 Hbar_init = rep(0,nregions)
 D_init = init$D
 R_init = init$R
-S_init = init$population - (E_init + I_s_init + I_m_init + A_init + H_init + Hbar_init + D_init + R_init)
+S_init = as.numeric(populations) - (E_init + I_s_init + I_m_init + A_init + H_init + Hbar_init + D_init + R_init)
 
 state0 = c(S=S_init, E=E_init, I_s=I_s_init, I_m=I_m_init, A=A_init, H=H_init, Hbar=Hbar_init, D=D_init, R=R_init)
+
 
 ########################
 # draw random params
@@ -140,9 +148,10 @@ sir_results = lapply(1:nsim, function(i){
   res = run_sir_model(state0=state0, 
                       params=rparams(),  # note: effect_intvx is in params, and is not passed to run_sir_model separately 
                       region_adj=adj, 
-                      populations=init$population, 
+                      populations=as.numeric(populations), 
                       tmax=tmax, 
-                      interventions=list(lockdown=lockfun, schools=schoolsfun)) # intervention functions! 
+                      interventions=list(lockdown=lockfun, schools=schoolsfun), # intervention functions! 
+                      capacities=county_capacities)
   res$sim_id = i
   res
 })

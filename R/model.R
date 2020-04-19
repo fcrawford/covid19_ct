@@ -3,10 +3,8 @@
 # params is a list of parameter values 
 # region_adj is an adjacency matrix whose row/col labels are 
 
-# need intervention coding 
-# hosp capacity
 
-run_sir_model = function(state0, params, region_adj, populations, tmax, interventions) {
+run_sir_model = function(state0, params, region_adj, populations, tmax, interventions, capacities) {
 
   if(is.null(interventions$lockdown) || is.null(interventions$schools) || 
      !is.function(interventions$lockdown) || !is.function(interventions$schools)) { 
@@ -68,7 +66,7 @@ run_sir_model = function(state0, params, region_adj, populations, tmax, interven
       
       # FIX this when we have hospital capacity information: 
 
-      Hospital_capacities_breached = 0 #(1- 1/(1+exp(slope*(H-(capacity * capacity_function(time)))))) 
+      Hospital_capacities_breached = lapply(
       
       
       ##################
