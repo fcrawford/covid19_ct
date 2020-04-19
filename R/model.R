@@ -68,8 +68,8 @@ run_sir_model = function(state0, params, region_adj, populations, tmax, interven
 
       # effect of testing on recovery for mild  and asymptomatic 
       # should this instead be a reduction on infectiousness?  Does it matter? 
-      a_t = interventions$testing(time)*params$testing_effect
-      
+      a_t_Im = interventions$testing(time) * ((1 - params$gamma_Im * params$testing_effect_Im)^(-1) - 1)
+      a_t_A = interventions$testing(time) * ((1 - params$gamma_A * params$testing_effect_A)^(-1) - 1)
 
       # Hospital capacities
       actual_capacities = as.numeric(lapply(county_capacities, function(cap)cap(time)))
@@ -81,28 +81,29 @@ run_sir_model = function(state0, params, region_adj, populations, tmax, interven
       ##################
       
       # k_A        relative transmission from asymptomatic infectives
-      # delta      1/incubation period
-      # q_A        % infected and asymptomatic
-      # q_Im       % infected and mild
-      # alpha      rate at which sever cases need hospitalization/care
-      # gamma_A    recovery rate of asymptomatic
-      # gamma_H    recovery rate of hosp
-      # gamma_Hbar recovery rate of unhosp
-      # m_H  r     % hospitalized that die
-      # m_Hbar     % unhospitalized that die
+      # delta      1/latency period
+      # q_A        % infectious and asymptomatic
+      # q_Im       % infectious and mild
+      # alpha      rate at which severe cases need hospitalization/care
+      # gamma_A    recovery/removal rate of asymptomatic
+      # gamma_Im   recovery/removal rate of mild
+      # gamma_H    recovery/removal rate of hospitalized 
+      # gamma_Hbar recovery/removal rate of unhosp
+      # m_H        % hospitalized severe that die
+      # m_Hbar     % unhospitalized severe that die
       
       #################
   
       
-      dS    <-            -S*( beta %*% ( (1-a_t)*(I_s + I_m) + k_A*A)/populations )    # populations normalized contact rates
+      dS    <-            -S*( beta %*% ( I_s + I_m + k_A*A)/populations )    # populations normalized contact rates
       
-      dE    <-  -delta*E + S*( beta %*% ( (1-a_t)*(I_s + I_m) + k_A*A)/populations )
+      dE    <-  -delta*E + S*( beta %*% ( I_s + I_m + k_A*A)/populations )
       
       dI_s  <- (1 - q_Im - q_A)*delta*E - alpha*I_s
       
-      dI_m  <- q_Im*delta*E - gamma_Im*I_m
+      dI_m  <- q_Im*delta*E - (1 + a_t_Im)*gamma_Im*I_m
       
-      dA    <- q_A*delta*E - gamma_A*A
+      dA    <- q_A*delta*E - (1 + a_t_A)*gamma_A*A
       
       dH    <- alpha*I_s*(1-Hospital_capacities_breached) - gamma_H*H
       
