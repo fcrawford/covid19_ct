@@ -208,7 +208,7 @@ plot_ct_region = function(data=NULL,
   
  #dayseq = seq(day0, daymax, by="day")
   start_day = day0
-  tmax.plot = as.numeric(difftime(daymax, day0, units="days"))
+  tmax.plot = as.numeric(difftime(end_day, day0, units="days"))
 
   monthseq = seq(start_day, end_day, by="month")
   lab_show = format(monthseq, "%b %Y")
