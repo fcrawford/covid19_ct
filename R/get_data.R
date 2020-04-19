@@ -67,6 +67,10 @@ dat_ct_county <- merge(dat_ct_county, ct.hosp.county[, c("time", "county", "cur_
 dat_ct_county$state <-  dat_ct_county$state[1]
 dat_ct_county$date <- day0 +  dat_ct_county$time
 dat_ct_county$cur_hosp[is.na(dat_ct_county$cur_hosp)] <- 0
+# make sure when hosp data is lagged behind, we use NA
+hosp_last_day <- max(ct.hosp.county$time)
+dat_ct_county$cur_hosp[dat_ct_county$time > hosp_last_day] <- NA
+
 dat_ct_county$cases[is.na(dat_ct_county$cases)] <- dat_ct_county$cur_hosp[is.na(dat_ct_county$cases)]
 
 
