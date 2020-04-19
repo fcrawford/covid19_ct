@@ -21,7 +21,6 @@ geometry: margin=0.75in
 
 ```{r, echo=FALSE, include=FALSE}
 source("run_ct_model.R")
-
 ```
 
 
@@ -37,23 +36,21 @@ The projections evaluate the effect of a hypothetical lifting of the stay-at-hom
 
 
 
+
 # Projections 
+We first show the projected cumulative deaths and hospitalizations for Connecticut counties over time. The projections are based on parameters calibrated on [...]. By the end of April, May, and June, we project `r get_Cumulative(c("2020-04-30","2020-05-31"), "rD.Connecticut")`, and `r get_Cumulative("2020-06-30", "rD.Connecticut")` deaths, and `r get_Cumulative(c("2020-04-30","2020-05-31"), "cum_modH.Connecticut")`; and `r get_Cumulative("2020-06-30", "cum_modH.Connecticut")` cumulative hospitalizations.
 
 
-## Connecticut State 
-
-
-
-
-The following figures show projected cumulative deaths and hospitalizations for Connecticut over time. 
-
-
-```{r echo=FALSE}
-mapplot_ct_region(which.plot="rD", label="Cumulative Deaths", palette="Reds")
-mapplot_ct_region(which.plot="cum_modH",  label="Cumulative Hospitalizations", palette="Blues")  
+```{r echo=FALSE, fig.width=8,  fig.height=3.5}
+mapplot_ct_region(which.plot="rD", label="Cumulative\nDeaths", palette="Reds", ncol=4)
+mapplot_ct_region(which.plot="cum_modH",  label="Cumulative\nHospitalizations", palette="Blues", ncol=4)  
 ```
+We then show the projected trajectories for the state and each counties. In addition to the main projection, 90% uncertainty intervals are also shown ...
+[Describe sensitivity analysis, source of uncertainty coming from both parameter values and effect of lock down, acknowledge limitations?]
 
 \clearpage
+
+## Connecticut State 
 
 ```{r echo=FALSE}
 connecticut_summary_deaths = plot_ct_region("Connecticut", which.plot="rD")

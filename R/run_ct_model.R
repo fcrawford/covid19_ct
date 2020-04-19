@@ -247,18 +247,27 @@ plot_ct_region = function(region_name, which.plot = "D", add=NULL) {
   if("D" %in% which.plot || "rD" %in% which.plot){
       sir_result_region_sub <- filter(sir_result_region, variable==paste0(which.plot[1],".",region_name))
       count <- sir_result_region_sub$mean[sir_result_region_sub$time==tmax]
-      region_summary = paste(region_summary, "On ", format(daymax, "%b %d, %Y"),
+      count.min <- sir_result_region_sub$lower[sir_result_region_sub$time==tmax]
+      count.max <- sir_result_region_sub$upper[sir_result_region_sub$time==tmax]
+      region_summary = paste(region_summary, "On ", format(daymax, "%b %d"),
                        " projections show ", format(count, digits=2, big.mark=","),
-                       " cumulative deaths in ", region_name,
+                       " cumulative deaths reported in ", region_name,
+                       " with 90% uncertainty interval between ", format(count.min, digits=2, big.mark=","),
+                       " and ", format(count.max, digits=2, big.mark=","),
                        ".",
                        sep="")    
   }
   if("H" %in% which.plot || "rH" %in% which.plot){
       sir_result_region_sub <- filter(sir_result_region, variable==paste0(which.plot[1],".",region_name))
       count <- max(sir_result_region_sub$mean, na.rm=TRUE)
-      region_summary = paste(region_summary, "On ", format(daymax, "%b %d, %Y"),
+      peak <- which.max(sir_result_region_sub$mean)
+      count.min <- sir_result_region_sub$lower[peak]
+      count.max <- sir_result_region_sub$upper[peak]
+      region_summary = paste(region_summary, "On ", format(daymax, "%b %d"),
                        " projections show a peak of ", format(count, digits=2, big.mark=","),
-                       " hospitalizations in ", region_name,
+                       " hospitalizations reported in ", region_name,
+                       " with 90% uncertainty interval between ", format(count.min, digits=2, big.mark=","), 
+                       " and ", format(count.max, digits=2, big.mark=","),
                        ". The dashed line shows historical and projected hospital capacity. ",
                        sep="")    
   }
@@ -325,6 +334,17 @@ plot_interventions = function() {
   polygon(c(1,1:(tmax+1), tmax+1), c(0,sir_results[[1]]$intervention_pattern, 0), col="orange", border=NA)
   abline(v=Sys.Date()-day0, col="gray", lty=2)
 
+}
+
+####################################
+# get_Cumulative("2020-07-01", "rD.Connecticut")
+get_Cumulative <- function(date, tosum){
+  sir_result_internal = data.frame(filter(sir_results_summary, variable%in%tosum))
+  t = as.numeric(difftime(as.Date(date), day0, unit='days'))
+  sir_result_internal = subset(sir_result_internal, time%in%t)
+  sir_result_internal$mean  <- as.character(round(sir_result_internal$mean, 0))
+  if(length(date)==1) return(sir_result_internal$mean)
+  if(length(date)>1) return(paste(sir_result_internal$mean, collapse=", "))
 }
 
 
