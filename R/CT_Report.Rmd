@@ -31,7 +31,7 @@ This report presents projections of COVID-19 hospitalizations and deaths in Conn
 An intervention scenario is described below. Projections under this scenario take into account historical and hypothetical future state-level interventions, including closing of schools on `r format(state_schools_close,"%b %d, %Y")` and the state-level stay-at-home order issued on `r format(state_lockdown_order, "%b %d, %Y")` which took effect on `r format(state_lockdown_start,"%b %d, %Y")`.  School closure is assumed to reduce transmission by `r params_init$school_closure_effect * 100`%, and the state-level stay-at-home order reduces transmission by `r params_init$lockdown_effect * 100`%.  
 
 ```{r echo=FALSE, fig.height = 5}
-plot_interventions(res1$raw_results, mydaymax)
+plot_interventions(res$raw_results, mydaymax, stayhome_compare=TRUE, titles=res$titles)
 ```
 The projections presented below evaluate the effect of a hypothetical lifting of the stay-at-home order on **`r format(mylockdown_end_date1, "%b %d, %Y")`** and **`r format(mylockdown_end_date2, "%b %d, %Y")`**. Re-opening of schools is set to be on `r format(myschools_reopen_date, "%b %d, %Y")`.  When the stay-at-home order is lifted, the projections assume an ongoing `r params_init$distancing_effect * 100`% reduction in transmission. 
 

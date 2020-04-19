@@ -452,7 +452,12 @@ mapplot_ct_region_list =  function(data, which.plot = "D", label = "Cumulative D
 
 ####################################
 
-plot_interventions = function(sir_results, daymax) {
+plot_interventions = function(sir_results, daymax, stayhome_compares=FALSE, titles=NULL) {
+
+  if(stayhome_compares){
+    sir_results_full <- sir_results
+    sir_results <- sir_results[[1]]
+  }
 
   dayseq = seq(day0, daymax, by="day")
   tmax = as.numeric(difftime(daymax, day0, units="days"))
@@ -469,19 +474,23 @@ plot_interventions = function(sir_results, daymax) {
   #stop("here")
 
   par(mar=c(3,3,3,0), bty="n")
-  layout(matrix(c(1,2,3,4),nrow=,4), heights=c(2,2,2,2))
+  nn <- 4
+  if(stayhome_compares) nn <- 3 + length(sir_results_full)
+  layout(matrix(c(1:nn),nrow=,nn), heights=rep(2, nn))
 
   plot(sir_results[[1]]$intervention_schools, ylim=c(0,1), type="n", ylab="", xlab="", main="Schools in session", axes=FALSE)
   axis(1, at=daymonthseq, lab=monthseq_lab)
   axis(2)
   polygon(c(1,1:(tmax+1), tmax+1), c(0,sir_results[[1]]$intervention_schools, 0), col="orange", border=NA)
   abline(v=Sys.Date()-day0, col="gray", lty=2)
-
-  plot(sir_results[[1]]$intervention_lockdown, ylim=c(0,1), type="n", ylab="", xlab="", main="Stay-at-home order in place", axes=FALSE)
-  axis(1, at=daymonthseq, lab=monthseq_lab)
-  axis(2)
-  polygon(c(1,1:(tmax+1), tmax+1), c(0,sir_results[[1]]$intervention_lockdown, 0), col="orange", border=NA)
-  abline(v=Sys.Date()-day0, col="gray", lty=2)
+  
+  if(!stayhome_compares){
+      plot(sir_results[[1]]$intervention_lockdown, ylim=c(0,1), type="n", ylab="", xlab="", main="Stay-at-home order in place", axes=FALSE)
+      axis(1, at=daymonthseq, lab=monthseq_lab)
+      axis(2)
+      polygon(c(1,1:(tmax+1), tmax+1), c(0,sir_results[[1]]$intervention_lockdown, 0), col="orange", border=NA)
+      abline(v=Sys.Date()-day0, col="gray", lty=2)
+  }
 
   plot(sir_results[[1]]$intervention_pattern, ylim=c(0,1),  type="n", ylab="", xlab="", main="Relative reduction in transmission", axes=FALSE)
   axis(1, at=daymonthseq, lab=monthseq_lab)
@@ -494,6 +503,17 @@ plot_interventions = function(sir_results, daymax) {
   axis(2)
   polygon(c(1,1:(tmax+1), tmax+1), c(0,sir_results[[1]]$intervention_testing, 0), col="orange", border=NA)
   abline(v=Sys.Date()-day0, col="gray", lty=2)
+
+  if(stayhome_compares){
+      for(i in 1:length(sir_results_full)){
+        plot(sir_results_full[[i]][[1]]$intervention_lockdown, ylim=c(0,1), type="n", ylab="", xlab="", main=titles[[i]], axes=FALSE)
+        axis(1, at=daymonthseq, lab=monthseq_lab)
+        axis(2)
+        polygon(c(1,1:(tmax+1), tmax+1), c(0,sir_results_full[[i]][[1]]$intervention_lockdown, 0), col="orange", border=NA)
+        abline(v=Sys.Date()-day0, col="gray", lty=2)
+      }
+  }
+
 }
 
 ####################################
@@ -543,6 +563,7 @@ mytitles <- list("Stay-at-home order in place until 6/1",
 mytitles_long <- list("When the stay-at-home order is in place until June 01", 
                     "When the stay-at-home order is in place until July 01")
 res <- list(
+            raw_results = list(res1$raw_results, res2$raw_results), 
             summary = list(res1$summary, res2$summary), 
             titles = mytitles,
             descriptions = mytitles_long
