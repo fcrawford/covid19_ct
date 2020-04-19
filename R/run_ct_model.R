@@ -170,8 +170,10 @@ sir_results_summary <- sir_results_long %>% group_by(variable, time) %>%
 ####################
 # plotting 
 # @param which.plot the prefix of the compartment to plot, e.g., S, E, I_s, I_m. If a vector of more than one specified, it plots multiple lines
+# @param add logical, if adding capacity line                         
 
-plot_ct_region = function(region_name, which.plot = "D", add=NULL) {
+
+plot_ct_region = function(region_name, which.plot = "D", add=FALSE) {
   #compartment_plot_labels = c("D")
   #compartment_plot_names = c("Deaths")
   #compartment_plot_colors = rainbow(length(compartment_plot_labels))
@@ -189,7 +191,7 @@ plot_ct_region = function(region_name, which.plot = "D", add=NULL) {
                                     "Severe Infections","Mild Infections",
                                     "Asymptomatic Infections"))
 
-  if("rH" %in% which.plot) add <- dat_ct_capacity
+  if("rH" %in% which.plot) add <- TRUE
 
   par(mar=c(3,4,3,0), bty="n")
   toplot <- paste(rep(which.plot,each=length(region_name)),
@@ -199,13 +201,20 @@ plot_ct_region = function(region_name, which.plot = "D", add=NULL) {
   title <- paste0(lab.table$labels[lab.table$compartment==which.plot[1]], " in ", region_name)
   ymax <- max(sir_result_region$mean[sir_result_region$time <= tmax], na.rm=TRUE)
   
-  if(!is.null(add)){
-    if(region_name != "Connecticut"){
-        sub.add <- subset(add, County == region_name)
-      }else{
-        sub.add <- aggregate(Capacity~Date, data=add, FUN=function(x){sum(x)})
+  if(add){
+    if(region_name %in% names(county_capacities)){
+        sub.add <- data.frame(time = 0:tmax, 
+                              Capacity = county_capacities[[region_name]](0:tmax))
+    }else if(region_name == "Connecticut"){
+      cap.state <- rep(0, tmax+1)
+      for(nm in 1:length(county_capacities)){
+          cap.state <- cap.state + county_capacities[[nm]](0:tmax)
       }
-      ymax <- max(ymax, sub.add$Capacity)
+      sub.add <- data.frame(time = 0:tmax, Capacity = cap.state)
+    }else{
+      stop(paste0(region_name, " not recognized in capacity function"))
+    }
+    ymax <- max(ymax, sub.add$Capacity)
   }
 
   plot(0, type="n", xlab="", ylab="People", main=title, col="black", 
@@ -227,12 +236,8 @@ plot_ct_region = function(region_name, which.plot = "D", add=NULL) {
     text(sir_result_region_sub$time[tmax+1], sir_result_region_sub$mean[tmax+1], format(sir_result_region_sub$mean[tmax+1],digits=2, big.mark=","), pos=4, col=col.line)
     text(sir_result_region_sub$time[tmax+1], sir_result_region_sub$lower[tmax+1], format(sir_result_region_sub$lower[tmax+1],digits=2, big.mark=","), pos=4, col=col.polygon)
     text(sir_result_region_sub$time[tmax+1], sir_result_region_sub$upper[tmax+1], format(sir_result_region_sub$upper[tmax+1],digits=2, big.mark=","), pos=4, col=col.polygon)
-    if(!is.null(add)){
-      lines(as.numeric(as.Date(sub.add$Date) - day0), sub.add$Capacity, col='gray30', lty  = 2,  lwd=1.2)
-      tmp1 = as.numeric(today() - day0)
-      tmp2 = as.numeric(daymax - day0)
-      capvalue = sub.add$Capacity[length(sub.add$Capacity)]
-      lines(c(tmp1,tmp2), rep(capvalue,2), col='gray30', lty  = 2,  lwd=1.2)
+    if(add){
+      lines(sub.add$time, sub.add$Capacity, col='gray30', lty  = 2,  lwd=1.2)
     }
   }
 
