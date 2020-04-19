@@ -1,5 +1,5 @@
 
-# Draws from the translated and scaled beta distribution 
+# Draws from the truncated and scaled beta distribution 
 
 rtruncdist = function(nsamples, mean, sd, lower, upper) {
 
@@ -17,5 +17,4 @@ rtruncdist = function(nsamples, mean, sd, lower, upper) {
   res = lower + (upper - lower)*rbeta(nsamples, shape1=a, shape2=b)
   return(res)
 }
-
 

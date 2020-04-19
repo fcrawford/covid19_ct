@@ -13,6 +13,7 @@ library(mapproj)
 source("model.R")
 source("get_data.R")
 source("intervention_functions.R")
+source("truncated_distributions.R")
 
 ########################
 # Dates
@@ -40,7 +41,7 @@ daymonthseq = difftime(monthseq, day0, units="days")
 
 
 
-#############################3
+#############################
 # hypothetical end date of lockdown
 
 lockdown_end_date=dmy("01/06/2020") 
@@ -99,16 +100,13 @@ state0 = c(S=S_init, E=E_init, I_s=I_s_init, I_m=I_m_init, A=A_init, H=H_init, H
 
 rparams = function() {
   params_tmp = params_init
-  # sample new param values, 
-  params_tmp$beta_pre = max(0,rnorm(1,mean=params_init$beta_pre,  sd=params_init$sd_beta_pre))
-  params_tmp$delta = 1/max(0.001,rnorm(1,mean=1/params_init$delta,  sd=params_init$sd_recip_delta))
-  params_tmp$gamma_H = 1/max(0.001,rnorm(1,mean=1/params_init$gamma_H,  sd=params_init$sd_recip_gamma_H))
-  params_tmp$m_H = max(0,rnorm(1,mean=params_init$m_H,  sd=params_init$sd_m_H))
-  params_tmp$m_H = min(1,params_tmp$m_H)
-  params_tmp$m_Hbar_mult <- max(0,rnorm(1,mean=params_init$m_Hbar_mult,  sd=params_init$sd_m_Hbar_mult))
-  #params_tmp$lockdown_effect <- min(1, rnorm(1,mean=params_init$lockdown_effect,  sd=params_init$sd_lockdown_effect))
-  params_tmp$lockdown_effect <- rnorm(1,mean=params_init$lockdown_effect,  sd=params_init$sd_lockdown_effect)
-  #params_tmp$lockdown_effect <- max(0, params_tmp$lockdown_effect)
+  # sample new param values
+  params_tmp$beta_pre = rtruncdist(1, mean=params_init$beta_pre, sd=params_init$sd_beta_pre, lower=params_init$lower_beta_pre, upper=params_init$upper_beta_pre)
+  params_tmp$delta = rtruncdist(1, mean=params_init$delta, sd=params_init$sd_delta, lower=params_init$lower_delta, upper=params_init$upper_delta)
+  params_tmp$gamma_H = rtruncdist(1, mean=params_init$gamma_H, sd=params_init$sd_gamma_H, lower=params_init$lower_gamma_H, upper=params_init$upper_gamma_H)
+  params_tmp$m_H = rtruncdist(1, mean=params_init$m_H, sd=params_init$sd_m_H, lower=params_init$lower_m_H, upper=params_init$upper_m_H)
+  params_tmp$m_Hbar_mult = rtruncdist(1, mean=params_init$m_Hbar_mult, sd=params_init$sd_m_Hbar_mult, lower=params_init$lower_m_Hbar_mult, upper=params_init$upper_m_Hbar_mult)
+  params_tmp$lockdown_effect = rtruncdist(1, mean=params_init$lockdown_effect, sd=params_init$sd_lockdown_effect, lower=params_init$lower_lockdown_effect, upper=params_init$upper_lockdown_effect)
   # add sampling of initial conditions
   return(params_tmp)
 }
@@ -142,7 +140,7 @@ for(nm in region_names) {
 #######################
 # run the sims
 
-nsim = 1
+nsim = 100
 
 sir_results = lapply(1:nsim, function(i){
   res = run_sir_model(state0=state0, 
