@@ -68,8 +68,8 @@ run_sir_model = function(state0, params, region_adj, populations, tmax, interven
 
       # effect of testing on recovery for mild  and asymptomatic 
       # should this instead be a reduction on infectiousness?  Does it matter? 
-      a_t_Im = interventions$testing(time) * ((1 - params$gamma_Im * params$testing_effect_Im)^(-1) - 1)
-      a_t_A = interventions$testing(time) * ((1 - params$gamma_A * params$testing_effect_A)^(-1) - 1)
+      a_t_Im = interventions$testing(time) * params$testing_effect_Im
+      a_t_A = interventions$testing(time) * params$testing_effect_A
 
       # Hospital capacities
       actual_capacities = as.numeric(lapply(county_capacities, function(cap)cap(time)))

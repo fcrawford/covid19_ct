@@ -127,14 +127,6 @@ get_sir_results = function(daymax=ymd("2020-09-01"),
   dayseq = seq(day0, daymax, by="day")
   tmax = as.numeric(difftime(daymax, day0, units="days"))
 
-  #date.time <- as.data.frame(cbind(format(as.Date(dayseq)),c(0:(length(dayseq)-1))))
-  #colnames(date.time) <- c("date", 'time')
-
-  # the month sequences are for display only
-  #monthseq = seq(day0, daymax, by="month")
-  #monthseq_lab = format(monthseq, "%b %Y")
-  #daymonthseq = difftime(monthseq, day0, units="days")
-
   lockfun = get_state_lockdown_fun(dayseq, offdate=lockdown_end_date)
   schoolsfun = get_school_in_session_fun(dayseq, schools_reopen_date=schools_reopen_date)
   testingfun = get_testing_on_fun(dayseq, testing_on_date=testing_on_date)
@@ -166,6 +158,8 @@ get_sir_results = function(daymax=ymd("2020-09-01"),
   return(list(raw_results=sir_results, summary=sir_results_summary))
 }
 
+
+##############################
 
 
 plot_ct_region_list = function(data=NULL, 
@@ -319,9 +313,9 @@ plot_ct_region = function(data=NULL,
         time.print <- tmax.plot + 1
       }
       polygon(c(sir_result_region_sub$time, rev(sir_result_region_sub$time)), c(sir_result_region_sub$lower, rev(sir_result_region_sub$upper)), col=col.polygon, border=NA)
-      text(sir_result_region_sub$time[tmax.plot+1], sir_result_region_sub$mean[time.print], format(sir_result_region_sub$mean[time.print],digits=2, big.mark=","), pos=4, col=col.line)
-      text(sir_result_region_sub$time[tmax.plot+1], sir_result_region_sub$lower[time.print], format(sir_result_region_sub$lower[time.print],digits=2, big.mark=","), pos=4, col=col.polygon)
-      text(sir_result_region_sub$time[tmax.plot+1], sir_result_region_sub$upper[time.print], format(sir_result_region_sub$upper[time.print],digits=2, big.mark=","), pos=4, col=col.polygon)
+      text(sir_result_region_sub$time[tmax.plot+1], sir_result_region_sub$mean[tmax.plot+1], format(sir_result_region_sub$mean[time.print],digits=2, big.mark=","), pos=4, col=col.line)
+      text(sir_result_region_sub$time[tmax.plot+1], sir_result_region_sub$lower[tmax.plot+1], format(sir_result_region_sub$lower[time.print],digits=2, big.mark=","), pos=4, col=col.polygon)
+      text(sir_result_region_sub$time[tmax.plot+1], sir_result_region_sub$upper[tmax.plot+1], format(sir_result_region_sub$upper[time.print],digits=2, big.mark=","), pos=4, col=col.polygon)
     }
     lines(sir_result_region_sub$time, sir_result_region_sub$mean, col=col.line)
   }
@@ -365,7 +359,7 @@ plot_ct_region = function(data=NULL,
       count.max <- sir_result_region_sub$upper[sir_result_region_sub$time==tmax.plot]
       region_summary = paste(region_summary, "On ", format(end_day, "%B %d"),
                        " projections show ", format(count, digits=2, big.mark=","),
-                       " cumulative deaths reported in ", region_name,
+                       " cumulative deaths in ", region_name,
                        " with 90% uncertainty interval between ", format(count.min, digits=2, big.mark=","),
                        " and ", format(count.max, digits=2, big.mark=","),
                        ".",
@@ -397,7 +391,7 @@ plot_ct_region = function(data=NULL,
 #####################################
 #
 # @param which.plot the prefix of the compartment to plot, e.g., S, E, I_s, I_m. If a vector of more than one specified, it takes the sum of the compartment (only the mean!)
-mapplot_ct_region = function(data=sir_results_summary, which.plot = "D", label = "Cumulative Deaths", palette="Reds", subtitle=NULL, ...) {
+mapplot_ct_region = function(data, which.plot = "D", label = "Cumulative Deaths", palette="Reds", subtitle=NULL, ...) {
   map = CTmap
   region_names <- as.character(map$NAME10)
   toplot <- paste(rep(which.plot,each=length(region_names)),
@@ -492,11 +486,11 @@ plot_interventions = function(sir_results, daymax, stayhome_compares=FALSE, titl
       abline(v=Sys.Date()-day0, col="gray", lty=2)
   }
 
-  plot(sir_results[[1]]$intervention_pattern, ylim=c(0,1),  type="n", ylab="", xlab="", main="Relative reduction in transmission", axes=FALSE)
-  axis(1, at=daymonthseq, lab=monthseq_lab)
-  axis(2)
-  polygon(c(1,1:(tmax+1), tmax+1), c(0,sir_results[[1]]$intervention_pattern, 0), col="orange", border=NA)
-  abline(v=Sys.Date()-day0, col="gray", lty=2)
+  #plot(sir_results[[1]]$intervention_pattern, ylim=c(0,1),  type="n", ylab="", xlab="", main="Relative reduction in transmission", axes=FALSE)
+  #axis(1, at=daymonthseq, lab=monthseq_lab)
+  #axis(2)
+  #polygon(c(1,1:(tmax+1), tmax+1), c(0,sir_results[[1]]$intervention_pattern, 0), col="orange", border=NA)
+  #abline(v=Sys.Date()-day0, col="gray", lty=2)
 
   plot(sir_results[[1]]$intervention_testing, ylim=c(0,1), type="n", ylab="", xlab="", main="Expanded testing", axes=FALSE)
   axis(1, at=daymonthseq, lab=monthseq_lab)
@@ -538,36 +532,37 @@ get_compartment <- function(data=sir_results_summary, date, toprint, start_day =
 
 #######################
 
-mydaymax              = ymd("2020-09-01") 
-mylockdown_end_date1   = ymd("2020-06-01") 
-myschools_reopen_date = ymd("2020-09-01")
-mytesting_on_date     = ymd("2020-05-15")
+#mydaymax              = ymd("2020-09-01") 
+#mylockdown_end_date1   = ymd("2020-06-01") 
+#myschools_reopen_date = ymd("2020-09-01")
+#mytesting_on_date     = ymd("2020-05-15")
 
-res1 = get_sir_results(daymax=mydaymax,
-                      lockdown_end_date=mylockdown_end_date1,
-                      schools_reopen_date=myschools_reopen_date,
-                      testing_on_date=mytesting_on_date,
-                      nsim=10)
+#res1 = get_sir_results(daymax=mydaymax,
+                      #lockdown_end_date=mylockdown_end_date1,
+                      #schools_reopen_date=myschools_reopen_date,
+                      #testing_on_date=mytesting_on_date,
+                      #nsim=10)
 
 # Scenario 2
-mylockdown_end_date2   = ymd("2020-07-01") 
-res2 = get_sir_results(daymax=mydaymax,
-                      lockdown_end_date=mylockdown_end_date2,
-                      schools_reopen_date=myschools_reopen_date,
-                      testing_on_date=mytesting_on_date,
-                      nsim=10)
+#mylockdown_end_date2   = ymd("2020-07-01") 
+#res2 = get_sir_results(daymax=mydaymax,
+                      #lockdown_end_date=mylockdown_end_date2,
+                      #schools_reopen_date=myschools_reopen_date,
+                      #testing_on_date=mytesting_on_date,
+                      #nsim=10)
 
 # Put into one list
-mytitles <- list("Stay-at-home order in place until 6/1", 
-               "Stay-at-home order in place until 7/1")
-mytitles_long <- list("When the stay-at-home order is in place until June 01", 
-                    "When the stay-at-home order is in place until July 01")
-res <- list(
-            raw_results = list(res1$raw_results, res2$raw_results), 
-            summary = list(res1$summary, res2$summary), 
-            titles = mytitles,
-            descriptions = mytitles_long
-      ) 
+#mytitles <- list("Stay-at-home order in place until 6/1", 
+               #"Stay-at-home order in place until 7/1")
+#mytitles_long <- list("When the stay-at-home order is in place until June 01", 
+                    #"When the stay-at-home order is in place until July 01")
+#res <- list(
+            #raw_results = list(res1$raw_results, res2$raw_results), 
+            #summary = list(res1$summary, res2$summary), 
+            #titles = mytitles,
+            #descriptions = mytitles_long
+      #) 
+
 # plot_ct_region_list(data=res$summary, end_day=mydaymax, title=res$titles, description=res$descriptions, region_name="Connecticut", which.plot="rD")
 
 # mapplot_ct_region_list(data = res$summary, which.plot="rD", label="Cumulative\nDeaths", palette="Reds", ncol=3, subtitle=res$titles)

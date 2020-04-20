@@ -21,19 +21,51 @@ geometry: margin=0.75in
 
 ```{r, echo=FALSE, include=FALSE}
 source("run_ct_model.R")
+mydaymax              = ymd("2020-09-01") 
+myschools_reopen_date = ymd("2020-09-01")
+mytesting_on_date     = ymd("2020-05-15")
+
+# Scenario 1
+mylockdown_end_date1   = ymd("2020-06-01") 
+res1 = get_sir_results(daymax=mydaymax,
+                      lockdown_end_date=mylockdown_end_date1,
+                      schools_reopen_date=myschools_reopen_date,
+                      testing_on_date=mytesting_on_date,
+                      nsim=10)
+
+# Scenario 2
+mylockdown_end_date2   = ymd("2020-07-01") 
+res2 = get_sir_results(daymax=mydaymax,
+                      lockdown_end_date=mylockdown_end_date2,
+                      schools_reopen_date=myschools_reopen_date,
+                      testing_on_date=mytesting_on_date,
+                      nsim=10)
+
+# Put into one list
+mytitles <- list("Stay-at-home order in place until 6/1", 
+               "Stay-at-home order in place until 7/1")
+mytitles_long <- list("When the stay-at-home order is in place until June 01", 
+                    "When the stay-at-home order is in place until July 01")
+res <- list(
+            raw_results = list(res1$raw_results, res2$raw_results), 
+            summary = list(res1$summary, res2$summary), 
+            titles = mytitles,
+            descriptions = mytitles_long)
+
+
 ```
 
 
 # Introduction 
 
-This report presents projections of COVID-19 hospitalizations and deaths in Connecticut as a whole, and by county. Projections are shown as lines with uncertainty intervals in lighter colors, and actual data (if available) overlaid. Horizontal axes extend to the time horizon for this analysis, `r format(mydaymax, "%b %d, %Y")`.  The report was prepared for the Governor's Reopen Connecticut Advisory group. 
+This report presents projections of COVID-19 hospitalizations and deaths in Connecticut as a whole, and by county. Projections are shown as lines with uncertainty intervals in lighter colors, and actual data (if available) overlaid. Horizontal axes extend to the time horizon for this analysis, `r format(mydaymax, "%B %d, %Y")`.  The report was prepared for the Governor's Reopen Connecticut Advisory group. 
 
-An intervention scenario is described below. Projections under this scenario take into account historical and hypothetical future state-level interventions, including closing of schools on `r format(state_schools_close,"%b %d, %Y")` and the state-level stay-at-home order issued on `r format(state_lockdown_order, "%b %d, %Y")` which took effect on `r format(state_lockdown_start,"%b %d, %Y")`.  School closure is assumed to reduce transmission by `r params_init$school_closure_effect * 100`%, and the state-level stay-at-home order reduces transmission by `r params_init$lockdown_effect * 100`%.  
+An intervention scenario is described below. Projections under this scenario take into account historical and hypothetical future state-level interventions, including closing of schools on `r format(state_schools_close,"%B %d, %Y")` and the state-level stay-at-home order issued on `r format(state_lockdown_order, "%B %d, %Y")` which took effect on `r format(state_lockdown_start,"%B %d, %Y")`.  School closure is assumed to reduce transmission by `r params_init$school_closure_effect * 100`%, and the state-level stay-at-home order reduces transmission by `r params_init$lockdown_effect * 100`%.  
 
 ```{r echo=FALSE, fig.height = 7}
 plot_interventions(res$raw_results, mydaymax, stayhome_compare=TRUE, titles=res$titles)
 ```
-The projections presented below evaluate the effect of a hypothetical lifting of the stay-at-home order on **`r format(mylockdown_end_date1, "%b %d, %Y")`** and **`r format(mylockdown_end_date2, "%b %d, %Y")`**. Re-opening of schools is set to be on `r format(myschools_reopen_date, "%b %d, %Y")`.  When the stay-at-home order is lifted, the projections assume an ongoing `r params_init$distancing_effect * 100`% reduction in transmission. 
+The projections presented below evaluate the effect of a hypothetical lifting of the stay-at-home order on **`r format(mylockdown_end_date1, "%B %d, %Y")`** and **`r format(mylockdown_end_date2, "%B %d, %Y")`**. Re-opening of schools is set to be on `r format(myschools_reopen_date, "%B %d, %Y")`.  When the stay-at-home order is lifted, the projections assume an ongoing `r params_init$distancing_effect * 100`% reduction in transmission. 
 
 
 
