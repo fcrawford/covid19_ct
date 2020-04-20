@@ -1,0 +1,57 @@
+---
+title: "COVID-19 Projections for Connecticut: Key Parameters"
+date: "`r format(Sys.time(), '%I:%M %p %B %d %Y')`"
+header-includes:
+  - \usepackage{helvet}
+  - \usepackage[T1]{fontenc}
+  - \renewcommand\familydefault{\sfdefault} 
+output:
+  pdf_document:
+    toc: false
+    fig_crop: false
+    fig_width: 7.0
+    fig_height: 3.0
+fontsize: 11pt
+geometry: margin=0.75in
+---
+
+```{r, echo=FALSE, include=FALSE}
+#source("run_ct_model.R")
+library(yaml)
+params_init = yaml.load_file("params.yml") 
+```
+
+
+# Key epidemiologic parameters 
+
+## Case type distribution
+
+Probability of severe disease that requires hospitalization and may lead to death: `r 1 - params_init$q_Im - params_init$q_A`. 
+
+Probability of mild disease that does not require hospitalization and will lead to recovery: `r params_init$q_Im`. 
+
+Probability of asymptomatic infection: `r params_init$q_A`. 
+
+## Probability of death
+
+Probability of death given hospitalization: `r params_init$m_H`
+
+## Reproductive numbers
+
+```{r, echo=FALSE, include=FALSE}
+R0 = params_init$beta_pre * (params_init$q_A * params_init$k_A * (1/params_init$gamma_A) + params_init$q_Im * (1/params_init$gamma_Im) + (1- params_init$q_Im - params_init$q_A) * (1/params_init$alpha))
+```
+Basic reproductive number: `r round(R0, 1)`.
+
+Reproductive number after school closure: `r round(R0 * (1 - params_init$school_closure_effect), 1)`
+
+Reproductive number after school closure and lockdown: `r round(R0 * (1 - params_init$school_closure_effect) * (1 - params_init$lockdown_effect), 1)`
+
+### Version: 
+Code version reference: `r system("git rev-parse HEAD", intern=TRUE)`
+
+
+
+
+
+
