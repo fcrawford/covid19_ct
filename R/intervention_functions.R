@@ -55,17 +55,46 @@ get_testing_on_fun = function(dayseq, testing_on_date) {
 
 ###########################
 
-severity_proportion <- function(threshold_age){
-severity_by_age <- read.csv('../data/severity.csv', stringsAsFactors=FALSE) 
 
-severity_by_age$prop_adj <- severity_by_age$pr_age * 0.3
+release_age_thresh <- function(threshold_age, lockdown_effect){
 
-for (i in 3: nrow(severity_by_age)){
-if (severity_by_age$max_age[i] < threshold_age) {severity_by_age$prop_adj[i] <- severity_by_age$pr_age[i] * 0.8}  
-}
-severity_by_age$prop_adj <- severity_by_age$prop_adj/sum(severity_by_age$prop_adj)
-q_Is_new <- sum(severity_by_age$prop_adj * severity_by_age$pr_severe)
-return(q_Is_new)
+  dat <- read.csv('../data/severity.csv', stringsAsFactors=FALSE) 
+
+  # current age proportions
+  ageprops = dat$pr_age
+
+  # avg_severity_prop = ageprops %*% dat$pr_severe # not used
+
+  release_ageprops = ageprops * (dat$max_age<threshold_age) # zero out older proportions 
+  prop_released = sum(release_ageprops) # the proportion being released
+
+  # normalized age proportions to be released
+  release_ageprops_normalized = release_ageprops / prop_released
+
+  # new age proportion not locked down: a mixture of locked down ageprops and the released people in the rest, normalized
+  new_ageprops = (lockdown_effect*ageprops + (1-lockdown_effect)*prop_released*release_ageprops_normalized) / (lockdown_effect + (1-lockdown_effect)*prop_released)
+
+  # our lockdown effect gets bigger (worse)
+  new_lockdown_effect = lockdown_effect + (1-lockdown_effect)*prop_released
+
+  # new average severity for released
+  new_avg_severity_prop = sum(new_ageprops * dat$pr_severe)
+
+  return(list(new_lockdown_effect=new_lockdown_effect, new_avg_severity_prop=new_avg_severity_prop))
+
+
+  #prop_adj <- severity_by_age$pr_age * 0.3
+
+  #for (i in 3: nrow(severity_by_age)){
+    #if(severity_by_age$max_age[i] < threshold_age) {
+      #prop_adj[i] <- severity_by_age$pr_age[i] * 0.8
+    #}  
+  #}
+  #
+  #prop_adj <- prop_adj / sum(prop_adj)
+  #
+  #q_Is_new <- sum(prop_adj * severity_by_age$pr_severe)
+  #return(q_Is_new)
 }
 
 
