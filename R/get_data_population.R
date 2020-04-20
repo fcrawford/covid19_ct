@@ -16,3 +16,13 @@ demog <- demog[, c("county", "label",  "estimate")]
 demog$label <-  factor(demog$label, levels = label)
 demog.wide <- spread(demog, label, estimate)
 write.csv(demog.wide, file = "../data/CT_demog_ACS2018_5year_estimates.csv", row.names=FALSE)
+
+
+if(FALSE){
+	library(ggplot2)
+	library(reshape2)
+	demog <- read.csv("../data/CT_demog_ACS2018_5year_estimates.csv", check.names=FALSE)
+	# demog[, -1] <- demog[, -1] / demog[,]
+	demoglong <- melt(demog, id.vars=c("county"))
+	ggplot(subset(demoglong, variable != "population"), aes(x=variable, y=value, color=county, group=county)) + geom_point() + geom_line() + scale_color_brewer(palette="Set1") + xlab("Age") + ylab("Population")
+}

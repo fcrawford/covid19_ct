@@ -1,0 +1,9 @@
+Date,County,Capacity,Occupied_total,Occupied_covid,Inpatient COVID-positive census,Negative pressure beds - Occupied,ICU/critical care beds - Occupied,Isolation beds - Occupied,Total available beds,Addition surge beds
+2020-04-17,Fairfield,3186,792,776,776,63,266,463,2498,704
+2020-04-17,Hartford,2112,1117,417,417,186,354,577,2297,515
+2020-04-17,Litchfield,213,67,30,30,7,16,44,194,56
+2020-04-17,Middlesex,90,178,36,36,6,20,152,160,72
+2020-04-17,New Haven,2067,1027,638,638,139,342,546,2186,270
+2020-04-17,New London,355,155,23,23,18,60,77,421,66
+2020-04-17,Tolland,147,8,14,14,3,5,0,126,15
+2020-04-17,Windham,160,55,4,4,5,31,19,95,116
