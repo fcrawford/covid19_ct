@@ -59,9 +59,9 @@ school_closure_effect: 0.28
 lockdown_effect: 0.48
 
 # intervention effect on isolation/recovery for A and I_m
-# this is a _reduction_ in average number of days spent in infectious state
-testing_effect_Im: 1
-testing_effect_A: 1
+# this is increase in a rate of transitioning out of infectious compartment 
+testing_effect_Im: 0.3
+testing_effect_A: 0.2
 
 # hospital beds occupancy: user-defined
 bed_occup: 0.65 #default

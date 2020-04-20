@@ -53,6 +53,20 @@ get_testing_on_fun = function(dayseq, testing_on_date) {
 
 
 
+###########################
+
+severity_proportion <- function(threshold_age){
+severity_by_age <- read.csv('../data/severity.csv', stringsAsFactors=FALSE) 
+
+severity_by_age$prop_adj <- severity_by_age$pr_age * 0.3
+
+for (i in 3: nrow(severity_by_age)){
+if (severity_by_age$max_age[i] < threshold_age) {severity_by_age$prop_adj[i] <- severity_by_age$pr_age[i] * 0.8}  
+}
+severity_by_age$prop_adj <- severity_by_age$prop_adj/sum(severity_by_age$prop_adj)
+q_Is_new <- sum(severity_by_age$prop_adj * severity_by_age$pr_severe)
+return(q_Is_new)
+}
 
 
 ###########################
