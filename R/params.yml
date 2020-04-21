@@ -43,8 +43,8 @@ lower_m_Hbar_mult: 1.25
 upper_m_Hbar_mult: 1.75
 
 sd_lockdown_effect: 0.05
-lower_lockdown_effect: 0.8
-upper_lockdown_effect: 0.7
+lower_lockdown_effect: 0.7
+upper_lockdown_effect: 0.8
 
 # model timeframe
 #timeframe: 183
