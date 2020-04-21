@@ -311,15 +311,15 @@ plot_ct_region = function(data=NULL,
     col.polygon <- adjustcolor(col.line, alpha.f = 0.5)
     sir_result_region_sub <- filter(sir_result_region, variable==paste0(which.plot[i],".",region_name))
     if(which.plot[i] %in% which.plot.ci){
-      if(which.plot[i] %in% c("rH", "rHbar", "rHsum")){
-        time.print <- which.max(sir_result_region_sub$mean)
-      }else{
+      # if(which.plot[i] %in% c("rH", "rHbar", "rHsum")){
+        # time.print <- which.max(sir_result_region_sub$mean)
+      # }else{
         time.print <- tmax.plot + 1
-      }
+      # }
       polygon(c(sir_result_region_sub$time, rev(sir_result_region_sub$time)), c(sir_result_region_sub$lower, rev(sir_result_region_sub$upper)), col=col.polygon, border=NA)
-      text(sir_result_region_sub$time[tmax.plot+1], sir_result_region_sub$mean[tmax.plot+1], format(sir_result_region_sub$mean[time.print],digits=2, big.mark=","), pos=4, col=col.line)
-      text(sir_result_region_sub$time[tmax.plot+1], sir_result_region_sub$lower[tmax.plot+1], format(sir_result_region_sub$lower[time.print],digits=2, big.mark=","), pos=4, col=col.polygon)
-      text(sir_result_region_sub$time[tmax.plot+1], sir_result_region_sub$upper[tmax.plot+1], format(sir_result_region_sub$upper[time.print],digits=2, big.mark=","), pos=4, col=col.polygon)
+      text(sir_result_region_sub$time[tmax.plot+1], sir_result_region_sub$mean[time.print], format(sir_result_region_sub$mean[time.print],digits=2, big.mark=","), pos=4, col=col.line)
+      text(sir_result_region_sub$time[tmax.plot+1], sir_result_region_sub$lower[time.print], format(sir_result_region_sub$lower[time.print],digits=2, big.mark=","), pos=4, col=col.polygon)
+      text(sir_result_region_sub$time[tmax.plot+1], sir_result_region_sub$upper[time.print], format(sir_result_region_sub$upper[time.print],digits=2, big.mark=","), pos=4, col=col.polygon)
     }
     lines(sir_result_region_sub$time, sir_result_region_sub$mean, col=col.line)
   }
