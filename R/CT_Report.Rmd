@@ -25,13 +25,19 @@ mydaymax              = ymd("2020-09-01")
 myschools_reopen_date = ymd("2020-09-01")
 mytesting_on_date     = ymd("2020-05-15")
 
+set.seed(12345)
+nsim <- 10
+params <- NULL
+for(i in 1:nsim) params[[i]] <- rparams()
+
 # Scenario 1
 mylockdown_end_date1   = ymd("2020-06-01") 
 res1 = get_sir_results(daymax=mydaymax,
                       lockdown_end_date=mylockdown_end_date1,
                       schools_reopen_date=myschools_reopen_date,
                       testing_on_date=mytesting_on_date,
-                      nsim=10)
+                      nsim=nsim,
+                      params=params)
 
 # Scenario 2
 mylockdown_end_date2   = ymd("2020-07-01") 
@@ -39,7 +45,8 @@ res2 = get_sir_results(daymax=mydaymax,
                       lockdown_end_date=mylockdown_end_date2,
                       schools_reopen_date=myschools_reopen_date,
                       testing_on_date=mytesting_on_date,
-                      nsim=10)
+                      nsim=nsim,
+                      params=params)
 
 # Put into one list
 mytitles <- list("Stay-at-home order in place until 6/1", 

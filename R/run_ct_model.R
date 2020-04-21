@@ -122,7 +122,11 @@ get_sir_results = function(daymax=ymd("2020-09-01"),
                            lockdown_end_date, 
                            schools_reopen_date,
                            testing_on_date,
-                           nsim=1) {
+                           nsim=1,
+                           params = NULL) {
+  if(is.null(params)){
+    for(i in 1:nsim) params[[i]] <- rparams()
+  }
 
   dayseq = seq(day0, daymax, by="day")
   tmax = as.numeric(difftime(daymax, day0, units="days"))
@@ -135,7 +139,7 @@ get_sir_results = function(daymax=ymd("2020-09-01"),
 
   sir_results = lapply(1:nsim, function(i){
     res = run_sir_model(state0=state0, 
-                        params=rparams(),  # note: effect_intvx is in params, and is not passed to run_sir_model separately 
+                        params=params[[i]],  # note: effect_intvx is in params, and is not passed to run_sir_model separately 
                         region_adj=adj, 
                         populations=as.numeric(populations), 
                         tmax=tmax, 
