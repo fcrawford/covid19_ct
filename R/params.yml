@@ -1,19 +1,24 @@
 
 ##### Epi parameters: means 
 beta_pre: 1.25
-q_Im: 0.59
-q_A: 0.36
+q_Im: 0.587
+q_A: 0.356
 delta: 0.25
-alpha: 0.1190476
-gamma_H: 0.09615385
-gamma_Hbar: 0.09615385
+alpha: 0.1666667
+gamma_H: 0.09090909
+gamma_Hbar: 0.09090909
 gamma_Im: 0.25
-gamma_A: 0.125
-m_H: 0.36
+gamma_A: 0.1428571
+m_H: 0.18
 slope: 500
 k_A: 0.375
-k_n: 0.05
+k_n: 0.01
 m_Hbar_mult: 1.5
+
+# parameters to accomodate severe uninsured cases
+q_ins: 0.7
+gamma_Is: 0.07142857
+m_Is_mult: 2.25
 
 # standard deviations, lower and upper bounds 
 # of model parameters for uncertainty in projections
@@ -29,24 +34,24 @@ sd_gamma_H: 0.01
 lower_gamma_H: 0.07
 upper_gamma_H: 0.14
 
-sd_m_H: 0.025
-lower_m_H: 0.3
-upper_m_H: 0.4
+sd_m_H: 0.02
+lower_m_H: 0.14
+upper_m_H: 0.22
 
 sd_m_Hbar_mult: 0.1
 lower_m_Hbar_mult: 1.25
 upper_m_Hbar_mult: 1.75
 
 sd_lockdown_effect: 0.05
-lower_lockdown_effect: 0.4
-upper_lockdown_effect: 0.6
+lower_lockdown_effect: 0.8
+upper_lockdown_effect: 0.7
 
 # model timeframe
 #timeframe: 183
 
 # reporting lag (days): not user-defined
-H_lag: 6 
-D_lag: 6
+H_lag: 7 
+D_lag: 2
 
 # effectiveness of stay-at-home intervention: user-defined
 #effect_intvx: 0.5 # NOT USED
@@ -55,8 +60,8 @@ D_lag: 6
 # e.g. an effect of 0.1 reduces the intervention from 1 (full effect) to 0.9. 
 
 # intervention effects on contact: 
-school_closure_effect: 0.28
-lockdown_effect: 0.48
+school_closure_effect: 0.1
+lockdown_effect: 0.75
 
 # intervention effect on isolation/recovery for A and I_m
 # this is increase in a rate of transitioning out of infectious compartment 
