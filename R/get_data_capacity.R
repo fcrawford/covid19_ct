@@ -8,7 +8,9 @@ library(data.table)
 library(ggplot2)
 library(reshape2)
 
-raw <- fread("../data/COVID Data Extract (4-17-20).csv")
+# data_stream <- "4-17-20"
+data_stream <- "4-21-20"
+raw <- fread(paste0("../data/COVID Data Extract (", data_stream, ").csv"))
 dat <- transpose(raw[,-1])
 colnames(dat) <- as.character(as.matrix(raw)[, 1])
 dat <- cbind(Date = as.Date(gsub("X", "",  colnames(raw)[-1]),  format = "%m/%d/%y"), dat)
@@ -21,7 +23,8 @@ head(dat.long)
 ##
 ##	Capacity
 ##
-subset <- c("Negative pressure total available beds",
+if(data_stream ==  "4-17-20"){
+	subset <- c("Negative pressure total available beds",
 			"Negative pressure beds - Occupied",
 			"Negative pressure additional surge beds",
 			"ICU/critical care total available beds",
@@ -32,25 +35,27 @@ subset <- c("Negative pressure total available beds",
 			"Isolation additional surge beds",
 			"Total available beds",
 			"Addition surge beds")
-# ggplot(subset(dat.long, variable %in% subset[c(2,5,8,10)]), aes(x = Date, y = value, color =  variable)) + geom_line() + facet_wrap(~County, ncol =  4, scale='free') 
-dat.long$value[is.na(dat.long$value)] <- 0
+	# ggplot(subset(dat.long, variable %in% subset[c(2,5,8,10)]), aes(x = Date, y = value, color =  variable)) + geom_line() + facet_wrap(~County, ncol =  4, scale='free') 
+	dat.long$value[is.na(dat.long$value)] <- 0
 
-subset1 <- c("Total available beds",
-			"Addition surge beds",
-			"Negative pressure beds - Occupied",
-			"ICU/critical care beds - Occupied",
-			"Isolation beds - Occupied",
-			"Inpatient COVID-positive census"
-			)
-dat.capacity <- subset(dat.long, variable %in% subset1)
-dat.capacity <- data.frame(dcast(dat.capacity, Date  + County ~  variable,  value.var="value"), check.names=FALSE)
-dat.capacity$Capacity <- dat.capacity[, subset1[1]] + dat.capacity[, subset1[2]] - 
-						 dat.capacity[, subset1[3]] - dat.capacity[, subset1[4]] - 
-						 dat.capacity[, subset1[5]] + dat.capacity[, subset1[6]]   
+	subset1 <- c("Total available beds",
+				"Addition surge beds",
+				"Negative pressure beds - Occupied",
+				"ICU/critical care beds - Occupied",
+				"Isolation beds - Occupied",
+				"Inpatient COVID-positive census"
+				)
+	dat.capacity <- subset(dat.long, variable %in% subset1)
+	dat.capacity <- data.frame(dcast(dat.capacity, Date  + County ~  variable,  value.var="value"), check.names=FALSE)
+	dat.capacity$Capacity <- dat.capacity[, subset1[1]] + dat.capacity[, subset1[2]] - 
+							 dat.capacity[, subset1[3]] - dat.capacity[, subset1[4]] - 
+							 dat.capacity[, subset1[5]] + dat.capacity[, subset1[6]]   
 
-write.csv(dat.capacity[, c("Date", "County", "Capacity")], 
-		  "../data/ct_hosp_cap.csv", row.names=FALSE, quote=FALSE)
-# ggplot(dat.capacity) + geom_line(aes(x = Date, y = `Total available beds`), color =  "blue")+ geom_line(aes(x = Date, y = `Addition surge beds`), color =  "darkgreen") + geom_line(aes(x = Date, y = Capacity), color =  "red") + facet_wrap(~County, ncol =  4, scale='free') 
+	write.csv(dat.capacity[, c("Date", "County", "Capacity")], 
+			  "../data/ct_hosp_cap.csv", row.names=FALSE, quote=FALSE)
+	# ggplot(dat.capacity) + geom_line(aes(x = Date, y = `Total available beds`), color =  "blue")+ geom_line(aes(x = Date, y = `Addition surge beds`), color =  "darkgreen") + geom_line(aes(x = Date, y = Capacity), color =  "red") + facet_wrap(~County, ncol =  4, scale='free') 
+}
+
 
 ##
 ##	Current hospitalization
