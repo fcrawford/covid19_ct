@@ -48,6 +48,7 @@ run_sir_model = function(state0, params, region_adj, populations, tmax, interven
   beta_matrix  = ( (1-params$k_n)*diag(1,nregions) + params$k_n*(1/region_adj_num)*region_adj ) * beta_pre 
 
   params$m_Hbar = params$m_H * params$m_Hbar_mult
+  params$m_Is = params$m_H * params$m_Is_mult
 
 
   model <- function(time, state, parameters) {
@@ -84,13 +85,16 @@ run_sir_model = function(state0, params, region_adj, populations, tmax, interven
       # delta      1/latency period
       # q_A        % infectious and asymptomatic
       # q_Im       % infectious and mild
+      # q_ins      % severe and insured (can move to either H or Hbar)
       # alpha      rate at which severe cases need hospitalization/care
       # gamma_A    recovery/removal rate of asymptomatic
       # gamma_Im   recovery/removal rate of mild
       # gamma_H    recovery/removal rate of hospitalized 
       # gamma_Hbar recovery/removal rate of unhosp
+      # gamma_Is   recovery/removal rate of severe uninsured
       # m_H        % hospitalized severe that die
       # m_Hbar     % unhospitalized severe that die
+      # m_Is       % uninsured severe that die
       
       #################
   
@@ -99,19 +103,19 @@ run_sir_model = function(state0, params, region_adj, populations, tmax, interven
       
       dE    <-  -delta*E + S*( beta %*% ( I_s + I_m + k_A*A)/populations )
       
-      dI_s  <- (1 - q_Im - q_A)*delta*E - alpha*I_s
+      dI_s  <- (1 - q_Im - q_A)*delta*E - q_ins*alpha*I_s - (1 - q_ins)*gamma_Is*I_s
       
       dI_m  <- q_Im*delta*E - (1 + a_t_Im)*gamma_Im*I_m
       
       dA    <- q_A*delta*E - (1 + a_t_A)*gamma_A*A
       
-      dH    <- alpha*I_s*(1-Hospital_capacities_breached) - gamma_H*H
+      dH    <- q_ins*alpha*I_s*(1-Hospital_capacities_breached) - gamma_H*H
       
-      dHbar <- alpha*I_s*Hospital_capacities_breached - gamma_Hbar*Hbar
+      dHbar <- q_ins*alpha*I_s*Hospital_capacities_breached - gamma_Hbar*Hbar
       
-      dD    <- gamma_H*m_H*H + gamma_Hbar*m_Hbar*Hbar
+      dD    <- gamma_H*m_H*H + gamma_Hbar*m_Hbar*Hbar + (1 - q_ins)*gamma_Is*m_Is*I_s
       
-      dR    <- gamma_H*(1 - m_H)*H + gamma_Hbar*(1 - m_Hbar)*Hbar + gamma_Im*I_m + gamma_A*A
+      dR    <- gamma_H*(1 - m_H)*H + gamma_Hbar*(1 - m_Hbar)*Hbar + (1-q_ins)*gamma_Is*(1 - m_Is)*I_s + gamma_Im*I_m + gamma_A*A
 
       return(list(c(dS,dE,dI_s,dI_m,dA,dH,dHbar,dD,dR)))
     })
@@ -144,7 +148,7 @@ run_sir_model = function(state0, params, region_adj, populations, tmax, interven
   out$R.Connecticut    = rowSums(out[,paste0("R.", region_names, sep="")])
 
   out$dailyI.Connecticut <- params$delta * out$E.Connecticut
-  out$dailyH.Connecticut <- params$alpha * out$I_s.Connecticut
+  out$dailyH.Connecticut <- params$q_ins * params$alpha * out$I_s.Connecticut
   out$cum_modI.Connecticut <- cumsum(out$dailyI.Connecticut)
   out$cum_modH.Connecticut <- cumsum(out$dailyH.Connecticut)
 
@@ -186,7 +190,7 @@ run_sir_model = function(state0, params, region_adj, populations, tmax, interven
     
   #  Add cumulative for counties
   for(i in region_names){
-    dailyH <- params$alpha * out[[paste0("I_s.", i)]]
+    dailyH <- params$q_ins * params$alpha * out[[paste0("I_s.", i)]]
     out[[paste0("cum_modH.", i)]] <- cumsum(dailyH)
   }
 
