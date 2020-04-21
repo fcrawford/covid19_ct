@@ -148,7 +148,7 @@ run_sir_model = function(state0, params, region_adj, populations, tmax, interven
   out$R.Connecticut    = rowSums(out[,paste0("R.", region_names, sep="")])
 
   out$dailyI.Connecticut <- params$delta * out$E.Connecticut
-  out$dailyH.Connecticut <- params$alpha * out$I_s.Connecticut
+  out$dailyH.Connecticut <- params$q_ins * params$alpha * out$I_s.Connecticut
   out$cum_modI.Connecticut <- cumsum(out$dailyI.Connecticut)
   out$cum_modH.Connecticut <- cumsum(out$dailyH.Connecticut)
 
@@ -190,7 +190,7 @@ run_sir_model = function(state0, params, region_adj, populations, tmax, interven
     
   #  Add cumulative for counties
   for(i in region_names){
-    dailyH <- params$alpha * out[[paste0("I_s.", i)]]
+    dailyH <- params$q_ins * params$alpha * out[[paste0("I_s.", i)]]
     out[[paste0("cum_modH.", i)]] <- cumsum(dailyH)
   }
 
