@@ -9,17 +9,19 @@ library(ggplot2)
 library(reshape2)
 
 # data_stream <- "4-17-20"
-data_stream <- "4-21-20"
+data_stream <- "4-22-20"
 raw <- fread(paste0("../data/COVID Data Extract (", data_stream, ").csv"))
 dat <- transpose(raw[,-1])
 colnames(dat) <- as.character(as.matrix(raw)[, 1])
 dat <- cbind(Date = as.Date(gsub("X", "",  colnames(raw)[-1]),  format = "%m/%d/%y"), dat)
 message(which(diff(dat$Date) < 0))
+
 # fix bug in spreadsheet received
-if(data_stream == "4-21-20"){
+if(data_stream %in% c("4-21-20")){
+	#if the message above is 40
 	print(dat$Date[31:51])
 	dat$Date[40:47] <- dat$Date[40]
-	matrix(c(0, dat$Date), ncol=8, byrow=TRUE)
+	matrix(c(0, dat$Date-18338), ncol=8, byrow=TRUE)
 }
 
 dat.long <-  melt(dat, id.vars = c("Date", "County"))
