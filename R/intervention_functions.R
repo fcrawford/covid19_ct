@@ -50,10 +50,32 @@ get_testing_on_fun = function(dayseq, testing_on_date) {
   return(approxfun(1:(tmax+1), testing_on, method="linear", rule=2))
 }
 
+################################
+# distancing After lockdown
+
+get_distancing_on_fun = function(dayseq, distancing_on_date) {
+  tmax = as.numeric(max(dayseq)-day0)
+  distancing_on = sapply(dayseq,function(dy) {
+    if(dy<distancing_on_date) {0}
+    else {1}
+  })
+  return(approxfun(1:(tmax+1), distancing_on, method="linear", rule=2))
+}
+
+
 
 
 
 ###########################
+
+get_R0 = function(params) {
+
+  R0 = params$beta_pre * (params$q_A * params$k_A / params$gamma_A + params$q_Im / params$gamma_Im + (1-params$q_Im - params$q_A)/params$alpha)
+
+  return(R0)
+}
+
+######################### 
 
 
 release_age_thresh <- function(threshold_age, lockdown_effect){
@@ -82,19 +104,6 @@ release_age_thresh <- function(threshold_age, lockdown_effect){
 
   return(list(new_lockdown_effect=new_lockdown_effect, new_avg_severity_prop=new_avg_severity_prop))
 
-
-  #prop_adj <- severity_by_age$pr_age * 0.3
-
-  #for (i in 3: nrow(severity_by_age)){
-    #if(severity_by_age$max_age[i] < threshold_age) {
-      #prop_adj[i] <- severity_by_age$pr_age[i] * 0.8
-    #}  
-  #}
-  #
-  #prop_adj <- prop_adj / sum(prop_adj)
-  #
-  #q_Is_new <- sum(prop_adj * severity_by_age$pr_severe)
-  #return(q_Is_new)
 }
 
 
