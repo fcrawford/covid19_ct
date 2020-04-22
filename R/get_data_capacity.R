@@ -14,10 +14,17 @@ raw <- fread(paste0("../data/COVID Data Extract (", data_stream, ").csv"))
 dat <- transpose(raw[,-1])
 colnames(dat) <- as.character(as.matrix(raw)[, 1])
 dat <- cbind(Date = as.Date(gsub("X", "",  colnames(raw)[-1]),  format = "%m/%d/%y"), dat)
+message(which(diff(dat$Date) < 0))
+# fix bug in spreadsheet received
+if(data_stream == "4-21-20"){
+	print(dat$Date[31:51])
+	dat$Date[40:47] <- dat$Date[40]
+	matrix(c(0, dat$Date), ncol=8, byrow=TRUE)
+}
+
 dat.long <-  melt(dat, id.vars = c("Date", "County"))
 dat.long$value <- as.numeric(dat.long$value)
 head(dat.long)
-
 
 
 ##
@@ -50,7 +57,7 @@ dat.long$value[is.na(dat.long$value)] <- 0
 # 						 dat.capacity[, subset1[3]] - dat.capacity[, subset1[4]] - 
 # 						 dat.capacity[, subset1[5]] + dat.capacity[, subset1[6]]   
 
-dat.capacity <- subset(dat.long, variable %in% subset1)
+dat.capacity <- subset(dat.long, variable %in% "Total available beds")
 dat.capacity$Capacity <- dat.capacity$value
 write.csv(dat.capacity[, c("Date", "County", "Capacity")], 
 		  "../data/ct_hosp_cap.csv", row.names=FALSE, quote=FALSE)
