@@ -32,12 +32,8 @@ dat_ct_county$date <- ymd(dat_ct_county$date)
 dat2 <- subset(dat_ct_county, select=c(date, cases, deaths))
 dat_ct_state <- aggregate(. ~ date, data=dat2, FUN=function(x){sum(x)})
 dat_ct_state <- dat_ct_state[order(dat_ct_state$date),]
+dat_ct_state$time <- round(as.numeric(difftime(dat_ct_state$date, day0, units="days")),0) # add time variable that indexes time 
 
-first.data.time <- round(as.numeric(difftime(dat_ct_state$date[1], day0, units="days")),0)
-
-dat_ct_state$time <- c(first.data.time:(nrow(dat_ct_state)+first.data.time-1)) # add time variable that indexes time 
-
-#time.date <- subset(nyt_ct, select=c(date,time)) # for future matching use
 # calculate daily new reported cases and deaths 
 #nyt_ct$new_cases <- nyt_ct$new_deaths <- 0
 #nyt_ct$new_cases[1] <- nyt_ct$cases[1] 
@@ -49,10 +45,9 @@ dat_ct_state$time <- c(first.data.time:(nrow(dat_ct_state)+first.data.time-1)) #
 ## add state-level hospitalizations (current counts): this csv file needs to be updated manually ##
 ct.hosp <- read.csv('../data/ct_hosp.csv')
 ct.hosp$date <- mdy(ct.hosp$date)
-first.hosp.data.time <- round(as.numeric(difftime(ct.hosp$date[1], day0, units="days")),0)
+ct.hosp$time <- round(as.numeric(difftime(ct.hosp$date, day0, units="days")),0)
 
-ct.hosp$time <- c(first.hosp.data.time:(nrow(ct.hosp)+first.hosp.data.time-1)) 
-
+# merge cases and death counts from NYT with hospitalization data
 dat_ct_state <- merge(dat_ct_state, ct.hosp, by='time', all=T)
 dat_ct_state$date.y <- NULL
 names(dat_ct_state)[names(dat_ct_state) == "date.x"] <- "date"
