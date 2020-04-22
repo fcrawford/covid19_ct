@@ -122,6 +122,7 @@ get_sir_results = function(daymax=ymd("2020-09-01"),
                            lockdown_end_date, 
                            schools_reopen_date,
                            testing_on_date,
+                           distancing_on_date,
                            nsim=1,
                            params = NULL) {
   if(is.null(params)){
@@ -134,8 +135,9 @@ get_sir_results = function(daymax=ymd("2020-09-01"),
   lockfun = get_state_lockdown_fun(dayseq, offdate=lockdown_end_date)
   schoolsfun = get_school_in_session_fun(dayseq, schools_reopen_date=schools_reopen_date)
   testingfun = get_testing_on_fun(dayseq, testing_on_date=testing_on_date)
+  distancingfun = get_distancing_on_fun(dayseq, distancing_on_date=distancing_on_date)
 
-  interventions = list(lockdown=lockfun, schools=schoolsfun, testing=testingfun) 
+  interventions = list(lockdown=lockfun, schools=schoolsfun, testing=testingfun, distancing=distancingfun) 
 
   sir_results = lapply(1:nsim, function(i){
     res = run_sir_model(state0=state0, 

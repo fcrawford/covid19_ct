@@ -37,7 +37,12 @@ run_sir_model = function(state0, params, region_adj, populations, tmax, interven
   # here we define the intervention function: 
   # note that this function should be <= 1
   # and the effect of different interventions is additive, so coefficients must sum to <= 1.  
-  contact_intervention_fun = function(t_tmp) { 1 - (params$school_closure_effect*(1-interventions$schools(t_tmp)) + params$lockdown_effect*interventions$lockdown(t_tmp))}
+  contact_intervention_fun = function(t_tmp) { 
+    1 - (params$school_closure_effect*(1-interventions$schools(t_tmp)) + 
+         params$lockdown_effect*interventions$lockdown(t_tmp) + 
+         params$distancing_effect*interventions$distancing(t_tmp)
+         )
+    }
 
   
 
