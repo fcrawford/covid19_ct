@@ -28,11 +28,11 @@ upper_beta_pre: 1.5
 
 sd_delta: 0.025
 lower_delta: 0.2
-upper_delta: 0.33
+upper_delta: 0.3
 
 sd_gamma_H: 0.0025
 lower_gamma_H: 0.1
-upper_gamma_H: 0.125
+upper_gamma_H: 0.12
 
 sd_m_H: 0.015
 lower_m_H: 0.11
@@ -43,15 +43,15 @@ lower_m_Hbar_mult: 1.25
 upper_m_Hbar_mult: 1.75
 
 sd_lockdown_effect: 0.025
-lower_lockdown_effect: 0.67
-upper_lockdown_effect: 0.77
+lower_lockdown_effect: 0.6
+upper_lockdown_effect: 0.7
 
 # model timeframe
 #timeframe: 183
 
 # reporting lag (days): not user-defined
-H_lag: 7 
-D_lag: 2
+H_lag: 5 
+D_lag: 0
 
 # effectiveness of stay-at-home intervention: user-defined
 #effect_intvx: 0.5 # NOT USED
@@ -60,8 +60,8 @@ D_lag: 2
 # e.g. an effect of 0.1 reduces the intervention from 1 (full effect) to 0.9. 
 
 # intervention effects on contact: 
-school_closure_effect: 0.1
-lockdown_effect: 0.72
+school_closure_effect: 0.16
+lockdown_effect: 0.65
 distancing_effect: 0.3
 
 # intervention effect on isolation/recovery for A and I_m
