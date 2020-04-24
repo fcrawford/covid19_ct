@@ -36,6 +36,7 @@ res1 = get_sir_results(daymax=mydaymax,
                       lockdown_end_date=mylockdown_end_date1,
                       schools_reopen_date=myschools_reopen_date,
                       testing_on_date=mytesting_on_date,
+                      distancing_on_date=mylockdown_end_date1,
                       nsim=nsim,
                       params=params)
 
@@ -45,6 +46,7 @@ res2 = get_sir_results(daymax=mydaymax,
                       lockdown_end_date=mylockdown_end_date2,
                       schools_reopen_date=myschools_reopen_date,
                       testing_on_date=mytesting_on_date,
+                      distancing_on_date=mylockdown_end_date2,
                       nsim=nsim,
                       params=params)
 
