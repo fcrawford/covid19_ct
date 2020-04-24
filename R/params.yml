@@ -15,53 +15,21 @@ k_A: 0.375
 k_n: 0.015
 m_Hbar_mult: 1.5
 
-# parameters to accomodate severe uninsured cases
+# parameters to accomodate severe uninsured cases (nursing homes)
 q_ins: 0.6
 gamma_Is: 0.05555556  # 1/18
 m_Is_mult: 1.75
 
+# coefficients to adjust infectiousness of severe cases to have more realistic time to death
 k_Is_ins: 0.5
 k_Is_noins: 0.5
-
-# standard deviations, lower and upper bounds 
-# of model parameters for uncertainty in projections
-sd_beta_pre: 0.1
-lower_beta_pre: 1
-upper_beta_pre: 1.5
-
-sd_delta: 0.025
-lower_delta: 0.2
-upper_delta: 0.3
-
-sd_gamma_H: 0.0025
-lower_gamma_H: 0.1
-upper_gamma_H: 0.12
-
-sd_m_H: 0.015
-lower_m_H: 0.11
-upper_m_H: 0.17
-
-sd_m_Hbar_mult: 0.1
-lower_m_Hbar_mult: 1.25
-upper_m_Hbar_mult: 1.75
-
-sd_lockdown_effect: 0.02
-lower_lockdown_effect: 0.64
-upper_lockdown_effect: 0.7
-
-# model timeframe
-#timeframe: 183
 
 # reporting lag (days): not user-defined
 H_lag: 4 
 D_lag: 4
 
-# effectiveness of stay-at-home intervention: user-defined
-#effect_intvx: 0.5 # NOT USED
-
 # the following effects are ADDITIVE and must sum to a number <= 1
 # e.g. an effect of 0.1 reduces the intervention from 1 (full effect) to 0.9. 
-
 # intervention effects on contact: 
 school_closure_effect: 0.13
 lockdown_effect: 0.67
@@ -72,9 +40,48 @@ distancing_effect: 0.3
 testing_effect_Im: 0.3
 testing_effect_A: 0.2
 
+
+# standard deviations, lower and upper bounds 
+# of model parameters for uncertainty in projections
+sd_beta_pre: 0.05
+lower_beta_pre: 1.15
+upper_beta_pre: 1.35
+
+sd_q_A: 0.015
+lower_q_A: 0.33
+upper_q_A: 0.39
+
+sd_gamma_H: 0.0025
+lower_gamma_H: 0.1
+upper_gamma_H: 0.12
+
+sd_m_H: 0.015
+lower_m_H: 0.15
+upper_m_H: 0.21
+
+sd_m_Hbar_mult: 0.1
+lower_m_Hbar_mult: 1.25
+upper_m_Hbar_mult: 1.75
+
+sd_lockdown_effect: 0.02
+lower_lockdown_effect: 0.63
+upper_lockdown_effect: 0.71
+
+
+sd_delta: 0.025
+lower_delta: 0.2
+upper_delta: 0.3
+
+
+### these parameters are likely not used 
+# model timeframe
+#timeframe: 183
+
+# effectiveness of stay-at-home intervention: user-defined
+#effect_intvx: 0.5 # NOT USED
+
 # hospital beds occupancy: user-defined
 bed_occup: 0.65 #default
-
 
 # increasing hospital capacity
 # capacity ramping time interval (days), not user-defined
