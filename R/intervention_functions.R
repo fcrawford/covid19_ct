@@ -71,8 +71,8 @@ get_distancing_on_fun = function(dayseq, distancing_on_date) {
 get_R0 = function(params) {
   R0 = params$beta_pre * (  params$q_A * params$k_A / params$gamma_A 
                           + params$q_Im / params$gamma_Im 
-                          + (1 - params$q_Im - params$q_A) * params$q_ins / params$alpha  
-                          + (1 - params$q_Im - params$q_A) * (1 - params$q_ins) / params$gamma_Is ) 
+                          + (1 - params$q_Im - params$q_A) * params$q_ins * params$k_Is_ins / params$alpha  
+                          + (1 - params$q_Im - params$q_A) * (1 - params$q_ins) * params$k_Is_noins / params$gamma_Is ) 
   return(R0)
 }
 

@@ -3,22 +3,25 @@
 beta_pre: 1.25
 q_Im: 0.52
 q_A: 0.36
-delta: 0.25
-alpha: 0.2
-gamma_H: 0.1111111111
-gamma_Hbar: 0.1111111111
-gamma_Im: 0.25
-gamma_A: 0.1428571
+delta: 0.25 #1/4
+alpha: 0.1 #1/10
+gamma_H: 0.1111111111 # 1/9
+gamma_Hbar: 0.1111111111 #1/9
+gamma_Im: 0.25 #1/4
+gamma_A: 0.1428571 #1/7
 m_H: 0.14
 slope: 500
 k_A: 0.375
-k_n: 0.02
+k_n: 0.015
 m_Hbar_mult: 1.5
 
 # parameters to accomodate severe uninsured cases
-q_ins: 0.7
-gamma_Is: 0.08333333
-m_Is_mult: 2.5
+q_ins: 0.65
+gamma_Is: 0.05555556 #1/18
+m_Is_mult: 2
+
+k_Is_ins: 0.5
+k_Is_noins: 0.5
 
 # standard deviations, lower and upper bounds 
 # of model parameters for uncertainty in projections
@@ -42,16 +45,16 @@ sd_m_Hbar_mult: 0.1
 lower_m_Hbar_mult: 1.25
 upper_m_Hbar_mult: 1.75
 
-sd_lockdown_effect: 0.025
-lower_lockdown_effect: 0.6
-upper_lockdown_effect: 0.7
+sd_lockdown_effect: 0.02
+lower_lockdown_effect: 0.65
+upper_lockdown_effect: 0.71
 
 # model timeframe
 #timeframe: 183
 
 # reporting lag (days): not user-defined
 H_lag: 5 
-D_lag: 0
+D_lag: 1
 
 # effectiveness of stay-at-home intervention: user-defined
 #effect_intvx: 0.5 # NOT USED
@@ -60,8 +63,8 @@ D_lag: 0
 # e.g. an effect of 0.1 reduces the intervention from 1 (full effect) to 0.9. 
 
 # intervention effects on contact: 
-school_closure_effect: 0.16
-lockdown_effect: 0.65
+school_closure_effect: 0.13
+lockdown_effect: 0.68
 distancing_effect: 0.3
 
 # intervention effect on isolation/recovery for A and I_m

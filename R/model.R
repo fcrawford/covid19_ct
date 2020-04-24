@@ -100,13 +100,15 @@ run_sir_model = function(state0, params, region_adj, populations, tmax, interven
       # m_H        % hospitalized severe that die
       # m_Hbar     % unhospitalized severe that die
       # m_Is       % uninsured severe that die
+      # k_Is_ins   relative transmission from severe insured before they get admitted to a hospital: added to delay death without increasing FOI
+      # k_Is_noins relative transmission from severe uninsured: added to delay death without increasing FOI
       
       #################
   
       
-      dS    <-            -S*( beta %*% ( I_s + I_m + k_A*A)/populations )    # populations normalized contact rates
+      dS    <-            -S*( beta %*% ( (k_Is_ins * q_ins + k_Is_noins * (1 - q_ins)) * I_s + I_m + k_A*A)/populations )    # populations normalized contact rates
       
-      dE    <-  -delta*E + S*( beta %*% ( I_s + I_m + k_A*A)/populations )
+      dE    <-  -delta*E + S*( beta %*% ( (k_Is_ins * q_ins + k_Is_noins * (1 - q_ins)) * I_s + I_m + k_A*A)/populations )
       
       dI_s  <- (1 - q_Im - q_A)*delta*E - q_ins*alpha*I_s - (1 - q_ins)*gamma_Is*I_s
       
