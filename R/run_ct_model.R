@@ -201,6 +201,7 @@ plot_ct_region_list = function(data=NULL,
   # form a sentence
   unit <- "reported deaths"
   if(which.plot=="rHsum") unit <- "reported hospitalization required"
+  if(which.plot=="dailyI") unit <- "reported daily Infections"
 
   out.print=NULL
 
@@ -243,18 +244,21 @@ plot_ct_region = function(data=NULL,
   lab.table <- data.frame(compartment=c("D","rD",
                                         "H","rH",
                                         "Hbar", "rHbar", "rHsum",
-                                        "cum_modH","S","E","I_s","I_m","A"),
+                                        "cum_modH","S","E","I_s","I_m","A", 
+                                        "dailyI"),
                           color=c('#e41a1c','#e41a1c','#377eb8','#377eb8', 
                                   '#4daf4a','#4daf4a','#377eb8', #'#cab2d6',
                                   '#984ea3','#ff7f00','#ffff33',
-                                  '#a65628','#f781bf','#999999'),
+                                  '#a65628','#f781bf','#999999', 
+                                  '#a65628'),
                           labels=c("Cumulative deaths","Cumulative deaths",
                                     "Hospitalizations","Hospitalizations",
                                     "Hospital overflow","Hospital overflow","Required hospitalizations",
                                     "Cumulative hospitalizations",
                                     "Susceptible population","Exposed population",
                                     "Severe infections","Mild infections",
-                                    "Asymptomatic infections"))
+                                    "Asymptomatic infections", 
+                                    "Daily infections"))
   
  #dayseq = seq(day0, daymax, by="day")
   start_day = day0
@@ -371,15 +375,16 @@ plot_ct_region = function(data=NULL,
                        ".",
                        sep="")    
   }
-  if("rHsum" %in% which.plot){
+  if("rHsum" %in% which.plot || "dailyI" %in% which.plot){
       sir_result_region_sub <- filter(sir_result_region, variable==paste0(which.plot[1],".",region_name))
       count <- max(sir_result_region_sub$mean, na.rm=TRUE)
       peak <- which.max(sir_result_region_sub$mean)
       count.min <- sir_result_region_sub$lower[peak]
       count.max <- sir_result_region_sub$upper[peak]
+      name <- ifelse(which.plot ==  "rHsum",  "required hospitalizations", "daily infections")
       region_summary = paste(region_summary, "On ", format(end_day, "%B %d"),
                        " projections show a peak of ", format(count, digits=2, big.mark=","),
-                       " required hospitalizations reported in ", region_name,
+                       " ", name,  " reported in ", region_name,
                        " with 90% uncertainty interval between ", format(count.min, digits=2, big.mark=","), 
                        " and ", format(count.max, digits=2, big.mark=","),
                        ". The dashed line shows historical and projected hospital capacity. ",
