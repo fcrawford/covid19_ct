@@ -19,6 +19,7 @@ geometry: margin=0.75in
 #source("run_ct_model.R")
 library(yaml)
 params_init = yaml.load_file("params.yml") 
+source("intervention_functions.R")
 ```
 
 
@@ -26,33 +27,44 @@ params_init = yaml.load_file("params.yml")
 
 ## Case type distribution
 
-Probability of severe disease that requires hospitalization and may lead to death: `r 1 - params_init$q_Im - params_init$q_A`. 
+Probability of severe disease that requires hospitalization and may lead to death: \textbf{`r 1 - params_init$q_Im - params_init$q_A`}. 
 
-Probability of mild disease that does not require hospitalization and will lead to recovery: `r params_init$q_Im`. 
+Proportion of severe infections, which will lead to hospitalization unless there is a hospital overflow: \textbf{`r params_init$q_ins`}. The rest \textbf{`r (1 - params_init$q_ins)`} of severe infections are people in nursing homes, people, who do not have access to hospitalization, or people hospitalized in other states.
 
-Probability of asymptomatic infection: `r params_init$q_A`. 
+Proportion of all infections (including asymptomatic) that end up hospitalized: \textbf{`r (1 - params_init$q_Im - params_init$q_A) * params_init$q_ins`}.
 
-## Probability of death
+Probability of mild disease that does not require hospitalization and will lead to recovery: \textbf{`r params_init$q_Im`}. 
 
-Probability of death given hospitalization: `r params_init$m_H`
+Probability of asymptomatic infection: \textbf{`r params_init$q_A`}. 
 
-## Reproductive numbers
 
-```{r, echo=FALSE, include=FALSE}
-R0 = params_init$beta_pre * (params_init$q_A * params_init$k_A * (1/params_init$gamma_A) + params_init$q_Im * (1/params_init$gamma_Im) 
-                                 + (1 - params_init$q_Im - params_init$q_A) * params_init$q_ins * (1/params_init$alpha) + 
-                                   (1 - params_init$q_Im - params_init$q_A) * (1 - params_init$q_ins) * (1/params_init$gamma_Is) ) 
-```
-"Crude" basic reproductive number: `r round(R0, 1)`.
+## CFR: probability of death
 
-This value of basic reproductive number is not adjusted for infections "imported" fron NYC at early stages of the epidemic. Assuming that imported infections, in particular in Fairfield, accounted for one third of all infections (equivalently number of imported infections is half of locally acquired), the "adjusted" basic reproductive number equals  `r round(R0*(1/1.5), 1)`
+CFR among hospitalized: \textbf{`r params_init$m_H`}.
 
-Reproductive number after school closure: `r round(R0 * (1 - params_init$school_closure_effect), 1)`
+CFR among severe cases in nursing homes or among people with no access to hospitalization: \textbf{`r params_init$m_H * params_init$m_Is_mult`}.
 
-Reproductive number after school closure and lockdown: `r round(R0 * (1 - params_init$school_closure_effect - params_init$lockdown_effect), 1)`
+CFR among all severe cases: \textbf{`r round( with(params_init, q_ins * m_H + (1 - q_ins) * m_H * m_Is_mult ), 2)`}.
 
-### Version: 
-Code version reference: `r system("git rev-parse HEAD", intern=TRUE)`
+CFR among symptomatic infections: \textbf{ `r round( with (params_init, (1 - q_A - q_Im) * (q_ins * m_H + (1 - q_ins) * m_H * m_Is_mult) / (1 - q_A) ), 3) `}.
+
+CFR among all infections (aka IFR): \textbf{`r round( with (params_init, (1 - q_A - q_Im) * (q_ins * m_H + (1 - q_ins) * m_H * m_Is_mult) ), 3) `}. 
+
+
+## Reproductive numbers 
+
+"Crude" basic reproductive number: \textbf{`r round(get_R0(params_init), 1)`}.
+
+This value of basic reproductive number is not adjusted for infections "imported" fron NYC at early stages of the epidemic. Assuming that imported infections, in particular in Fairfield, accounted for one third of all infections (equivalently number of imported infections is half of locally acquired), the "adjusted" basic reproductive number equals  \textbf{`r round(get_R0(params_init)/1.5, 1)`}.
+
+Reproductive number after school closure (no testing effect): \textbf{`r round(get_R0(params_init) * (1 - params_init$school_closure_effect), 1)`}.
+
+Reproductive number after school closure and lockdown (no testing effect): \textbf{`r round(get_R0(params_init) * (1 - params_init$school_closure_effect - params_init$lockdown_effect), 2)`}.
+
+Reproductive number after lockdown lift (no testing effect): \textbf{`r round(get_R0(params_init) * (1 - params_init$school_closure_effect - params_init$distancing_effect), 2)`}.
+
+ <!-- ### Version:  -->
+ <!-- Code version reference: `r system("git rev-parse HEAD", intern=TRUE)` -->
 
 
 
