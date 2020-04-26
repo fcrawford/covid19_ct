@@ -6,7 +6,7 @@ mydaymax              = ymd("2021-04-01")
 myschools_reopen_date = ymd("3000-01-01") # NEVER: this is replaced by terms in the distancing stepdown
 
 
-nsim = 100
+nsim = 500
 
 ####################################
 
@@ -38,15 +38,19 @@ res1 = get_sir_results(daymax=mydaymax,
 w = 900
 h = 300
 
-par(mfrow=c(3,1), mar=c(4,4,1,1))
+par(mfrow=c(4,1), mar=c(4,4,1,1))
 
-ymax = 1e5
+
+ymax = 5e4
 connecticut_summary_deaths1 = plot_ct_region(data=res1$summary, 
                                              end_day=mydaymax, 
                                              title=str,
                                              region_name="Connecticut", 
-                                             which.plot="rD",
+                                             which.plot="dailyI",
                                              ymax=ymax)
+
+
+
 
 
 ymax = 3e4
@@ -55,6 +59,13 @@ connecticut_summary_hosp1 = plot_ct_region(data=res1$summary,
                                              title=str,
                                              region_name="Connecticut", 
                                              which.plot="rHsum",
+                                             ymax=ymax)
+ymax = 1e5
+connecticut_summary_deaths1 = plot_ct_region(data=res1$summary, 
+                                             end_day=mydaymax, 
+                                             title=str,
+                                             region_name="Connecticut", 
+                                             which.plot="rD",
                                              ymax=ymax)
 
 
