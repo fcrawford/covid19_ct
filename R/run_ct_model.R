@@ -306,7 +306,7 @@ plot_ct_region = function(data=NULL,
   if(is.null(xlab)) xlab <- ""
   if(is.null(ylab)) ylab <- "People"
   plot(0, type="n", xlab=xlab, ylab=ylab, main=title, col="black", 
-       ylim=c(0,1.05*ymax), xlim=c(0,1.15*tmax.plot), axes=FALSE)
+       ylim=c(0,1.05*ymax), xlim=c(0,1.05*tmax.plot), axes=FALSE)
   axis(1,at=lab_where, lab=lab_show)
   axis(2)
 
@@ -485,7 +485,7 @@ plot_interventions = function(sir_results, daymax, stayhome_compares=FALSE, titl
   if(stayhome_compares) nn <- 3 + length(sir_results_full)
   #layout(matrix(c(1:nn),nrow=,nn), heights=rep(2, nn))
 
-  plot(sir_results[[1]]$intervention_pattern, ylim=c(0,1), type="n", ylab="", xlab="", main="Overall contact intervention", axes=FALSE)
+  plot(sir_results[[1]]$intervention_pattern, ylim=c(0,1), xlim=c(0,1.05*tmax), type="n", ylab="", xlab="", main="Overall contact intervention", axes=FALSE)
   axis(1, at=daymonthseq, lab=monthseq_lab)
   axis(2)
   polygon(c(1,1:(tmax+1), tmax+1), c(0,sir_results[[1]]$intervention_pattern, 0), col="orange", border=NA)
