@@ -124,6 +124,7 @@ get_sir_results = function(daymax=ymd("2020-09-01"),
                            schools_reopen_date,
                            testing_on_date,
                            distancing_on_date,
+                           distancing_stepdown_dates,
                            nsim=1,
                            params = NULL) {
   if(is.null(params)){
@@ -136,7 +137,7 @@ get_sir_results = function(daymax=ymd("2020-09-01"),
   lockfun = get_state_lockdown_fun(dayseq, offdate=lockdown_end_date)
   schoolsfun = get_school_in_session_fun(dayseq, schools_reopen_date=schools_reopen_date)
   testingfun = get_testing_on_fun(dayseq, testing_on_date=testing_on_date)
-  distancingfun = get_distancing_on_fun(dayseq, distancing_on_date=distancing_on_date)
+  distancingfun = get_distancing_stepdown_fun(dayseq, distancing_on_date=distancing_on_date, distancing_stepdown_dates=distancing_stepdown_dates)
 
   interventions = list(lockdown=lockfun, schools=schoolsfun, testing=testingfun, distancing=distancingfun) 
 
@@ -482,21 +483,36 @@ plot_interventions = function(sir_results, daymax, stayhome_compares=FALSE, titl
   par(mar=c(3,3,3,0), bty="n")
   nn <- 4
   if(stayhome_compares) nn <- 3 + length(sir_results_full)
-  layout(matrix(c(1:nn),nrow=,nn), heights=rep(2, nn))
+  #layout(matrix(c(1:nn),nrow=,nn), heights=rep(2, nn))
 
-  plot(sir_results[[1]]$intervention_schools, ylim=c(0,1), type="n", ylab="", xlab="", main="Schools in session", axes=FALSE)
+  plot(sir_results[[1]]$intervention_pattern, ylim=c(0,1), type="n", ylab="", xlab="", main="Overall contact intervention", axes=FALSE)
   axis(1, at=daymonthseq, lab=monthseq_lab)
   axis(2)
-  polygon(c(1,1:(tmax+1), tmax+1), c(0,sir_results[[1]]$intervention_schools, 0), col="orange", border=NA)
+  polygon(c(1,1:(tmax+1), tmax+1), c(0,sir_results[[1]]$intervention_pattern, 0), col="orange", border=NA)
   abline(v=Sys.Date()-day0, col="gray", lty=2)
+
+  #if(!stayhome_compares){
+      #plot(sir_results[[1]]$intervention_lockdown, ylim=c(0,1), type="n", ylab="", xlab="", main="Stay-at-home order in place", axes=FALSE)
+      #axis(1, at=daymonthseq, lab=monthseq_lab)
+      #axis(2)
+      #polygon(c(1,1:(tmax+1), tmax+1), c(0,sir_results[[1]]$intervention_lockdown, 0), col="orange", border=NA)
+      #abline(v=Sys.Date()-day0, col="gray", lty=2)
+  #}
+
+
+  #plot(sir_results[[1]]$intervention_schools, ylim=c(0,1), type="n", ylab="", xlab="", main="Schools in session", axes=FALSE)
+  #axis(1, at=daymonthseq, lab=monthseq_lab)
+  #axis(2)
+  #polygon(c(1,1:(tmax+1), tmax+1), c(0,sir_results[[1]]$intervention_schools, 0), col="orange", border=NA)
+  #abline(v=Sys.Date()-day0, col="gray", lty=2)
   
-  if(!stayhome_compares){
-      plot(sir_results[[1]]$intervention_lockdown, ylim=c(0,1), type="n", ylab="", xlab="", main="Stay-at-home order in place", axes=FALSE)
-      axis(1, at=daymonthseq, lab=monthseq_lab)
-      axis(2)
-      polygon(c(1,1:(tmax+1), tmax+1), c(0,sir_results[[1]]$intervention_lockdown, 0), col="orange", border=NA)
-      abline(v=Sys.Date()-day0, col="gray", lty=2)
-  }
+  #if(!stayhome_compares){
+      #plot(sir_results[[1]]$intervention_lockdown, ylim=c(0,1), type="n", ylab="", xlab="", main="Stay-at-home order in place", axes=FALSE)
+      #axis(1, at=daymonthseq, lab=monthseq_lab)
+      #axis(2)
+      #polygon(c(1,1:(tmax+1), tmax+1), c(0,sir_results[[1]]$intervention_lockdown, 0), col="orange", border=NA)
+      #abline(v=Sys.Date()-day0, col="gray", lty=2)
+  #}
 
   #plot(sir_results[[1]]$intervention_pattern, ylim=c(0,1),  type="n", ylab="", xlab="", main="Relative reduction in transmission", axes=FALSE)
   #axis(1, at=daymonthseq, lab=monthseq_lab)
@@ -504,21 +520,21 @@ plot_interventions = function(sir_results, daymax, stayhome_compares=FALSE, titl
   #polygon(c(1,1:(tmax+1), tmax+1), c(0,sir_results[[1]]$intervention_pattern, 0), col="orange", border=NA)
   #abline(v=Sys.Date()-day0, col="gray", lty=2)
 
-  plot(sir_results[[1]]$intervention_testing, ylim=c(0,1), type="n", ylab="", xlab="", main="Expanded testing", axes=FALSE)
-  axis(1, at=daymonthseq, lab=monthseq_lab)
-  axis(2)
-  polygon(c(1,1:(tmax+1), tmax+1), c(0,sir_results[[1]]$intervention_testing, 0), col="orange", border=NA)
-  abline(v=Sys.Date()-day0, col="gray", lty=2)
+  #plot(sir_results[[1]]$intervention_testing, ylim=c(0,1), type="n", ylab="", xlab="", main="Expanded testing", axes=FALSE)
+  #axis(1, at=daymonthseq, lab=monthseq_lab)
+  #axis(2)
+  #polygon(c(1,1:(tmax+1), tmax+1), c(0,sir_results[[1]]$intervention_testing, 0), col="orange", border=NA)
+  #abline(v=Sys.Date()-day0, col="gray", lty=2)
 
-  if(stayhome_compares){
-      for(i in 1:length(sir_results_full)){
-        plot(sir_results_full[[i]][[1]]$intervention_lockdown, ylim=c(0,1), type="n", ylab="", xlab="", main=titles[[i]], axes=FALSE)
-        axis(1, at=daymonthseq, lab=monthseq_lab)
-        axis(2)
-        polygon(c(1,1:(tmax+1), tmax+1), c(0,sir_results_full[[i]][[1]]$intervention_lockdown, 0), col="orange", border=NA)
-        abline(v=Sys.Date()-day0, col="gray", lty=2)
-      }
-  }
+  #if(stayhome_compares){
+      #for(i in 1:length(sir_results_full)){
+        #plot(sir_results_full[[i]][[1]]$intervention_lockdown, ylim=c(0,1), type="n", ylab="", xlab="", main=titles[[i]], axes=FALSE)
+        #axis(1, at=daymonthseq, lab=monthseq_lab)
+        #axis(2)
+        #polygon(c(1,1:(tmax+1), tmax+1), c(0,sir_results_full[[i]][[1]]$intervention_lockdown, 0), col="orange", border=NA)
+        #abline(v=Sys.Date()-day0, col="gray", lty=2)
+      #}
+  #}
 
 }
 

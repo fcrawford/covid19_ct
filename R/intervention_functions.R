@@ -52,14 +52,19 @@ get_testing_on_fun = function(dayseq, testing_on_date) {
 
 ################################
 # distancing After lockdown
+# stepdown dates govern return to normal contact
+# e.g. get_distancing_on_fun(dayseq, ymd("2020-06-01"), ymd(c("2020-07-01", "2020-07-15", "2020-07-30")))
 
-get_distancing_on_fun = function(dayseq, distancing_on_date) {
+get_distancing_stepdown_fun = function(dayseq, distancing_on_date, distancing_stepdown_dates) {
   tmax = as.numeric(max(dayseq)-day0)
-  distancing_on = sapply(dayseq,function(dy) {
-    if(dy<distancing_on_date) {0}
-    else {1}
-  })
-  return(approxfun(1:(tmax+1), distancing_on, method="linear", rule=2))
+  if(any(distancing_stepdown_dates < distancing_on_date)) stop("distancing stepdown dates must be greater than on date")
+  distancing_stepdown_dates = sort(distancing_stepdown_dates) 
+  distancing_stepdown_days = as.numeric(distancing_stepdown_dates - day0)
+  distancing_on_day = as.numeric(distancing_on_date - day0)
+  distancing_stepdown_fun = approxfun(c(0,distancing_on_day, distancing_stepdown_days), c(0,seq(1,0,length.out=length(distancing_stepdown_days)+1)), method="constant", rule=2)
+
+
+  return(distancing_stepdown_fun)
 }
 
 

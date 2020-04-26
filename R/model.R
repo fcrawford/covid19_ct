@@ -47,7 +47,10 @@ run_sir_model = function(state0, params, region_adj, populations, tmax, interven
   
 
   # quick integrity check:
-  if(any(contact_intervention_fun(1:(tmax+1))<0)) stop("intervention_fun returns negative values. Check that intervention prameters sum to <= 1")
+  if(any(contact_intervention_fun(1:(tmax+1))<0)) {
+    plot(contact_intervention_fun(1:(tmax+1)))
+    stop("intervention_fun returns negative values. Check that intervention prameters sum to <= 1")
+  }
 
   # region-wise beta transmission matrix 
   beta_matrix  = ( (1-params$k_n)*diag(1,nregions) + params$k_n*(1/region_adj_num)*region_adj ) * beta_pre 
