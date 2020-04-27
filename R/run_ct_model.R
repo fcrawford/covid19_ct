@@ -260,7 +260,7 @@ plot_ct_region = function(data=NULL,
                                     "Susceptible population","Exposed population",
                                     "Severe infections","Mild infections",
                                     "Asymptomatic infections", 
-                                    "Daily infections"))
+                                    "Daily new infections"))
   
  #dayseq = seq(day0, daymax, by="day")
   start_day = day0
