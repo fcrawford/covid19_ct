@@ -9,7 +9,7 @@ library(ggplot2)
 library(reshape2)
 
 # data_stream <- "4-17-20"
-data_stream <- "4-26-20"
+data_stream <- "4-27-20"
 raw <- fread(paste0("../data/COVID Data Extract (", data_stream, ").csv"))
 dat <- transpose(raw[,-1])
 colnames(dat) <- as.character(as.matrix(raw)[, 1])
@@ -21,10 +21,10 @@ if(data_stream %in% c("4-21-20")){
 	#if the message above is 40
 	print(dat$Date[31:51])
 	dat$Date[40:47] <- dat$Date[40]
-	tab <- matrix(c(0, dat$Date-18338), ncol=8, byrow=TRUE)
-	apply(tab, 1, function(x){length(unique(x))})
-	apply(tab, 2, function(x){length(unique(x))})
 }
+tab <- matrix(c(0, dat$Date-18338), ncol=8, byrow=TRUE)
+apply(tab, 1, function(x){length(unique(x))})
+apply(tab, 2, function(x){length(unique(x))})
 
 dat.long <-  melt(dat, id.vars = c("Date", "County"))
 dat.long$value <- as.numeric(dat.long$value)
