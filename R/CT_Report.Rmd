@@ -22,7 +22,7 @@ geometry: margin=0.75in
 ```{r, echo=FALSE, include=FALSE}
 source("run_ct_model.R")
 mydaymax              = ymd("2020-09-01") 
-myschools_reopen_date = ymd("2020-09-01")
+myschools_reopen_date = ymd("3000-01-01")
 mytesting_on_date     = ymd("2020-05-15")
 
 set.seed(12345)
@@ -32,21 +32,25 @@ for(i in 1:nsim) params[[i]] <- rparams()
 
 # Scenario 1
 mylockdown_end_date1   = ymd("2020-06-01") 
+mydistancing_stepdown_dates1 = seq(ymd("2020-06-15"), mydaymax, length.out=10)
 res1 = get_sir_results(daymax=mydaymax,
                       lockdown_end_date=mylockdown_end_date1,
                       schools_reopen_date=myschools_reopen_date,
                       testing_on_date=mytesting_on_date,
-                      distancing_on_date=mylockdown_end_date1,
+                      distancing_on_date=mylockdown_end_date1+1,
+                      distancing_stepdown_dates=mydistancing_stepdown_dates1,
                       nsim=nsim,
                       params=params)
 
 # Scenario 2
 mylockdown_end_date2   = ymd("2020-07-01") 
+mydistancing_stepdown_dates2 = seq(ymd("2020-07-15"), mydaymax, length.out=10)
 res2 = get_sir_results(daymax=mydaymax,
                       lockdown_end_date=mylockdown_end_date2,
                       schools_reopen_date=myschools_reopen_date,
                       testing_on_date=mytesting_on_date,
-                      distancing_on_date=mylockdown_end_date2,
+                      distancing_on_date=mylockdown_end_date2+1,
+                      distancing_stepdown_dates=mydistancing_stepdown_dates2,
                       nsim=nsim,
                       params=params)
 
