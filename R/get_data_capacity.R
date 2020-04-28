@@ -9,7 +9,7 @@ library(ggplot2)
 library(reshape2)
 
 # data_stream <- "4-17-20"
-data_stream <- "4-27-20"
+data_stream <- "4-28-20"
 raw <- fread(paste0("../data/COVID Data Extract (", data_stream, ").csv"))
 dat <- transpose(raw[,-1])
 colnames(dat) <- as.character(as.matrix(raw)[, 1])
