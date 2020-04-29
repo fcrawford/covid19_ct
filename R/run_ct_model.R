@@ -247,12 +247,12 @@ plot_ct_region = function(data=NULL,
                                         "H","rH",
                                         "Hbar", "rHbar", "rHsum",
                                         "cum_modH","S","E","I_s","I_m","A", 
-                                        "dailyI"),
+                                        "dailyI", "cum_modI"),
                           color=c('#e41a1c','#e41a1c','#377eb8','#377eb8', 
                                   '#4daf4a','#4daf4a','#377eb8', #'#cab2d6',
                                   '#984ea3','#ff7f00','#ffff33',
                                   '#a65628','#f781bf','#999999', 
-                                  '#a65628'),
+                                  '#a65628', '#a65628'),
                           labels=c("Cumulative deaths","Cumulative deaths",
                                     "Hospitalizations","Hospitalizations",
                                     "Hospital overflow","Hospital overflow","Required hospitalizations",
@@ -260,7 +260,7 @@ plot_ct_region = function(data=NULL,
                                     "Susceptible population","Exposed population",
                                     "Severe infections","Mild infections",
                                     "Asymptomatic infections", 
-                                    "Daily new infections"))
+                                    "Daily new infections", "Cumulative infections"))
   
  #dayseq = seq(day0, daymax, by="day")
   start_day = day0
