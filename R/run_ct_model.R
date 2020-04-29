@@ -83,19 +83,49 @@ for(nm in region_names) {
 rparams = function(params) {
   params_tmp = params
   # sample new param values
-  params_tmp$beta_pre = rtruncdist(1, mean=(params_init$beta_pre*0.9975), sd=params_init$sd_beta_pre, lower=params_init$lower_beta_pre, upper=params_init$upper_beta_pre)
-  params_tmp$q_Im = rtruncdist(1, mean=(params_init$q_Im), sd=params_init$sd_q_Im, lower=params_init$lower_q_Im, upper=params_init$upper_q_Im)
-  #params_tmp$q_A = rtruncdist(1, mean=(params_init$q_A), sd=params_init$sd_q_A, lower=params_init$lower_q_A, upper=params_init$upper_q_A)
-  params_tmp$gamma_H = rtruncdist(1, mean=params_init$gamma_H, sd=params_init$sd_gamma_H, lower=params_init$lower_gamma_H, upper=params_init$upper_gamma_H)
-  params_tmp$m_H = rtruncdist(1, mean=params_init$m_H, sd=params_init$sd_m_H, lower=params_init$lower_m_H, upper=params_init$upper_m_H)
-  params_tmp$m_Hbar_mult = rtruncdist(1, mean=params_init$m_Hbar_mult, sd=params_init$sd_m_Hbar_mult, lower=params_init$lower_m_Hbar_mult, upper=params_init$upper_m_Hbar_mult)
-  params_tmp$lockdown_effect = rtruncdist(1, mean=params_init$lockdown_effect, sd=params_init$sd_lockdown_effect, lower=params_init$lower_lockdown_effect, upper=params_init$upper_lockdown_effect)
-  # params_tmp$delta = rtruncdist(1, mean=params_init$delta, sd=params_init$sd_delta, lower=params_init$lower_delta, upper=params_init$upper_delta)
-  # add sampling of initial conditions
+  params_tmp$beta_pre = rtruncdist(1, mean=(params$beta_pre*0.9975), sd=params$sd_beta_pre, lower=params$lower_beta_pre, upper=params$upper_beta_pre)
+  params_tmp$q_Im = rtruncdist(1, mean=(params$q_Im), sd=params$sd_q_Im, lower=params$lower_q_Im, upper=params$upper_q_Im)
+  params_tmp$gamma_H = rtruncdist(1, mean=params$gamma_H, sd=params$sd_gamma_H, lower=params$lower_gamma_H, upper=params$upper_gamma_H)
+  params_tmp$m_H = rtruncdist(1, mean=params$m_H, sd=params$sd_m_H, lower=params$lower_m_H, upper=params$upper_m_H)
+  params_tmp$m_Hbar_mult = rtruncdist(1, mean=params$m_Hbar_mult, sd=params$sd_m_Hbar_mult, lower=params$lower_m_Hbar_mult, upper=params$upper_m_Hbar_mult)
+  params_tmp$lockdown_effect = rtruncdist(1, mean=params$lockdown_effect, sd=params$sd_lockdown_effect, lower=params$lower_lockdown_effect, upper=params$upper_lockdown_effect)
+  #params_tmp$q_A = rtruncdist(1, mean=(params$q_A), sd=params$sd_q_A, lower=params$lower_q_A, upper=params$upper_q_A)
+  # params_tmp$delta = rtruncdist(1, mean=params$delta, sd=params$sd_delta, lower=params$lower_delta, upper=params$upper_delta)
   return(params_tmp)
 }
 
 
+
+########################
+# function: get state0 from initial confitions
+get_state0 = function(init_file_csv){
+init <- read.csv(init_file_csv, stringsAsFactors=FALSE) 
+
+      E_init = init$E
+      I_s_init = init$Is
+      I_m_init = init$Im
+      A_init = init$A
+      H_init = init$H
+      Hbar_init = rep(0,nregions)
+      D_init = init$D
+      R_init = init$R
+      S_init = as.numeric(populations) - (E_init + I_s_init + I_m_init + A_init + H_init + Hbar_init + D_init + R_init)
+
+# this is state0 to be passed to get_sir_results 
+state0 = c(S=S_init, E=E_init, I_s=I_s_init, I_m=I_m_init, A=A_init, H=H_init, Hbar=Hbar_init, D=D_init, R=R_init)
+return(state0)
+}
+
+
+########################
+#### set default parameters and initial conditions
+# these can be changed when the model run is called
+
+# get initial conditions
+state0 = get_state0("../data/ct_init.csv")
+
+# default parameters
+myparams = yaml.load_file("params.yml")  
 
 
 
@@ -110,31 +140,13 @@ get_sir_results = function(daymax=ymd("2020-09-01"),
                            distancing_on_date,
                            distancing_stepdown_dates,
                            nsim=1,
-                           params = "params.yml",
-                           init = "../data/ct_init.csv") {
-  
-   # initial conditions
-   init <- read.csv(init, stringsAsFactors=FALSE) 
-
-      E_init = init$E
-      I_s_init = init$Is
-      I_m_init = init$Im
-      A_init = init$A
-      H_init = init$H
-      Hbar_init = rep(0,nregions)
-      D_init = init$D
-      R_init = init$R
-      S_init = as.numeric(populations) - (E_init + I_s_init + I_m_init + A_init + H_init + Hbar_init + D_init + R_init)
-
-      state0 = c(S=S_init, E=E_init, I_s=I_s_init, I_m=I_m_init, A=A_init, H=H_init, Hbar=Hbar_init, D=D_init, R=R_init)
-
+                           params = myparams,
+                           state0 = state0) {
    # parameters
-   params_init = yaml.load_file(params) 
-   
    pars <- list()
    if(nsim == 1){
-     pars[[1]] =  params_init } else { 
-    for(i in 1:nsim) pars[[i]] <- rparams(params_init)
+     pars[[1]] =  myparams } else { 
+    for(i in 1:nsim) pars[[i]] <- rparams(myparams)
      } 
    
 

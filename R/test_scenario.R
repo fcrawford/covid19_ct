@@ -6,7 +6,7 @@ mydaymax              = ymd("2021-04-01")
 myschools_reopen_date = ymd("3000-01-01") # NEVER: this is replaced by terms in the distancing stepdown
 
 
-nsim = 1
+nsim = 50
 
 ####################################
 
@@ -16,13 +16,20 @@ mytesting_on_date  = mydaymax
 mydistancing_on_date  = mylockdown_end_date+1 # distancing on at end of lockdown
 mydistancing_stepdown_dates = seq(ymd("2020-07-01"), mydaymax, length.out=20)
 
-myparams = "params_a05.yml"
-myinit = "../data/ct_init_a05.csv"
 
-#params_init$testing_effect_A = 0.2
-#params_init$testing_effect_Im = 0.5
+## choose your scenario
 
-#params_init$distancing_effect = 0.6
+# get initial conditions
+mystate0 = get_state0("../data/ct_init_a05.csv")
+
+# get parameter values 
+myparams = yaml.load_file("params_a05.yml")  
+
+
+myparams$testing_effect_A = 0.2
+myparams$testing_effect_Im = 0.5
+
+myparams$distancing_effect = 0.6
 
 
 ####################################
@@ -35,7 +42,7 @@ res1 = get_sir_results(daymax=mydaymax,
                       distancing_stepdown_dates=mydistancing_stepdown_dates,
                       nsim=nsim,
                       params = myparams,
-                      init = myinit)
+                      state0 = mystate0)
 
 
 ####################################
