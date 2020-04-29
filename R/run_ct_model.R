@@ -42,10 +42,7 @@ dat_ct_state <- data$dat_ct_state
 dat_ct_county <- data$dat_ct_county
 
 
-############ modeling #############
-
-# load fixed parameters
-params_init = yaml.load_file("params.yml") 
+############ regional population and adjacency #############
 
 # load region adjacency matrix 
 adj = read.csv("../map/CT_adj_matrix.csv", stringsAsFactors=FALSE)
@@ -53,52 +50,15 @@ rownames(adj) = adj$X
 adj = adj[,-1]
 adj = as.matrix(adj)
 
-# populations and initial conditions
+# county populations
 nregions = nrow(adj)
 
-init <- read.csv('../data/ct_init.csv', stringsAsFactors=FALSE) 
+pop = read.csv('../data/ct_population.csv', stringsAsFactors=FALSE)
 populations = list()
-populations[1:nregions] = init$population
-names(populations) = init$county
+populations[1:nregions] = pop$population
+names(populations) = pop$county
 
-region_names = init$county
-
-# the ordering of counties in init is the standard throughout the code
-# make sure adj has the same ordering! 
-
-#########################
-# set up initial state0
-
-E_init = init$E
-I_s_init = init$Is
-I_m_init = init$Im
-A_init = init$A
-H_init = init$H
-Hbar_init = rep(0,nregions)
-D_init = init$D
-R_init = init$R
-S_init = as.numeric(populations) - (E_init + I_s_init + I_m_init + A_init + H_init + Hbar_init + D_init + R_init)
-
-state0 = c(S=S_init, E=E_init, I_s=I_s_init, I_m=I_m_init, A=A_init, H=H_init, Hbar=Hbar_init, D=D_init, R=R_init)
-
-
-########################
-# draw random params
-
-rparams = function() {
-  params_tmp = params_init
-  # sample new param values
-  params_tmp$beta_pre = rtruncdist(1, mean=(params_init$beta_pre*0.9975), sd=params_init$sd_beta_pre, lower=params_init$lower_beta_pre, upper=params_init$upper_beta_pre)
-  params_tmp$q_Im = rtruncdist(1, mean=(params_init$q_Im), sd=params_init$sd_q_Im, lower=params_init$lower_q_Im, upper=params_init$upper_q_Im)
-  #params_tmp$q_A = rtruncdist(1, mean=(params_init$q_A), sd=params_init$sd_q_A, lower=params_init$lower_q_A, upper=params_init$upper_q_A)
-  params_tmp$gamma_H = rtruncdist(1, mean=params_init$gamma_H, sd=params_init$sd_gamma_H, lower=params_init$lower_gamma_H, upper=params_init$upper_gamma_H)
-  params_tmp$m_H = rtruncdist(1, mean=params_init$m_H, sd=params_init$sd_m_H, lower=params_init$lower_m_H, upper=params_init$upper_m_H)
-  params_tmp$m_Hbar_mult = rtruncdist(1, mean=params_init$m_Hbar_mult, sd=params_init$sd_m_Hbar_mult, lower=params_init$lower_m_Hbar_mult, upper=params_init$upper_m_Hbar_mult)
-  params_tmp$lockdown_effect = rtruncdist(1, mean=params_init$lockdown_effect, sd=params_init$sd_lockdown_effect, lower=params_init$lower_lockdown_effect, upper=params_init$upper_lockdown_effect)
-  # params_tmp$delta = rtruncdist(1, mean=params_init$delta, sd=params_init$sd_delta, lower=params_init$lower_delta, upper=params_init$upper_delta)
-  # add sampling of initial conditions
-  return(params_tmp)
-}
+region_names = pop$county
 
 
 #######################
@@ -114,6 +74,29 @@ for(nm in region_names) {
 }
 
 
+# the ordering of counties is the standard throughout the code
+# make sure adj and initial conditions have the same ordering! 
+
+########################
+# draw random params
+
+rparams = function(params) {
+  params_tmp = params
+  # sample new param values
+  params_tmp$beta_pre = rtruncdist(1, mean=(params_init$beta_pre*0.9975), sd=params_init$sd_beta_pre, lower=params_init$lower_beta_pre, upper=params_init$upper_beta_pre)
+  params_tmp$q_Im = rtruncdist(1, mean=(params_init$q_Im), sd=params_init$sd_q_Im, lower=params_init$lower_q_Im, upper=params_init$upper_q_Im)
+  #params_tmp$q_A = rtruncdist(1, mean=(params_init$q_A), sd=params_init$sd_q_A, lower=params_init$lower_q_A, upper=params_init$upper_q_A)
+  params_tmp$gamma_H = rtruncdist(1, mean=params_init$gamma_H, sd=params_init$sd_gamma_H, lower=params_init$lower_gamma_H, upper=params_init$upper_gamma_H)
+  params_tmp$m_H = rtruncdist(1, mean=params_init$m_H, sd=params_init$sd_m_H, lower=params_init$lower_m_H, upper=params_init$upper_m_H)
+  params_tmp$m_Hbar_mult = rtruncdist(1, mean=params_init$m_Hbar_mult, sd=params_init$sd_m_Hbar_mult, lower=params_init$lower_m_Hbar_mult, upper=params_init$upper_m_Hbar_mult)
+  params_tmp$lockdown_effect = rtruncdist(1, mean=params_init$lockdown_effect, sd=params_init$sd_lockdown_effect, lower=params_init$lower_lockdown_effect, upper=params_init$upper_lockdown_effect)
+  # params_tmp$delta = rtruncdist(1, mean=params_init$delta, sd=params_init$sd_delta, lower=params_init$lower_delta, upper=params_init$upper_delta)
+  # add sampling of initial conditions
+  return(params_tmp)
+}
+
+
+
 
 
 #######################
@@ -127,10 +110,33 @@ get_sir_results = function(daymax=ymd("2020-09-01"),
                            distancing_on_date,
                            distancing_stepdown_dates,
                            nsim=1,
-                           params = NULL) {
-  if(is.null(params)){
-    for(i in 1:nsim) params[[i]] <- rparams()
-  }
+                           params = "params.yml",
+                           init = "../data/ct_init.csv") {
+  
+   # initial conditions
+   init <- read.csv(init, stringsAsFactors=FALSE) 
+
+      E_init = init$E
+      I_s_init = init$Is
+      I_m_init = init$Im
+      A_init = init$A
+      H_init = init$H
+      Hbar_init = rep(0,nregions)
+      D_init = init$D
+      R_init = init$R
+      S_init = as.numeric(populations) - (E_init + I_s_init + I_m_init + A_init + H_init + Hbar_init + D_init + R_init)
+
+      state0 = c(S=S_init, E=E_init, I_s=I_s_init, I_m=I_m_init, A=A_init, H=H_init, Hbar=Hbar_init, D=D_init, R=R_init)
+
+   # parameters
+   params_init = yaml.load_file(params) 
+   
+   pars <- list()
+   if(nsim == 1){
+     pars[[1]] =  params_init } else { 
+    for(i in 1:nsim) pars[[i]] <- rparams(params_init)
+     } 
+   
 
   dayseq = seq(day0, daymax, by="day")
   tmax = as.numeric(difftime(daymax, day0, units="days"))
@@ -144,7 +150,7 @@ get_sir_results = function(daymax=ymd("2020-09-01"),
 
   sir_results = lapply(1:nsim, function(i){
     res = run_sir_model(state0=state0, 
-                        params=params[[i]],  # note: effect_intvx is in params, and is not passed to run_sir_model separately 
+                        params=pars[[i]],  # note: effect_intvx is in params, and is not passed to run_sir_model separately 
                         region_adj=adj, 
                         populations=as.numeric(populations), 
                         tmax=tmax, 
