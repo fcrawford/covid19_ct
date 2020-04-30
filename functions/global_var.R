@@ -32,15 +32,22 @@ source("../functions/truncated_distributions.R")
 source("../functions/plot_functions.R")
 
 
-########################
-# Load data objects
+#################################################### 
+# Other global variables that should not be changed
+####################################################
 global_dat <- get_ct_data(day0=day0)
 
+# State and county observed data, for plotting purposes only
 DAT_CT_STATE <- global_dat$dat_ct_state
 DAT_CT_COUNTY <- global_dat$dat_ct_county
+# County capacity functions, ordered
 COUNTY_CAPACITIES <- global_dat$county_capacities
+# Spatial polygons
 CT_MAP <- global_dat$CTmap
+# Spatial adj  matrix
 CT_ADJ <- global_dat$adj
+# Population count vector in the same order as CT_ADJ
 CT_POPULATIONS <- global_dat$populations
+# County names in the correct order
 CT_NAMES <- colnames(CT_ADJ)
 
