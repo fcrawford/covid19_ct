@@ -24,6 +24,8 @@ rparams = function(params) {
 # function: get state0 from initial confitions
 get_state0 = function(init_file_csv){
       init <- read.csv(init_file_csv, stringsAsFactors=FALSE) 
+      # double double check order
+      init <- init[match(CT_NAMES,  init$county), ]
 
       E_init = init$E
       I_s_init = init$Is
