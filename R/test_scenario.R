@@ -20,6 +20,9 @@ params_init$testing_effect_A = 0.2
 params_init$testing_effect_Im = 0.5
 params_init$distancing_effect = 0.6
 
+myparams = "params_a05.yml"
+myinit = "../data/ct_init_a05.csv"
+
 
 ####################################
 
@@ -29,7 +32,9 @@ res1 = get_sir_results(daymax=mydaymax,
                       testing_on_date=mytesting_on_date,
                       distancing_on_date=mydistancing_on_date, 
                       distancing_stepdown_dates=mydistancing_stepdown_dates,
-                      nsim=nsim)
+                      nsim=nsim,
+                      params = myparams,
+                      init = myinit)
 
 
 ####################################
@@ -40,7 +45,6 @@ h = 300
 par(mfrow=c(5,1), mar=c(4,4,1,1))
 
 
-ymax = 2e4
 connecticut_summary_dailyI = plot_ct_region(data=res1$summary, 
                                              end_day=mydaymax, 
                                              title=str,
