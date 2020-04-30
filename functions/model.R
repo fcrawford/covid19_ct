@@ -215,6 +215,22 @@ run_sir_model = function(state0, params, region_adj, populations, tmax, interven
   out$intervention_lockdown = interventions$lockdown(1:(tmax+1))
   out$intervention_testing = interventions$testing(1:(tmax+1))
 
+  # compute dynamics of R_eff
+  # R_eff takes into account social distancing, testing effect in reducing FOI and depletion of susceptibles
+  FOI_init <- ( params$q_A * params$k_A / params$gamma_A 
+              + params$q_Im / params$gamma_Im 
+              + (1 - params$q_Im - params$q_A) * params$q_ins * params$k_Is_ins / params$alpha  
+              + (1 - params$q_Im - params$q_A) * (1 - params$q_ins) * params$k_Is_noins / params$gamma_Is )
+  
+  FOI_testing = ( params$q_A * params$k_A / ( (1 + params$testing_effect_Im) * params$gamma_A )
+              + params$q_Im / ( (1 + params$testing_effect_A) * params$gamma_Im ) 
+              + (1 - params$q_Im - params$q_A) * params$q_ins * params$k_Is_ins / params$alpha  
+              + (1 - params$q_Im - params$q_A) * (1 - params$q_ins) * params$k_Is_noins / params$gamma_Is )
+  
+  FOI = FOI_init * (1 - out$intervention_testing) + FOI_testing * out$intervention_testing
+  
+  out$R_eff = params$beta_pre * FOI * out$intervention_pattern * out$S.Connecticut / (pop_ct - out$D.Connecticut)
+  
   return(out)
 }
 
