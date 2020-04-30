@@ -229,7 +229,7 @@ run_sir_model = function(state0, params, region_adj, populations, tmax, interven
   
   FOI = FOI_init * (1 - out$intervention_testing) + FOI_testing * out$intervention_testing
   
-  out$R_eff = params$beta_pre * FOI * out$intervention_pattern * out$S.Connecticut / (pop_ct - out$D.Connecticut)
+  out$R_eff.Connecticut = params$beta_pre * FOI * out$intervention_pattern * out$S.Connecticut / (pop_ct - out$D.Connecticut)
   
   return(out)
 }

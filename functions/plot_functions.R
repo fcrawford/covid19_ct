@@ -39,12 +39,12 @@ plot_ct_region = function(data=NULL,
                                         "H","rH",
                                         "Hbar", "rHbar", "rHsum",
                                         "cum_modH","S","E","I_s","I_m","A", 
-                                        "dailyI", "cum_modI", "alive_cum_incid_prop", "alive_cum_incid_num"),
+                                        "dailyI", "cum_modI", "alive_cum_incid_prop", "alive_cum_incid_num", "R_eff"),
                           color=c('#e41a1c','#e41a1c','#377eb8','#377eb8', 
                                   '#4daf4a','#4daf4a','#377eb8', #'#cab2d6',
                                   '#984ea3','#ff7f00','#ffff33',
                                   '#a65628','#f781bf','#999999', 
-                                  '#a65628', '#a65628', "#006d2c", "#00441b"),
+                                  '#a65628', '#a65628', "#006d2c", "#00441b", "#006d2c"),
                           labels=c("Cumulative deaths","Cumulative deaths",
                                     "Hospitalizations","Hospitalizations",
                                     "Hospital overflow","Hospital overflow","Required hospitalizations",
@@ -54,7 +54,7 @@ plot_ct_region = function(data=NULL,
                                     "Asymptomatic infections", 
                                     "Daily new infections", "Cumulative infections", 
                                     "Proportion of cumulative incidents",
-                                    "Cumulative alive incidents"))
+                                    "Cumulative alive incidents", "R_eff"))
   
  #dayseq = seq(day0, daymax, by="day")
   start_day = day0
