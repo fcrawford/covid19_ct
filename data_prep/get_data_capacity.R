@@ -9,7 +9,7 @@ library(ggplot2)
 library(reshape2)
 
 # data_stream <- "4-17-20"
-data_stream <- "4-28-20"
+data_stream <- "4-29-20"
 raw <- fread(paste0("../data/COVID Data Extract (", data_stream, ").csv"))
 dat <- transpose(raw[,-1])
 colnames(dat) <- as.character(as.matrix(raw)[, 1])
@@ -23,12 +23,14 @@ if(data_stream %in% c("4-21-20")){
 	dat$Date[40:47] <- dat$Date[40]
 }
 tab <- matrix(c(0, dat$Date-18338), ncol=8, byrow=TRUE)
-apply(tab, 1, function(x){length(unique(x))})
-apply(tab, 2, function(x){length(unique(x))})
+check1 <- apply(tab, 1, function(x){length(unique(x))}) 
+check2 <-apply(tab, 2, function(x){length(unique(x))})
 
+if(sum(!(check1==1)) != 0 || length(unique(check2)) > 1){
+	stop("Manual inspection of the spreadsheet is needed")
+}else{
 dat.long <-  melt(dat, id.vars = c("Date", "County"))
 dat.long$value <- as.numeric(dat.long$value)
-head(dat.long)
 
 
 ##
@@ -83,7 +85,7 @@ for(i in 1:length(alldates)){
 											 County = counties,
 											 variable="Inpatient COVID-positive census",
 											 value = values))
-		message(alldates[i], " imputed from previous day")
+		message("\n", alldates[i], " imputed from previous day")
 	}
 }
 write.csv(current, 
@@ -127,8 +129,12 @@ for(c in dat_4162020$County){
 		new$cum_hosp[row] <- new$cum_hosp[row.prev] +  new$value[row]
 	}
 }
-subset(data.frame(new)[,-3], County==dat_4162020$County[8])
+message("\n==== Sample cum hospitalization data ====")
+print(tail(subset(data.frame(new)[,-3], County==dat_4162020$County[8])))
 write.csv(new[,c("Date", "County", "cum_hosp")], 
 		  "../data/ct_cum_hosp.csv", row.names=FALSE, quote=FALSE)
+
+message("\n**** Hospital data updated ****")
+}
 
 
