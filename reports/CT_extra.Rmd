@@ -16,10 +16,9 @@ geometry: margin=0.75in
 ---
 
 ```{r, echo=FALSE, include=FALSE}
-#source("run_ct_model.R")
 library(yaml)
-params_init = yaml.load_file("params.yml") 
-source("intervention_functions.R")
+params_init = yaml.load_file("../parameters/params.yml") 
+source("../functions/intervention_functions.R")
 ```
 
 
@@ -70,7 +69,7 @@ Reproductive number after lockdown lift (no testing effect): \textbf{`r round(ge
 
 
 ```{r, echo=FALSE, include=FALSE}
-params_init = yaml.load_file("params_a05.yml") 
+params_init = yaml.load_file("../parameters/params_a05.yml") 
 ```
 
 

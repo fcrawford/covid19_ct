@@ -1,12 +1,12 @@
 
 
-source("run_ct_model.R")
+source("../functions/run_ct_model.R")
 
 mydaymax              = ymd("2021-04-01") 
 myschools_reopen_date = ymd("3000-01-01") # NEVER: this is replaced by terms in the distancing stepdown
 
 
-nsim = 50
+nsim = 5
 
 ####################################
 
@@ -23,7 +23,7 @@ mydistancing_stepdown_dates = seq(ymd("2020-07-01"), mydaymax, length.out=20)
 mystate0 = get_state0("../data/ct_init_a05.csv")
 
 # get parameter values 
-myparams = yaml.load_file("params_a05.yml")  
+myparams = yaml.load_file("../parameters/params_a05.yml")  
 
 
 myparams$testing_effect_A = 0.2
