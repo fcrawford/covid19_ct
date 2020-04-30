@@ -4,7 +4,7 @@ mydaymax              = ymd("2020-09-01")
 myschools_reopen_date = ymd("2021-09-01") 
 
 
-nsim = 100
+nsim = 1
 
 ####################################
 
@@ -18,10 +18,10 @@ mydistancing_stepdown_dates = seq(ymd("2020-07-01"), ymd("2021-04-01"), length.o
 ## choose your scenario
 
 # get initial conditions
-mystate0 = get_state0("../data/ct_init_a05.csv")
+mystate0 = get_state0("../data/ct_init_a07.csv")
 
 # get parameter values 
-myparams = yaml.load_file("../parameters/params_a05.yml")  
+myparams = yaml.load_file("../parameters/params_a07.yml")  
 
 
 myparams$testing_effect_A = 0.2
