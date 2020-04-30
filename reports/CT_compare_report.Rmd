@@ -20,7 +20,7 @@ geometry: margin=0.75in
 ---
 
 ```{r, echo=FALSE, include=FALSE}
-source("../functions/run_ct_model.R")
+source("../functions/global_var.R")
 mystate0 = get_state0("../data/ct_init.csv")
 myparams = yaml.load_file("../parameters/params.yml")  
 
@@ -78,8 +78,9 @@ This report presents projections of COVID-19 hospitalizations and deaths in Conn
 
 An intervention scenario is described below. Projections under this scenario take into account historical and hypothetical future state-level interventions, including closing of schools on `r format(state_schools_close,"%B %d, %Y")` and the state-level stay-at-home order issued on `r format(state_lockdown_order, "%B %d, %Y")` which took effect on `r format(state_lockdown_start,"%B %d, %Y")`.  School closure is assumed to reduce transmission by `r myparams$school_closure_effect * 100`%, and the state-level stay-at-home order reduces transmission by `r myparams$lockdown_effect * 100`%.  
 
-```{r echo=FALSE, fig.height = 7}
-plot_interventions(res$raw_results, mydaymax, stayhome_compare=TRUE, titles=res$titles)
+```{r echo=FALSE, fig.height = 4}
+plot_interventions(res1$raw_results, mydaymax, subtitle=mytitles[[1]])
+plot_interventions(res2$raw_results, mydaymax, subtitle=mytitles[[2]])
 ```
 The projections presented below evaluate the effect of a hypothetical lifting of the stay-at-home order on **`r format(mylockdown_end_date1, "%B %d, %Y")`** and **`r format(mylockdown_end_date2, "%B %d, %Y")`**. Re-opening of schools is set to be on `r format(myschools_reopen_date, "%B %d, %Y")`.  When the stay-at-home order is lifted, the projections assume an ongoing `r myparams$distancing_effect * 100`% reduction in transmission. 
 

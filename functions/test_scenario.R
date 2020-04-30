@@ -1,6 +1,4 @@
-
-
-source("../functions/run_ct_model.R")
+source("../functions/global_var.R")
 
 mydaymax              = ymd("2020-09-01") 
 myschools_reopen_date = ymd("2021-09-01") 

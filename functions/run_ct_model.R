@@ -1,81 +1,4 @@
-library(deSolve)
-library(yaml)
-library(lubridate)
-library(plyr)
-library(reshape2)
-library(dplyr)
-library(rgdal)
-library(SUMMER)
-library(ggplot2)
-library(mapproj)
-#####################
-
-source("../functions/model.R")
-source("../functions/get_data.R")
-source("../functions/intervention_functions.R")
-source("../functions/truncated_distributions.R")
-source("../functions/plot_functions.R")
-
-########################
-# Dates
-
-# starting day
-day0 = ymd("2020-03-01")
-
-# actual dates: do not change
-state_schools_close = dmy("13/03/2020")
-state_lockdown_order = dmy("20/03/2020") # order date
-state_lockdown_start = dmy("23/03/2020") # actual start date
-
-
-#############################
-# hypothetical end date of lockdown
-
-# lockdown_end_date=dmy("01/06/2020") 
-
-
-########################
-
-##### get reported data from CT #####
-
-data <- get_ct_data(day0=day0)
-dat_ct_state <- data$dat_ct_state
-dat_ct_county <- data$dat_ct_county
-
-
-############ regional population and adjacency #############
-
-# load region adjacency matrix 
-adj = read.csv("../map/CT_adj_matrix.csv", stringsAsFactors=FALSE)
-rownames(adj) = adj$X
-adj = adj[,-1]
-adj = as.matrix(adj)
-
-# county populations
-nregions = nrow(adj)
-
-pop = read.csv('../data/ct_population.csv', stringsAsFactors=FALSE)
-populations = list()
-populations[1:nregions] = pop$population
-names(populations) = pop$county
-
-region_names = pop$county
-
-
-#######################
-
-# set county level capacities 
-
-county_capacities = list()
-for(nm in region_names) {
-  county_cap = filter(dat_ct_capacity, County==nm)
-  county_days = as.numeric(ymd(county_cap$Date) - day0)
-  county_cap_fun = approxfun(county_days, county_cap$Capacity, rule=2)
-  county_capacities[[nm]] = county_cap_fun
-}
-
-
-# the ordering of counties is the standard throughout the code
+# the ordering of counties is the standard throughout the code (in the global_var.R)
 # make sure adj and initial conditions have the same ordering! 
 
 ########################
@@ -100,39 +23,25 @@ rparams = function(params) {
 ########################
 # function: get state0 from initial confitions
 get_state0 = function(init_file_csv){
-init <- read.csv(init_file_csv, stringsAsFactors=FALSE) 
+      init <- read.csv(init_file_csv, stringsAsFactors=FALSE) 
 
       E_init = init$E
       I_s_init = init$Is
       I_m_init = init$Im
       A_init = init$A
       H_init = init$H
-      Hbar_init = rep(0,nregions)
+      Hbar_init = rep(0,dim(init)[1])
       D_init = init$D
       R_init = init$R
-      S_init = as.numeric(populations) - (E_init + I_s_init + I_m_init + A_init + H_init + Hbar_init + D_init + R_init)
+      S_init = as.numeric(init$population) - (E_init + I_s_init + I_m_init + A_init + H_init + Hbar_init + D_init + R_init)
 
-# this is state0 to be passed to get_sir_results 
-state0 = c(S=S_init, E=E_init, I_s=I_s_init, I_m=I_m_init, A=A_init, H=H_init, Hbar=Hbar_init, D=D_init, R=R_init)
-return(state0)
+       # this is state0 to be passed to get_sir_results 
+      state0 = c(S=S_init, E=E_init, I_s=I_s_init, I_m=I_m_init, A=A_init, H=H_init, Hbar=Hbar_init, D=D_init, R=R_init)
+      return(state0)
 }
-
-
-########################
-#### set default parameters and initial conditions
-# these can be changed when the model run is called
-
-# get initial conditions
-#mystate0 = get_state0("../data/ct_init.csv")
-
-# default parameters
-#myparams = yaml.load_file("../parameters/params.yml")  
-
-
 
 #######################
 # Run the model 
-
 
 get_sir_results = function(daymax, 
                            lockdown_end_date, 
@@ -144,6 +53,7 @@ get_sir_results = function(daymax,
                            params,
                            state0,
                            seed = NULL) {
+
   # parameters, set seed if given
   if(!is.null(seed)) set.seed(seed)
   pars <- list()
@@ -168,7 +78,7 @@ get_sir_results = function(daymax,
     res = run_sir_model(state0=state0, 
                         params=pars[[i]],  # note: effect_intvx is in params, and is not passed to run_sir_model separately 
                         region_adj=adj, 
-                        populations=as.numeric(populations), 
+                        populations=populations, 
                         tmax=tmax, 
                         interventions=interventions,
                         capacities=county_capacities)
@@ -177,7 +87,7 @@ get_sir_results = function(daymax,
   })
 
   sir_results_all = ldply(sir_results, rbind)
-  for(nm in c("Connecticut", region_names)){
+  for(nm in c("Connecticut", colnames(adj))){
     sir_results_all[, paste0("rHsum.", nm)] <-  sir_results_all[,paste0("rH.", nm)]+sir_results_all[,paste0("rHbar.", nm)]
   }
   sir_results_long <- melt(sir_results_all, id.vars = c("time", "sim_id"))
@@ -193,8 +103,8 @@ get_sir_results = function(daymax,
 
 ####################################
 # Print a vector of counts in the RMD file
-# get_compartment(date="2020-07-01", toprint="rD.Connecticut")
-get_compartment <- function(data=sir_results_summary, date, toprint, start_day = day0){
+# get_compartment(data=res1$sir_results_summary, date="2020-07-01", toprint="rD.Connecticut",start_day = day0)
+get_compartment <- function(data, date, toprint, start_day){
   sir_result_internal = data.frame(filter(data, variable%in%toprint))
   t = as.numeric(difftime(as.Date(date), start_day, unit='days'))
   sir_result_internal = subset(sir_result_internal, time%in%t)

@@ -21,7 +21,7 @@ See this document for codes and outputs. Also used as unit test when we make upd
 ### Load data and functions
 
 ```{r, echo=TRUE, include=TRUE, message=FALSE,warnings=FALSE}
-source("../functions/run_ct_model.R")
+source("../functions/global_var.R")
 mystate0 = get_state0("../data/ct_init.csv")
 myparams = yaml.load_file("../parameters/params.yml")  
 
