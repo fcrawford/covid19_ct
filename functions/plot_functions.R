@@ -299,3 +299,25 @@ mapplot_ct_region_list =  function(data, which.plot = "D", label = "Cumulative D
   return(g)
 }
 
+
+
+plot_interventions = function(sir_results, daymax, titles=NULL) {
+
+
+  dayseq = seq(day0, daymax, by="day")
+  tmax = as.numeric(difftime(daymax, day0, units="days"))
+
+  monthseq = seq(day0, daymax, by="month")
+  monthseq_lab = format(monthseq, "%b %Y")
+  daymonthseq = difftime(monthseq, day0, units="days")
+
+  par(mar=c(3,3,3,0), bty="n")
+  nn <- 4
+  #layout(matrix(c(1:nn),nrow=,nn), heights=rep(2, nn))
+
+  plot(sir_results[[1]]$intervention_pattern, ylim=c(0,1), xlim=c(0,1.05*tmax), type="n", ylab="", xlab="", main="Overall contact intervention", axes=FALSE)
+  axis(1, at=daymonthseq, lab=monthseq_lab)
+  axis(2)
+  polygon(c(1,1:(tmax+1), tmax+1), c(0,sir_results[[1]]$intervention_pattern, 0), col="orange", border=NA)
+  abline(v=Sys.Date()-day0, col="gray", lty=2)
+}
