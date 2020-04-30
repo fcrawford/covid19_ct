@@ -27,9 +27,9 @@ plot_ct_region = function(data=NULL,
                           #tmax.plot = tmax,
                           #start_day = day0,
                           end_day=NULL, # pass in daymax
-                          capacity_func = county_capacities,
-                          obs_state = dat_ct_state,
-                          obs_county = dat_ct_county, 
+                          capacity_func = COUNTY_CAPACITIES,
+                          obs_state = DAT_CT_STATE,
+                          obs_county = DAT_CT_COUNTY, 
                           ymax = NULL,
                           sentence=TRUE) {
 
@@ -202,9 +202,9 @@ plot_ct_region_list = function(data=NULL,
                           #tmax.plot = tmax,
                           #start_day = day0,
                           end_day=NULL, # pass in daymax
-                          capacity_func = county_capacities,
-                          obs_state = dat_ct_state,
-                          obs_county = dat_ct_county, 
+                          capacity_func = COUNTY_CAPACITIES,
+                          obs_state = DAT_CT_STATE,
+                          obs_county = DAT_CT_COUNTY, 
                           sentence=FALSE,
                           description=NULL){
   #  Get common y axis
@@ -247,7 +247,7 @@ plot_ct_region_list = function(data=NULL,
 #
 # @param which.plot the prefix of the compartment to plot, e.g., S, E, I_s, I_m. If a vector of more than one specified, it takes the sum of the compartment (only the mean!)
 mapplot_ct_region = function(data, which.plot = "D", label = "Cumulative Deaths", palette="Reds", subtitle=NULL, ...) {
-  map = CTmap
+  map = CT_MAP
   region_names <- as.character(map$NAME10)
   toplot <- paste(rep(which.plot,each=length(region_names)),
                   rep(region_names, length(which.plot)),sep=".")
@@ -279,7 +279,7 @@ mapplot_ct_region = function(data, which.plot = "D", label = "Cumulative Deaths"
 
 mapplot_ct_region_list =  function(data, which.plot = "D", label = "Cumulative Deaths", palette="Reds", subtitle=NULL, ...) {
   ylim <- NULL
-  map = CTmap
+  map = CT_MAP
   region_names <- as.character(map$NAME10)
   for(i in 1:length(data)){
       toplot <- paste(rep(which.plot,each=length(region_names)),

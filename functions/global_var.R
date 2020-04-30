@@ -36,11 +36,11 @@ source("../functions/plot_functions.R")
 # Load data objects
 global_dat <- get_ct_data(day0=day0)
 
-dat_ct_state <- global_dat$dat_ct_state
-dat_ct_county <- global_dat$dat_ct_county
-county_capacities <- global_dat$county_capacities
-CTmap <- global_dat$CTmap
-adj <- global_dat$adj
-populations <- global_dat$populations
-
+DAT_CT_STATE <- global_dat$dat_ct_state
+DAT_CT_COUNTY <- global_dat$dat_ct_county
+COUNTY_CAPACITIES <- global_dat$county_capacities
+CT_MAP <- global_dat$CTmap
+CT_ADJ <- global_dat$adj
+CT_POPULATIONS <- global_dat$populations
+CT_NAMES <- colnames(CT_ADJ)
 

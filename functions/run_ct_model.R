@@ -77,17 +77,17 @@ get_sir_results = function(daymax,
   sir_results = lapply(1:nsim, function(i){
     res = run_sir_model(state0=state0, 
                         params=pars[[i]],  # note: effect_intvx is in params, and is not passed to run_sir_model separately 
-                        region_adj=adj, 
-                        populations=populations, 
+                        region_adj=CT_ADJ, 
+                        populations=CT_POPULATIONS, 
                         tmax=tmax, 
                         interventions=interventions,
-                        capacities=county_capacities)
+                        capacities=COUNTY_CAPACITIES)
     res$sim_id = i
     res
   })
 
   sir_results_all = ldply(sir_results, rbind)
-  for(nm in c("Connecticut", colnames(adj))){
+  for(nm in c("Connecticut", colnames(CT_ADJ))){
     sir_results_all[, paste0("rHsum.", nm)] <-  sir_results_all[,paste0("rH.", nm)]+sir_results_all[,paste0("rHbar.", nm)]
   }
   sir_results_long <- melt(sir_results_all, id.vars = c("time", "sim_id"))

@@ -81,7 +81,7 @@ run_sir_model = function(state0, params, region_adj, populations, tmax, interven
       a_t_A = interventions$testing(time) * params$testing_effect_A
 
       # Hospital capacities
-      actual_capacities = as.numeric(lapply(county_capacities, function(cap)cap(time)))
+      actual_capacities = as.numeric(lapply(COUNTY_CAPACITIES, function(cap)cap(time)))
 
       smoothstep = function(x) 1/(1+exp(-0.5*x))
       Hospital_capacities_breached = smoothstep(H-actual_capacities)

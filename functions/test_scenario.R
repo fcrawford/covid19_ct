@@ -86,7 +86,7 @@ connecticut_summary_deaths1 = plot_ct_region(data=res1$summary,
                                              ymax=ymax)
 
 
-plot_interventions(res1$raw_results, mydaymax, titles="")
+plot_interventions(res1$raw_results, mydaymax, subtitle=NULL)
 
 
 
