@@ -158,9 +158,9 @@ Date,County,Capacity
 2020-04-05,New London,443
 2020-04-05,Tolland,111
 2020-04-05,Windham,92
-2020-04-06,Fairfield,2165
+2020-04-06,Fairfield,1890
 2020-04-06,Hartford,2057
-2020-04-06,Litchfield,168
+2020-04-06,Litchfield,132
 2020-04-06,Middlesex,160
 2020-04-06,New Haven,2156
 2020-04-06,New London,443
@@ -342,3 +342,11 @@ Date,County,Capacity
 2020-04-29,New London,427
 2020-04-29,Tolland,127
 2020-04-29,Windham,97
+2020-04-30,Fairfield,2505
+2020-04-30,Hartford,2289
+2020-04-30,Litchfield,193
+2020-04-30,Middlesex,160
+2020-04-30,New Haven,2221
+2020-04-30,New London,426
+2020-04-30,Tolland,110
+2020-04-30,Windham,97

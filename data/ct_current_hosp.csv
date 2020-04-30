@@ -158,9 +158,9 @@ Date,County,variable,value
 2020-04-05,New London,Inpatient COVID-positive census,12
 2020-04-05,Tolland,Inpatient COVID-positive census,4
 2020-04-05,Windham,Inpatient COVID-positive census,3
-2020-04-06,Fairfield,Inpatient COVID-positive census,665
+2020-04-06,Fairfield,Inpatient COVID-positive census,556
 2020-04-06,Hartford,Inpatient COVID-positive census,251
-2020-04-06,Litchfield,Inpatient COVID-positive census,20
+2020-04-06,Litchfield,Inpatient COVID-positive census,19
 2020-04-06,Middlesex,Inpatient COVID-positive census,28
 2020-04-06,New Haven,Inpatient COVID-positive census,428
 2020-04-06,New London,Inpatient COVID-positive census,16
@@ -342,6 +342,14 @@ Date,County,variable,value
 2020-04-29,New London,Inpatient COVID-positive census,41
 2020-04-29,Tolland,Inpatient COVID-positive census,4
 2020-04-29,Windham,Inpatient COVID-positive census,4
+2020-04-30,Fairfield,Inpatient COVID-positive census,537
+2020-04-30,Hartford,Inpatient COVID-positive census,413
+2020-04-30,Litchfield,Inpatient COVID-positive census,22
+2020-04-30,Middlesex,Inpatient COVID-positive census,40
+2020-04-30,New Haven,Inpatient COVID-positive census,533
+2020-04-30,New London,Inpatient COVID-positive census,38
+2020-04-30,Tolland,Inpatient COVID-positive census,6
+2020-04-30,Windham,Inpatient COVID-positive census,3
 2020-04-08,Fairfield,Inpatient COVID-positive census,664
 2020-04-08,Hartford,Inpatient COVID-positive census,275
 2020-04-08,Litchfield,Inpatient COVID-positive census,25
