@@ -159,8 +159,12 @@ run_sir_model = function(state0, params, region_adj, populations, tmax, interven
 
   out$dailyI.Connecticut <- params$delta * out$E.Connecticut
   out$dailyH.Connecticut <- params$q_ins * params$alpha * out$I_s.Connecticut
+  
   out$cum_modI.Connecticut <- cumsum(out$dailyI.Connecticut)
   out$cum_modH.Connecticut <- cumsum(out$dailyH.Connecticut)
+  
+  pop_ct = sum(populations)
+  out$alive_cum_incid.Connecticut = (pop_ct - out$S.Connecticut - out$E.Connecticut - out$D.Connecticut) / (pop_ct - out$D.Connecticut)
 
   #  Add cumulative for counties
   for(i in region_names){
