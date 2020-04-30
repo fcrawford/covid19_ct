@@ -134,15 +134,15 @@ return(state0)
 # Run the model 
 
 
-get_sir_results = function(daymax=ymd("2020-09-01"), 
+get_sir_results = function(daymax, 
                            lockdown_end_date, 
                            schools_reopen_date,
                            testing_on_date,
                            distancing_on_date,
                            distancing_stepdown_dates,
                            nsim=1,
-                           params = myparams,
-                           state0 = mystate0,
+                           params,
+                           state0,
                            seed = NULL) {
   # parameters, set seed if given
   if(!is.null(seed)) set.seed(seed)
