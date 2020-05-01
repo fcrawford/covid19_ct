@@ -47,7 +47,7 @@ res1 = get_sir_results(daymax=mydaymax,
 w = 900
 h = 300
 
-par(mfrow=c(5,1), mar=c(4,4,1,1))
+par(mfrow=c(7,1), mar=c(4,4,1,1))
 
 
 ymax = 2e4
