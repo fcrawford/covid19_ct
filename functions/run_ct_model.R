@@ -120,7 +120,22 @@ get_compartment <- function(data, date, toprint, start_day){
 }
 
 
+get_output <- function(data){
+  toprint <- c("rD.Connecticut", "rHsum.Connecticut")  
+  sir_result_internal <- filter(data, variable%in%toprint) %>% 
+                         ungroup(variable) %>% 
+                         mutate(variable=revalue(variable, c("rD.Connecticut"="Projected Cumulative Deaths","rHsum.Connecticut"="Projected Hospitalizations"))) %>%
+                         mutate(Date = day0 + time) %>%
+                         mutate(value = mean) %>%
+                         select(Date, variable,  value)
 
+
+  obs <- melt(DAT_CT_STATE[, c("date", "deaths", "cur_hosp")], id.vars=c("date"))
+  colnames(obs)[1] <- c("Date")
+  obs <- obs %>% mutate(variable=revalue(variable, c("deaths"="Cumulative Deaths","cur_hosp"="Hospitalizations")))
+  out <- rbind(sir_result_internal, obs)
+  return(out)
+}
 
 
 
