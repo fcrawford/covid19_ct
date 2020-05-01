@@ -111,4 +111,10 @@ plot_interventions(res1$raw_results, mydaymax, subtitle=NULL)
 
 
 
+##################################
+summary <- get_output(data=res1$summary)
+# Visual checks
+ggplot(summary, aes(x=Date, y=value, color=variable, group=variable)) + geom_line()
+write.csv(summary, file = "../output/test-output.csv", row.names=FALSE, quote=FALSE)
+
 
