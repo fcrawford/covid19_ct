@@ -99,6 +99,14 @@ connecticut_cumulative_incid_prop = plot_ct_region(data=res1$summary,
                                              which.plot="alive_cum_incid_prop",
                                              ymax=NULL)
 
+connecticut_R_eff = plot_ct_region(data=res1$summary, 
+                                             end_day=mydaymax, 
+                                             title=str,
+                                             region_name="Connecticut", 
+                                             which.plot="R_eff",
+                                             ymax=NULL)
+
+
 plot_interventions(res1$raw_results, mydaymax, subtitle=NULL)
 
 
