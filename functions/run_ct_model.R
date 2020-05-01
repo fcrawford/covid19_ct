@@ -120,20 +120,39 @@ get_compartment <- function(data, date, toprint, start_day){
 }
 
 
-get_output <- function(data){
+get_dashboard_output <- function(data, plot=TRUE, filename=NULL){
   toprint <- c("rD.Connecticut", "rHsum.Connecticut")  
-  sir_result_internal <- filter(data, variable%in%toprint) %>% 
-                         ungroup(variable) %>% 
-                         mutate(variable=revalue(variable, c("rD.Connecticut"="Projected Cumulative Deaths","rHsum.Connecticut"="Projected Hospitalizations"))) %>%
-                         mutate(Date = day0 + time) %>%
-                         mutate(value = mean) %>%
-                         select(Date, variable,  value)
+  if(is.null(names(data))) names(data) <- paste("Scenario", 1:length(data))
+  out <- NULL
+  for(i in 1:length(data)){
+      sir_result_internal <- filter(data[[i]]$summary, variable%in%toprint) %>% 
+                             ungroup(variable) %>% 
+                             mutate(variable=revalue(variable, c("rD.Connecticut"="Projected_Cumulative_Deaths","rHsum.Connecticut"="Projected_Hospitalizations"))) %>%
+                             mutate(Date = day0 + time, value = mean, Scenario=names(data)[i]) %>%
+                             select(Date, variable, value, Scenario) 
+       out <- rbind(out, sir_result_internal)                      
+  }
+  out$Scenario <- factor(out$Scenario,  levels = names(data))
 
+  obs <- DAT_CT_STATE[, c("date", "deaths", "cur_hosp")]
+  colnames(obs) <- c("Date", "Actual_Cumulative_Deaths", "Actual_Hospitalizations")
+  # add back 3/1 to 3/8
+  zeros <- data.frame(Date = day0 + c(0:(obs$Date[1] - day0 + 1)))
+  zeros$Actual_Cumulative_Deaths <- 0
+  zeros$Actual_Hospitalizations <- 0
+  obs <- rbind(zeros, obs)
 
-  obs <- melt(DAT_CT_STATE[, c("date", "deaths", "cur_hosp")], id.vars=c("date"))
-  colnames(obs)[1] <- c("Date")
-  obs <- obs %>% mutate(variable=revalue(variable, c("deaths"="Cumulative Deaths","cur_hosp"="Hospitalizations")))
-  out <- rbind(sir_result_internal, obs)
+  out <- dcast(out, Date + Scenario ~ variable,  value.var = "value")
+  out <- out %>% full_join(obs,  by = "Date") %>% arrange(Scenario, Date)
+  if(plot){
+    g <- ggplot(melt(out, id.vars=c("Date", "Scenario")), aes(x=Date, y=value, color=variable, group=variable)) + geom_line() + facet_wrap(~Scenario) + theme(legend.position = "bottom")
+    print(g)
+  }
+  out$Produced_by <- "Crawford Lab"
+  out$Produced_time <- Sys.time()
+  if(!is.null(filename)){
+    write.csv(out, file = filename, row.names=FALSE, quote=FALSE)
+  }
   return(out)
 }
 
