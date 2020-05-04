@@ -1,8 +1,8 @@
 ##########################################################
 ## Script to produce output for the dashboard
 ##########################################################
-setwd("functions/")
-source("../functions/global_var.R")
+#setwd("functions/")
+source("global_var.R")
 
 mydaymax              = ymd("2020-09-01") 
 myschools_reopen_date = ymd("2021-09-01") 
@@ -11,7 +11,7 @@ mytesting_on_date     = mydaymax + 1
 mydistancing_on_date  = mylockdown_end_date + 1 # distancing on at end of lockdown
 mydistancing_stepdown_dates = seq(ymd("2020-07-01"), ymd("2021-04-01"), length.out=10)
 
-nsim = 5
+nsim = 100
 
 #########################################################
 # First scenario
@@ -79,5 +79,5 @@ res <- list(`Scenario 1`   = res1,
 #	2. Show a plot for visual check
 #	3. Saves CSV file
 summary <- get_dashboard_output(data=res, plot=TRUE, 
-								filename = paste0("../output/model output ", Sys.Date(), ".csv"))
+								filename = paste0("../output/crawford_model_output_", Sys.Date(), ".csv"))
 

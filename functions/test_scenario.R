@@ -4,13 +4,13 @@ mydaymax              = ymd("2020-09-01")
 myschools_reopen_date = ymd("2021-09-01") 
 
 
-nsim = 1
+nsim = 100
 
 ####################################
 
 str = "\nwith release on 6/1 and phased reductions in distancing at businesses"
-mylockdown_end_date   = ymd("2020-06-01") 
-mytesting_on_date  = mydaymax
+mylockdown_end_date   = ymd("2020-05-20") 
+mytesting_on_date  = ymd("2020-05-20")
 mydistancing_on_date  = mylockdown_end_date+1 # distancing on at end of lockdown
 mydistancing_stepdown_dates = seq(ymd("2020-07-01"), ymd("2021-04-01"), length.out=10)
 
@@ -47,43 +47,46 @@ res1 = get_sir_results(daymax=mydaymax,
 w = 900
 h = 300
 
-par(mfrow=c(7,1), mar=c(4,4,1,1))
+par(mfrow=c(4,2), mar=c(4,4,1,1))
 
 
-ymax = 2e4
+
+plot_interventions(res1$raw_results, mydaymax, subtitle=NULL)
+
+
+
 connecticut_summary_dailyI = plot_ct_region(data=res1$summary, 
                                              end_day=mydaymax, 
                                              title=str,
                                              region_name="Connecticut", 
                                              which.plot="dailyI",
-                                             ymax=ymax)
+                                             ymax=NULL)
 
 
 
-ymax = 1e6
 connecticut_summary_hosp1 = plot_ct_region(data=res1$summary, 
                                              end_day=mydaymax, 
                                              title=str,
                                              region_name="Connecticut", 
                                              which.plot="cum_modI",
-                                             ymax=ymax)
+                                             ymax=NULL)
 
 
 
-ymax = 1e4
+ymax = 8e3
 connecticut_summary_hosp1 = plot_ct_region(data=res1$summary, 
                                              end_day=mydaymax, 
                                              title=str,
                                              region_name="Connecticut", 
                                              which.plot="rHsum",
                                              ymax=ymax)
-ymax = 2e4
+
 connecticut_summary_deaths1 = plot_ct_region(data=res1$summary, 
                                              end_day=mydaymax, 
                                              title=str,
                                              region_name="Connecticut", 
                                              which.plot="rD",
-                                             ymax=ymax)
+                                             ymax=NULL)
 
 connecticut_cumulative_incid = plot_ct_region(data=res1$summary, 
                                              end_day=mydaymax, 
@@ -104,11 +107,11 @@ connecticut_R_eff = plot_ct_region(data=res1$summary,
                                              title=str,
                                              region_name="Connecticut", 
                                              which.plot="R_eff",
-                                             ymax=NULL)
+                                             ymax=2, ylab="Effective reproductive number")
 
 
-plot_interventions(res1$raw_results, mydaymax, subtitle=NULL)
 
+abline(h=1, lty="dashed", col="gray")
 
 
 

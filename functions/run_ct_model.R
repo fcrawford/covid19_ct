@@ -121,16 +121,19 @@ get_compartment <- function(data, date, toprint, start_day){
 
 
 get_dashboard_output <- function(data, plot=TRUE, filename=NULL){
-  toprint <- c("rD.Connecticut", "rHsum.Connecticut")  
+  toprint <- c("rD.Connecticut", "rHsum.Connecticut", "dailyI.Connecticut", "dailyH.Connecticut")  
   if(is.null(names(data))) names(data) <- paste("Scenario", 1:length(data))
   out <- NULL
   for(i in 1:length(data)){
       sir_result_internal <- filter(data[[i]]$summary, variable%in%toprint) %>% 
                              ungroup(variable) %>% 
-                             mutate(variable=revalue(variable, c("rD.Connecticut"="Projected_Cumulative_Deaths","rHsum.Connecticut"="Projected_Hospitalizations"))) %>%
+                             mutate(variable=revalue(variable, c("rD.Connecticut"="Projected_Cumulative_Deaths",
+                                                                 "rHsum.Connecticut"="Projected_Hospitalizations",
+                                                                 "dailyI.Connecticut"="Projected_New_Infections",
+                                                                 "dailyH.Connecticut"="Projected_New_Hospitalizations"))) %>%
                              mutate(Date = day0 + time, value = mean, Scenario=names(data)[i]) %>%
                              select(Date, variable, value, Scenario) 
-       out <- rbind(out, sir_result_internal)                      
+       out <- rbind(out, sir_result_internal)
   }
   out$Scenario <- factor(out$Scenario,  levels = names(data))
 

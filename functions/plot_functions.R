@@ -53,8 +53,8 @@ plot_ct_region = function(data=NULL,
                                     "Severe infections","Mild infections",
                                     "Asymptomatic infections", 
                                     "Daily new infections", "Cumulative infections", 
-                                    "Proportion of cumulative incidents",
-                                    "Cumulative alive incidents", "R_eff"))
+                                    "Proportion of cumulative incidence",
+                                    "Cumulative incidence among living", "R_eff"))
   
  #dayseq = seq(day0, daymax, by="day")
   start_day = day0
@@ -80,7 +80,7 @@ plot_ct_region = function(data=NULL,
   }else{
     title <- paste0(lab.table$labels[lab.table$compartment==which.plot[1]], " in ", region_name, " ", title)
   }
-  if(is.null(ymax)) ymax <- max(sir_result_region$mean[sir_result_region$time <= tmax.plot], na.rm=TRUE)
+  if(is.null(ymax)) ymax <- max(sir_result_region$upper[sir_result_region$time <= tmax.plot], na.rm=TRUE)
   
   if(add){
     if(region_name %in% names(capacity_func)){
