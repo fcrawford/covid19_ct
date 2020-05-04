@@ -2,7 +2,7 @@
 ##### Epi parameters: means 
 # case type distribution
 q_A: 0.5
-q_Im: 0.44
+q_Im: 0.45
 
 # transmissibility
 beta_pre: 1.55
@@ -19,7 +19,7 @@ k_A: 0.375
 gamma_Im: 0.267   # 1/3.75
 
 # Severe: proportion going to H/Hbar stream (vs. nursing homes or alike)
-q_ins: 0.45
+q_ins: 0.55
 
 # FOI from Severe, nursing homes
 gamma_Is: 0.05555556  # 1/18
@@ -34,8 +34,8 @@ gamma_H: 0.1111111111   # 1/9
 gamma_Hbar: 0.1111111111   # 1/9
 
 # CFR
-m_H: 0.19 # among hospitalized
-m_Is_mult: 1.7 # RR among severe in nursing homes or alike
+m_H: 0.22 # among hospitalized
+m_Is_mult: 1.8 # RR among severe in nursing homes or alike
 m_Hbar_mult: 1.5 # RR among hospital overflow
 
 # other
@@ -43,7 +43,7 @@ k_n: 0.015 # transmission from adjacent counties
 
 # reporting lag (days): not user-defined
 H_lag: 5 
-D_lag: 15
+D_lag: 14
 
 # the following effects are ADDITIVE and must sum to a number <= 1
 # e.g. an effect of 0.1 reduces the intervention from 1 (full effect) to 0.9. 
