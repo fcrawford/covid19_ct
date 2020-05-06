@@ -5,7 +5,7 @@ q_A: 0.5
 q_Im: 0.45
 
 # transmissibility
-beta_pre: 1.55
+beta_pre: 1.56557
 
 # latency
 delta: 0.25   # 1/4
@@ -13,29 +13,29 @@ delta: 0.25   # 1/4
 ## FOI
 # FOI from Asymptomatic
 gamma_A: 0.1428571   # 1/7
-k_A: 0.375
+k_A: 0.3678414
 
 # FOI from Mild
 gamma_Im: 0.267   # 1/3.75
 
 # Severe: proportion going to H/Hbar stream (vs. nursing homes or alike)
-q_ins: 0.55
+q_ins: 0.52
 
 # FOI from Severe, nursing homes
 gamma_Is: 0.05555556  # 1/18
-k_Is_noins: 0.5
+k_Is_noins: 0.47
 
 # FOI from Severe, H/Hbar
 alpha: 0.091    # 1/11
 k_Is_ins: 0.6
 
 # length of hospital stay
-gamma_H: 0.1111111111   # 1/9
-gamma_Hbar: 0.1111111111   # 1/9
+gamma_H: 0.125   #1/8
+gamma_Hbar: 0.125  # 1/8 
 
 # CFR
-m_H: 0.22 # among hospitalized
-m_Is_mult: 1.8 # RR among severe in nursing homes or alike
+m_H: 0.21 # among hospitalized
+m_Is_mult: 1.62 # RR among severe in nursing homes or alike
 m_Hbar_mult: 1.5 # RR among hospital overflow
 
 # other
@@ -45,10 +45,13 @@ k_n: 0.015 # transmission from adjacent counties
 H_lag: 5 
 D_lag: 14
 
+# time point from candidate_state0 that becomes state0
+time_num: 14
+
 # the following effects are ADDITIVE and must sum to a number <= 1
 # e.g. an effect of 0.1 reduces the intervention from 1 (full effect) to 0.9. 
 # intervention effects on contact: 
-school_closure_effect: 0.18
+school_closure_effect: 0.167
 lockdown_effect: 0.69
 distancing_effect: 0.3
 
@@ -60,20 +63,20 @@ testing_effect_A: 0.2
 # standard deviations, lower and upper bounds 
 # of model parameters for uncertainty in projections
 sd_beta_pre: 0.05
-lower_beta_pre: 1.45
-upper_beta_pre: 1.65
+lower_beta_pre: 1.46
+upper_beta_pre: 1.66
 
 sd_q_Im: 0.01
-lower_q_Im: 0.42
+lower_q_Im: 0.44
 upper_q_Im: 0.46
 
 sd_gamma_H: 0.0025
-lower_gamma_H: 0.1
-upper_gamma_H: 0.12
+lower_gamma_H: 0.115
+upper_gamma_H: 0.135
 
 sd_m_H: 0.015
-lower_m_H: 0.16
-upper_m_H: 0.22
+lower_m_H: 0.19
+upper_m_H: 0.23
 
 sd_m_Hbar_mult: 0.1
 lower_m_Hbar_mult: 1.25
