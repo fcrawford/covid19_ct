@@ -51,3 +51,14 @@ CT_POPULATIONS <- global_dat$populations
 # County names in the correct order
 CT_NAMES <- colnames(CT_ADJ)
 
+
+# initial numbers exposed in each county: used to generate state0
+E_init_state0 <- c(7.8,    # 1. "Fairfield" 
+                  0.11,    # 2. "New London" 
+                  0.03,    # 3. "Litchfield" 
+                  0.01,    # 4. "Windham"  
+                  0.1,     # 5. "Tolland" 
+                  6.5,     # 6. "Hartford"
+                  0.25,    # 7. "Middlesex" 
+                  4.5)     # 8. "New Haven"
+
