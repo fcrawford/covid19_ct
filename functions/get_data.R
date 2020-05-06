@@ -16,6 +16,14 @@ dat_ct_state <- aggregate(. ~ date, data=dat2, FUN=function(x){sum(x)})
 dat_ct_state <- dat_ct_state[order(dat_ct_state$date),]
 dat_ct_state$time <- round(as.numeric(difftime(dat_ct_state$date, day0, units="days")),0) # add time variable that indexes time 
 
+# make corrections for May 2 and May 3 data to match CT DPH reports
+dat_ct_state$cases[dat_ct_state$date == "2020-05-02"] <- 29287
+dat_ct_state$cases[dat_ct_state$date == "2020-05-03"] <- 29287
+
+dat_ct_state$deaths[dat_ct_state$date == "2020-05-02"] <- 2436
+dat_ct_state$deaths[dat_ct_state$date == "2020-05-03"] <- 2495
+
+
 # calculate daily new reported cases and deaths 
 #nyt_ct$new_cases <- nyt_ct$new_deaths <- 0
 #nyt_ct$new_cases[1] <- nyt_ct$cases[1] 
@@ -49,6 +57,20 @@ hosp_last_day <- max(ct.hosp.county$time)
 dat_ct_county$cur_hosp[dat_ct_county$time > hosp_last_day] <- NA
 
 dat_ct_county$cases[is.na(dat_ct_county$cases)] <- dat_ct_county$cur_hosp[is.na(dat_ct_county$cases)]
+
+# make corrections for May 2 and May 3 data to match CT DPH reports
+dat_ct_county$cases[dat_ct_county$date == "2020-05-02" & dat_ct_county$county == "Unknown" ] <- 312
+dat_ct_county$deaths[dat_ct_county$date == "2020-05-02" & dat_ct_county$county == "Unknown" ] <- 1
+
+dat_ct_county$deaths[dat_ct_county$date == "2020-05-03" & dat_ct_county$county == "Fairfield" ] <- 886
+dat_ct_county$deaths[dat_ct_county$date == "2020-05-03" & dat_ct_county$county == "Hartford" ] <- 756
+dat_ct_county$deaths[dat_ct_county$date == "2020-05-03" & dat_ct_county$county == "Litchfield" ] <- 92
+dat_ct_county$deaths[dat_ct_county$date == "2020-05-03" & dat_ct_county$county == "Middlesex" ] <- 93
+dat_ct_county$deaths[dat_ct_county$date == "2020-05-03" & dat_ct_county$county == "New Haven" ] <- 580
+dat_ct_county$deaths[dat_ct_county$date == "2020-05-03" & dat_ct_county$county == "New London" ] <- 43
+dat_ct_county$deaths[dat_ct_county$date == "2020-05-03" & dat_ct_county$county == "Tolland" ] <- 40
+dat_ct_county$deaths[dat_ct_county$date == "2020-05-03" & dat_ct_county$county == "Windham" ] <- 3
+dat_ct_county$deaths[dat_ct_county$date == "2020-05-03" & dat_ct_county$county == "Unknown" ] <- 2
 
 
 CTmap <- readOGR("../map/wgs84/countyct_37800_0000_2010_s100_census_1_shp_wgs84.shp", verbose=FALSE)
