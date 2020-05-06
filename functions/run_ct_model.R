@@ -10,6 +10,7 @@ rparams = function(params) {
   params_tmp$beta_pre = rtruncdist(1, mean=(params$beta_pre*0.9975), sd=params$sd_beta_pre, lower=params$lower_beta_pre, upper=params$upper_beta_pre)
   params_tmp$q_Im = rtruncdist(1, mean=(params$q_Im), sd=params$sd_q_Im, lower=params$lower_q_Im, upper=params$upper_q_Im)
   params_tmp$gamma_H = rtruncdist(1, mean=params$gamma_H, sd=params$sd_gamma_H, lower=params$lower_gamma_H, upper=params$upper_gamma_H)
+  params_tmp$gamma_Hbar = params_tmp$gamma_H
   params_tmp$m_H = rtruncdist(1, mean=params$m_H, sd=params$sd_m_H, lower=params$lower_m_H, upper=params$upper_m_H)
   params_tmp$m_Hbar_mult = rtruncdist(1, mean=params$m_Hbar_mult, sd=params$sd_m_Hbar_mult, lower=params$lower_m_Hbar_mult, upper=params$upper_m_Hbar_mult)
   params_tmp$lockdown_effect = rtruncdist(1, mean=params$lockdown_effect, sd=params$sd_lockdown_effect, lower=params$lower_lockdown_effect, upper=params$upper_lockdown_effect)
@@ -42,6 +43,7 @@ get_state0 = function(init_file_csv){
       return(state0)
 }
 
+
 #######################
 # Run the model 
 
@@ -58,11 +60,12 @@ get_sir_results = function(daymax,
 
   # parameters, set seed if given
   if(!is.null(seed)) set.seed(seed)
+  
   pars <- list()
   if(nsim == 1){
-     pars[[1]] =  myparams 
+     pars[[1]] = params 
   } else { 
-    for(i in 1:nsim) pars[[i]] <- rparams(myparams)
+    for(i in 1:nsim) pars[[i]] <- rparams(params)
   } 
    
 
