@@ -1,3 +1,7 @@
+# q_Is is beta distribution
+prior.shape1.q_Is: 27
+prior.shape2.q_Is: 500
+
 # beta_pre is lognormal 
 prior.mulog.beta_pre: 0.4054651 #log(1.5)
 prior.sdlog.beta_pre: 0.15

@@ -9,23 +9,33 @@ nsim = 500
 ####################################
 
 str = "\nwith release on 6/1 and phased reductions in distancing at businesses"
+
+str = "\nwith release on 6/1"
 mylockdown_end_date   = ymd("2020-06-01") 
 mytesting_on_date  = mydaymax
 mydistancing_on_date  = mylockdown_end_date+1 # distancing on at end of lockdown
 mydistancing_stepdown_dates = seq(ymd("2020-07-01"), ymd("2021-04-01"), length.out=10)
 
 
-## choose your scenario
+## choose your scenario and get state0, params and a sample from posterior
 
-# get initial conditions
+# base scenario (low asymptomatic): q_A = 0.36, mean(q_Is) = 0.07
+mystate0 = get_state0("../data/ct_init.csv")
+myparams = yaml.load_file("../parameters/params.yml")  
+myposterior = read.csv("../data/posterior_a036.csv", stringsAsFactors=FALSE) 
+
+# alternative scenario 1 (medium asymptomatic): q_A = 0.5, mean(q_Is) = 0.05
 mystate0 = get_state0("../data/ct_init_a05.csv")
-
-# get parameter values 
 myparams = yaml.load_file("../parameters/params_a05.yml")  
-
-# load a sample from joint posterior distribution of parameters for a chosen scenario
 myposterior = read.csv("../data/posterior_a05.csv", stringsAsFactors=FALSE) 
 
+# alternative scenario 2 (high asymptomatic): q_A = 0.7, mean(q_Is) = 0.03
+mystate0 = get_state0("../data/ct_init_a07.csv")
+myparams = yaml.load_file("../parameters/params_a07.yml")  
+# posterior is in progress
+
+
+# set testing effects and distancing effect
 myparams$testing_effect_A = 0.2
 myparams$testing_effect_Im = 0.5
 
@@ -85,14 +95,14 @@ connecticut_summary_hosp1 = plot_ct_region(data=res1$summary,
 
 
 
-ymax = 2e4
+ymax = 3e4
 connecticut_summary_hosp1 = plot_ct_region(data=res1$summary, 
                                              end_day=mydaymax, 
                                              title=str,
                                              region_name="Connecticut", 
                                              which.plot="rHsum",
                                              ymax=ymax)
-ymax = 5e4
+ymax = 6.5e4
 connecticut_summary_deaths1 = plot_ct_region(data=res1$summary, 
                                              end_day=mydaymax, 
                                              title=str,

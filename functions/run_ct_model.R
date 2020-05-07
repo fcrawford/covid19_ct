@@ -150,6 +150,7 @@ rposterior = function(params, posterior){
 
 par_smpl = posterior[sample(c(1:nrow(posterior)), size = 1), ]
 
+params$q_Im = 1 - params$q_A - par_smpl$q_Is
 params$beta_pre = par_smpl$beta_pre 
 params$k_A = par_smpl$k_A
 params$k_Is_noins = par_smpl$k_Is_noins

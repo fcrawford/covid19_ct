@@ -5,7 +5,7 @@ q_A: 0.5
 q_Im: 0.45
 
 # transmissibility
-beta_pre: 1.56557
+beta_pre: 1.555
 
 # latency
 delta: 0.25   # 1/4
@@ -13,29 +13,29 @@ delta: 0.25   # 1/4
 ## FOI
 # FOI from Asymptomatic
 gamma_A: 0.1428571   # 1/7
-k_A: 0.3678414
+k_A: 0.375
 
 # FOI from Mild
 gamma_Im: 0.267   # 1/3.75
 
 # Severe: proportion going to H/Hbar stream (vs. nursing homes or alike)
-q_ins: 0.52
+q_ins: 0.56
 
 # FOI from Severe, nursing homes
 gamma_Is: 0.05555556  # 1/18
-k_Is_noins: 0.47
+k_Is_noins: 0.4
 
 # FOI from Severe, H/Hbar
 alpha: 0.091    # 1/11
 k_Is_ins: 0.6
 
 # length of hospital stay
-gamma_H: 0.125   #1/8
-gamma_Hbar: 0.125  # 1/8 
+gamma_H: 0.13  #1/7.7
+gamma_Hbar: 0.13  # 1/7.7 
 
 # CFR
-m_H: 0.21 # among hospitalized
-m_Is_mult: 1.62 # RR among severe in nursing homes or alike
+m_H: 0.20 # among hospitalized
+m_Is_mult: 1.7 # RR among severe in nursing homes or alike
 m_Hbar_mult: 1.5 # RR among hospital overflow
 
 # other
@@ -43,7 +43,7 @@ k_n: 0.015 # transmission from adjacent counties
 
 # reporting lag (days): not user-defined
 H_lag: 5 
-D_lag: 14
+D_lag: 13
 
 # time point from candidate_state0 that becomes state0
 time_num: 14
@@ -51,8 +51,8 @@ time_num: 14
 # the following effects are ADDITIVE and must sum to a number <= 1
 # e.g. an effect of 0.1 reduces the intervention from 1 (full effect) to 0.9. 
 # intervention effects on contact: 
-school_closure_effect: 0.167
-lockdown_effect: 0.69
+school_closure_effect: 0.155
+lockdown_effect: 0.705
 distancing_effect: 0.3
 
 # intervention effect on isolation/recovery for A and I_m
@@ -63,19 +63,19 @@ testing_effect_A: 0.2
 # standard deviations, lower and upper bounds 
 # of model parameters for uncertainty in projections
 sd_beta_pre: 0.05
-lower_beta_pre: 1.46
-upper_beta_pre: 1.66
+lower_beta_pre: 1.455
+upper_beta_pre: 1.655
 
 sd_q_Im: 0.01
-lower_q_Im: 0.44
-upper_q_Im: 0.46
+lower_q_Im: 0.435
+upper_q_Im: 0.465
 
 sd_gamma_H: 0.0025
-lower_gamma_H: 0.115
-upper_gamma_H: 0.135
+lower_gamma_H: 0.12
+upper_gamma_H: 0.14
 
 sd_m_H: 0.015
-lower_m_H: 0.19
+lower_m_H: 0.17
 upper_m_H: 0.23
 
 sd_m_Hbar_mult: 0.1
@@ -83,8 +83,8 @@ lower_m_Hbar_mult: 1.25
 upper_m_Hbar_mult: 1.75
 
 sd_lockdown_effect: 0.02
-lower_lockdown_effect: 0.65
-upper_lockdown_effect: 0.73
+lower_lockdown_effect: 0.665
+upper_lockdown_effect: 0.745
 
 
 # not used in simulation at the moment

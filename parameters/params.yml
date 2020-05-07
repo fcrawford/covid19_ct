@@ -2,7 +2,7 @@
 ##### Epi parameters: means 
 # case type distribution
 q_A: 0.36
-q_Im: 0.57
+q_Im: 0.567
 
 # transmissibility
 beta_pre: 1.25
@@ -13,29 +13,29 @@ delta: 0.25   # 1/4
 ## FOI
 # FOI from Asymptomatic
 gamma_A: 0.1428571   # 1/7
-k_A: 0.4
+k_A: 0.375
 
 # FOI from Mild
 gamma_Im: 0.25   # 1/4
 
 # Severe: proportion going to H/Hbar stream (vs. nursing homes or alike)
-q_ins: 0.5
+q_ins: 0.56
 
 # FOI from Severe, nursing homes
 gamma_Is: 0.05555556  # 1/18
-k_Is_noins: 0.53
+k_Is_noins: 0.4
 
 # FOI from Severe, H/Hbar
 alpha: 0.1    # 1/10
-k_Is_ins: 0.36
+k_Is_ins: 0.6
 
 # length of hospital stay
-gamma_H: 0.1111111111   # 1/9
-gamma_Hbar: 0.1111111111   # 1/9
+gamma_H: 0.13   # 1/7.7
+gamma_Hbar: 0.13   # 1/7.7
 
 # CFR
-m_H: 0.22 # among hospitalized
-m_Is_mult: 1.5 # RR among severe in nursing homes or alike
+m_H: 0.20 # among hospitalized
+m_Is_mult: 1.73 # RR among severe in nursing homes or alike
 m_Hbar_mult: 1.5 # RR among hospital overflow
 
 # other
@@ -51,7 +51,7 @@ time_num: 16
 # the following effects are ADDITIVE and must sum to a number <= 1
 # e.g. an effect of 0.1 reduces the intervention from 1 (full effect) to 0.9. 
 # intervention effects on contact: 
-school_closure_effect: 0.18
+school_closure_effect: 0.17
 lockdown_effect: 0.68
 distancing_effect: 0.3
 
@@ -67,16 +67,16 @@ lower_beta_pre: 1.15
 upper_beta_pre: 1.35
 
 sd_q_Im: 0.01
-lower_q_Im: 0.55
-upper_q_Im: 0.59
+lower_q_Im: 0.547
+upper_q_Im: 0.587
 
 sd_gamma_H: 0.0025
-lower_gamma_H: 0.1
-upper_gamma_H: 0.12
+lower_gamma_H: 0.12
+upper_gamma_H: 0.14
 
 sd_m_H: 0.015
-lower_m_H: 0.19
-upper_m_H: 0.25
+lower_m_H: 0.17
+upper_m_H: 0.23
 
 sd_m_Hbar_mult: 0.1
 lower_m_Hbar_mult: 1.25
