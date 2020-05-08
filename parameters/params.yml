@@ -50,7 +50,7 @@ D_lag: 13
 # intervention effects on contact: 
 school_closure_effect: 0.18
 lockdown_effect: 0.68
-distancing_effect: 0.3
+distancing_effect: 0.6
 
 # intervention effect on isolation/recovery for A and I_m
 # this is increase in a rate of transitioning out of infectious compartment 

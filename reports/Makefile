@@ -1,5 +1,9 @@
 
-default: CT_extra.pdf CT_demo.pdf
+default: CT_extra.pdf CT_demo.pdf CT_report.pdf
+
+
+CT_report.pdf: CT_report.Rmd  
+	Rscript --vanilla -e "rmarkdown::render(\"CT_report.Rmd\", output_format=\"pdf_document\", output_file=\"CT_report.pdf\")"
 
 #  Extra parameter doc from Olya
 CT_extra.pdf: CT_extra.Rmd  

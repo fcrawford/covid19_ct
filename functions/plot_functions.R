@@ -31,7 +31,9 @@ plot_ct_region = function(data=NULL,
                           obs_state = DAT_CT_STATE,
                           obs_county = DAT_CT_COUNTY, 
                           ymax = NULL,
-                          sentence=TRUE) {
+                          sentence=TRUE,
+                          show.data=TRUE, 
+                          title.override=NULL) {
 
  
 
@@ -77,9 +79,16 @@ plot_ct_region = function(data=NULL,
 
   if(is.null(title)){
     title <- paste0(lab.table$labels[lab.table$compartment==which.plot[1]], " in ", region_name)
-  }else{
+  } else {
     title <- paste0(lab.table$labels[lab.table$compartment==which.plot[1]], " in ", region_name, " ", title)
   }
+
+  if(!is.null(title.override)) {
+    title = title.override
+  }
+
+
+
   if(is.null(ymax)) ymax <- max(sir_result_region$upper[sir_result_region$time <= tmax.plot], na.rm=TRUE)
   
   if(add){
@@ -132,9 +141,9 @@ plot_ct_region = function(data=NULL,
 
   # Add observed deaths
   col.line <- lab.table$color[which(lab.table$compartment=="D")]
-  if(region_name == "Connecticut" && "rD" %in% which.plot) {
+  if(region_name == "Connecticut" && "rD" %in% which.plot && show.data) {
     points(obs_state$time, obs_state$deaths, pch=16, cex=0.6, col=col.line) 
-  } else if("rD" %in% which.plot) {
+  } else if("rD" %in% which.plot && show.data) {
     obs.region <- subset(obs_county, county == region_name)
     obs.region$date <- ymd(obs.region$date)
     first.region.time <- round(as.numeric(difftime(obs.region$date[1], start_day, units="days")),0)
@@ -145,9 +154,9 @@ plot_ct_region = function(data=NULL,
 
   # Add observed hospitalization
   col.line <- lab.table$color[which(lab.table$compartment=="H")]
-  if(region_name == "Connecticut" && ("rH" %in% which.plot || "rHsum" %in% which.plot))  {
+  if(region_name == "Connecticut" && ("rH" %in% which.plot || "rHsum" %in% which.plot) && show.data)  {
       points(obs_state$time, obs_state$cur_hosp, pch=16, cex=0.6, col=col.line) 
-  } else if("rH" %in% which.plot || "rHsum" %in% which.plot) {
+  } else if(("rH" %in% which.plot || "rHsum" %in% which.plot) && show.data) {
     obs.region <- subset(obs_county, county == region_name)
     obs.region$date <- ymd(obs.region$date)
     first.region.time <- round(as.numeric(difftime(obs.region$date[1], start_day, units="days")),0)

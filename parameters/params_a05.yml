@@ -50,7 +50,7 @@ D_lag: 14
 # intervention effects on contact: 
 school_closure_effect: 0.18
 lockdown_effect: 0.69
-distancing_effect: 0.3
+distancing_effect: 0.6
 
 # intervention effect on isolation/recovery for A and I_m
 # this is increase in a rate of transitioning out of infectious compartment 
@@ -72,8 +72,8 @@ lower_gamma_H: 0.1
 upper_gamma_H: 0.12
 
 sd_m_H: 0.015
-lower_m_H: 0.16
-upper_m_H: 0.22
+lower_m_H: 0.19
+upper_m_H: 0.25
 
 sd_m_Hbar_mult: 0.1
 lower_m_Hbar_mult: 1.25

@@ -1,4 +1,4 @@
-source("../functions/global_var.R")
+source("global_var.R")
 
 mydaymax              = ymd("2020-09-01") 
 myschools_reopen_date = ymd("2021-09-01") 
@@ -12,22 +12,21 @@ str = "\nwith release on 6/1 and phased reductions in distancing at businesses"
 mylockdown_end_date   = ymd("2020-05-20") 
 mytesting_on_date  = ymd("2020-05-20")
 mydistancing_on_date  = mylockdown_end_date+1 # distancing on at end of lockdown
-mydistancing_stepdown_dates = seq(ymd("2020-07-01"), ymd("2021-04-01"), length.out=10)
+mydistancing_stepdown_dates = seq(ymd("2020-06-01"), ymd("2020-10-01"), length.out=10)
 
 
 ## choose your scenario
 
 # get initial conditions
-mystate0 = get_state0("../data/ct_init_a07.csv")
+mystate0 = get_state0("../data/ct_init_a05.csv")
 
 # get parameter values 
-myparams = yaml.load_file("../parameters/params_a07.yml")  
+myparams = yaml.load_file("../parameters/params_a05.yml")  
 
 
-myparams$testing_effect_A = 0.2
-myparams$testing_effect_Im = 0.5
-
-myparams$distancing_effect = 0.6
+#myparams$testing_effect_A = 0.2
+#myparams$testing_effect_Im = 0.5
+#myparams$distancing_effect = 0.6
 
 ####################################
 
@@ -46,6 +45,7 @@ res1 = get_sir_results(daymax=mydaymax,
 
 w = 900
 h = 300
+
 
 par(mfrow=c(4,2), mar=c(4,4,1,1))
 
@@ -111,7 +111,7 @@ connecticut_R_eff = plot_ct_region(data=res1$summary,
 
 
 
-abline(h=1, lty="dashed", col="gray")
+abline(h=1, lty="dotted", col="gray")
 
 
 

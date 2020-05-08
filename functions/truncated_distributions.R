@@ -15,6 +15,15 @@ rtruncdist = function(nsamples, mean, sd, lower, upper) {
   a = ( (1-mu)/v - 1/mu ) * mu^2
   b = a * (1/mu - 1)
   res = lower + (upper - lower)*rbeta(nsamples, shape1=a, shape2=b)
+
+  if(any(is.na(res))) {
+    cat("mean =", mean, "\n")
+    cat("lower =", lower, "\n")
+    cat("upper =", upper, "\n")
+    cat("sd =", sd, "\n")
+    stop("NA's in res")
+  }
+
   return(res)
 }
 
