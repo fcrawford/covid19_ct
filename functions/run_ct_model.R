@@ -64,6 +64,8 @@ get_state0 = function(init_file_csv){
 get_state0_params <- function(params, E_init_state0, populations, adj, county_capacities){
 
 nregions = length(E_init_state0)
+dmax = day0 + params$time_num + 10
+dayseq = seq(day0, dmax, by="day")
 tmax = params$time_num + 1
 
 params_tmp <- params
@@ -184,7 +186,10 @@ return( list (params, state0) )
 
 
 #######################
-# Run the model 
+## Run the model 
+# draw_rparams controls uncertainty simulation: 
+# if draw_rparams = TRUE, parameters are drawn independently using rparams()
+# if draw_rparams = TRUE, parameters are drawn from joint posterior supplied as 'posterior'
 
 get_sir_results = function(daymax, 
                            lockdown_end_date, 
@@ -195,83 +200,27 @@ get_sir_results = function(daymax,
                            nsim=1,
                            params,
                            state0,
-                           seed = NULL) {
-
-  # parameters, set seed if given
-  if(!is.null(seed)) set.seed(seed)
-  
-  pars <- list()
-  if(nsim == 1){
-     pars[[1]] = params 
-  } else { 
-    for(i in 1:nsim) pars[[i]] <- rparams(params)
-  } 
-   
-
-  dayseq = seq(day0, daymax, by="day")
-  tmax = as.numeric(difftime(daymax, day0, units="days"))
-
-  lockfun = get_state_lockdown_fun(dayseq, offdate=lockdown_end_date)
-  schoolsfun = get_school_in_session_fun(dayseq, schools_reopen_date=schools_reopen_date)
-  testingfun = get_testing_on_fun(dayseq, testing_on_date=testing_on_date)
-  distancingfun = get_distancing_stepdown_fun(dayseq, distancing_on_date=distancing_on_date, distancing_stepdown_dates=distancing_stepdown_dates)
-
-  interventions = list(lockdown=lockfun, schools=schoolsfun, testing=testingfun, distancing=distancingfun) 
-
-  sir_results = lapply(1:nsim, function(i){
-    res = run_sir_model(state0=state0, 
-                        params=pars[[i]],  # note: effect_intvx is in params, and is not passed to run_sir_model separately 
-                        region_adj=CT_ADJ, 
-                        populations=CT_POPULATIONS, 
-                        tmax=tmax, 
-                        interventions=interventions,
-                        capacities=COUNTY_CAPACITIES)
-    res$sim_id = i
-    res
-  })
-
-  sir_results_all = ldply(sir_results, rbind)
-  for(nm in c("Connecticut", colnames(CT_ADJ))){
-    sir_results_all[, paste0("rHsum.", nm)] <-  sir_results_all[,paste0("rH.", nm)]+sir_results_all[,paste0("rHbar.", nm)]
-  }
-  sir_results_long <- melt(sir_results_all, id.vars = c("time", "sim_id"))
-  sir_results_summary <- sir_results_long %>% group_by(variable, time) %>% 
-			                     summarise(
-                             mean = mean(value),
-			                       lower = quantile(value, 0.05, na.rm=TRUE),
-			                       upper = quantile(value, 0.95, na.rm=TRUE))
-  return(list(raw_results=sir_results, summary=sir_results_summary))
-}
-
-
-
-
-
-
-
-
-
-#######################
-# Run the model with inputs from rposterior
-
-get_sir_results_post = function(daymax, 
-                           lockdown_end_date, 
-                           schools_reopen_date,
-                           testing_on_date,
-                           distancing_on_date,
-                           distancing_stepdown_dates,
-                           nsim=1,
-                           params,
-                           state0,
                            posterior,
+                           draw_rparams = FALSE,
                            seed = NULL) {
 
-  # parameters, set seed if given
-  if(!is.null(seed)) set.seed(seed)
+ pars <- list()
+ state0s <- list()
    
-  pars <- list()
-  state0s <- list()
+# parameters, set seed if given
+  if(!is.null(seed)) set.seed(seed)
   
+  if (draw_rparams == TRUE){
+       if(nsim == 1){
+     pars[[1]] = params 
+     state0s[[1]] = state0
+  } else { 
+    for(i in 1:nsim){ 
+       pars[[i]] <- rparams(params)
+       state0s[[i]] = state0
+    }
+  } 
+} else {
   if(nsim == 1){
      pars[[1]] = params
      state0s[[1]] = state0
@@ -282,7 +231,7 @@ get_sir_results_post = function(daymax,
        state0s[[i]] = rpost_out[[2]]
     }
   } 
-   
+}   
 
   dayseq = seq(day0, daymax, by="day")
   tmax = as.numeric(difftime(daymax, day0, units="days"))

@@ -23,6 +23,7 @@ geometry: margin=0.75in
 source("../functions/global_var.R")
 mystate0 = get_state0("../data/ct_init.csv")
 myparams = yaml.load_file("../parameters/params.yml")  
+myposterior = read.csv("../data/posterior_a036.csv", stringsAsFactors=FALSE) 
 
 mydaymax              = ymd("2020-09-01") 
 myschools_reopen_date = ymd("3000-01-01")
@@ -42,7 +43,9 @@ res1 = get_sir_results(daymax=mydaymax,
                       params=myparams,
                       state0=mystate0,
                       nsim=nsim,
-                      seed=12345)
+                      seed=12345,
+                      posterior = myposterior,
+                      draw_rparams = FALSE )
 
 # Scenario 2
 mylockdown_end_date2   = ymd("2020-07-01") 
@@ -56,7 +59,9 @@ res2 = get_sir_results(daymax=mydaymax,
                       params=myparams,
                       state0=mystate0,
                       nsim=nsim,
-                      seed=12345)
+                      seed=12345,
+                      posterior = myposterior,
+                      draw_rparams = FALSE )
 
 # Put into one list
 mytitles <- list("Stay-at-home order in place until 6/1", 

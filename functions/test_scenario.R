@@ -4,7 +4,7 @@ mydaymax              = ymd("2020-09-01")
 myschools_reopen_date = ymd("2021-09-01") 
 
 
-nsim = 500
+nsim = 50
 
 ####################################
 
@@ -32,7 +32,7 @@ myposterior = read.csv("../data/posterior_a05.csv", stringsAsFactors=FALSE)
 # alternative scenario 2 (high asymptomatic): q_A = 0.7, mean(q_Is) = 0.03
 mystate0 = get_state0("../data/ct_init_a07.csv")
 myparams = yaml.load_file("../parameters/params_a07.yml")  
-# posterior is in progress
+myposterior = read.csv("../data/posterior_a07.csv", stringsAsFactors=FALSE) 
 
 
 # set testing effects and distancing effect
@@ -43,28 +43,18 @@ myparams$distancing_effect = 0.6
 
 ####################################
 
-# run simulation sampling params independently using rparams() function 
-res1 = get_sir_results(daymax=mydaymax,
-                      lockdown_end_date=mylockdown_end_date,
-                      schools_reopen_date=myschools_reopen_date,
-                      testing_on_date=mytesting_on_date,
-                      distancing_on_date=mydistancing_on_date, 
-                      distancing_stepdown_dates=mydistancing_stepdown_dates,
-                      nsim=nsim,
-                      params = myparams,
-                      state0 = mystate0)
-
 # run simulation sampling parameters from joint posterior 
-res1 = get_sir_results_post(daymax=mydaymax,
-                           lockdown_end_date=mylockdown_end_date,
-                           schools_reopen_date=myschools_reopen_date,
-                           testing_on_date=mytesting_on_date,
-                           distancing_on_date=mydistancing_on_date, 
-                           distancing_stepdown_dates=mydistancing_stepdown_dates,
-                           nsim=nsim,
-                           params = myparams,
-                           state0 = mystate0,
-                           posterior = myposterior)
+res1 = get_sir_results( daymax=mydaymax,
+                        lockdown_end_date=mylockdown_end_date,
+                        schools_reopen_date=myschools_reopen_date,
+                        testing_on_date=mytesting_on_date,
+                        distancing_on_date=mydistancing_on_date, 
+                        distancing_stepdown_dates=mydistancing_stepdown_dates,
+                        nsim=nsim,
+                        params = myparams,
+                        state0 = mystate0,
+                        posterior = myposterior,
+                        draw_rparams = FALSE )
 
 
 ####################################

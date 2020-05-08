@@ -20,6 +20,9 @@ nsim = 5
 mystate0 = get_state0("../data/ct_init_a07.csv")
 # get parameter values 
 myparams = yaml.load_file("../parameters/params_a07.yml")  
+# get sample from posterior
+myposterior = read.csv("../data/posterior_a07.csv", stringsAsFactors=FALSE) 
+
 myparams$testing_effect_A = 0.2
 myparams$testing_effect_Im = 0.5
 
@@ -33,7 +36,9 @@ res1 = get_sir_results(daymax=mydaymax,
                       distancing_stepdown_dates=mydistancing_stepdown_dates,
                       nsim=nsim,
                       params = myparams,
-                      state0 = mystate0)
+                      state0 = mystate0,
+                      posterior = myposterior,
+                      draw_rparams = FALSE )
 
 
 #########################################################
@@ -48,7 +53,9 @@ res2 = get_sir_results(daymax=mydaymax,
                       distancing_stepdown_dates=mydistancing_stepdown_dates,
                       nsim=nsim,
                       params = myparams,
-                      state0 = mystate0)
+                      state0 = mystate0,
+                      posterior = myposterior,
+                      draw_rparams = FALSE )
 
 
 #########################################################
@@ -63,7 +70,9 @@ res3 = get_sir_results(daymax=mydaymax,
                       distancing_stepdown_dates=mydistancing_stepdown_dates,
                       nsim=nsim,
                       params = myparams,
-                      state0 = mystate0)
+                      state0 = mystate0,
+                      posterior = myposterior,
+                      draw_rparams = FALSE )
 
 
 
