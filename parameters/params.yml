@@ -78,9 +78,9 @@ sd_m_H: 0.015
 lower_m_H: 0.17
 upper_m_H: 0.23
 
-sd_m_Hbar_mult: 0.1
-lower_m_Hbar_mult: 1.25
-upper_m_Hbar_mult: 1.75
+sd_m_Hbar_mult: 0.25
+lower_m_Hbar_mult: 1.00
+upper_m_Hbar_mult: 2.00
 
 sd_lockdown_effect: 0.02
 lower_lockdown_effect: 0.64
