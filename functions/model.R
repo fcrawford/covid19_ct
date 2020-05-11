@@ -89,22 +89,22 @@ run_sir_model = function(state0, params, region_adj, populations, tmax, interven
       
       ##################
       
-      # k_A        relative transmission from asymptomatic infectives
       # delta      1/latency period
       # q_A        % infectious and asymptomatic
       # q_Im       % infectious and mild
-      # q_ins      % severe and insured (can move to either H or Hbar)
+      # q_ins      % severe and outside of nursing homes or "insured" (can move to either H or Hbar)
       # alpha      rate at which severe cases need hospitalization/care
       # gamma_A    recovery/removal rate of asymptomatic
       # gamma_Im   recovery/removal rate of mild
       # gamma_H    recovery/removal rate of hospitalized 
-      # gamma_Hbar recovery/removal rate of unhosp
-      # gamma_Is   recovery/removal rate of severe uninsured
+      # gamma_Hbar recovery/removal rate of hospital overflow group
+      # gamma_Is   recovery/removal rate of severe in nursing homes or uninsured
       # m_H        % hospitalized severe that die
-      # m_Hbar     % unhospitalized severe that die
-      # m_Is       % uninsured severe that die
-      # k_Is_ins   relative transmission from severe insured before they get admitted to a hospital: added to delay death without increasing FOI
-      # k_Is_noins relative transmission from severe uninsured: added to delay death without increasing FOI
+      # m_Hbar     % hospital overflow severe that die
+      # m_Is       % severe in nursing homes or uninsured that die
+      # k_A        relative transmission from asymptomatic infectives
+      # k_Is_ins   isolation coefficient among severe insured before they get admitted to a hospital: added to delay death without increasing FOI
+      # k_Is_noins isolation coefficient among severe in nursing homes or uninsured: added to delay death without increasing FOI
       
       #################
   
@@ -125,7 +125,7 @@ run_sir_model = function(state0, params, region_adj, populations, tmax, interven
       
       dD    <- gamma_H*m_H*H + gamma_Hbar*m_Hbar*Hbar + (1 - q_ins)*gamma_Is*m_Is*I_s
       
-      dR    <- gamma_H*(1 - m_H)*H + gamma_Hbar*(1 - m_Hbar)*Hbar + (1-q_ins)*gamma_Is*(1 - m_Is)*I_s + gamma_Im*I_m + gamma_A*A
+      dR    <- gamma_H*(1 - m_H)*H + gamma_Hbar*(1 - m_Hbar)*Hbar + (1-q_ins)*gamma_Is*(1 - m_Is)*I_s + (1 + a_t_Im) * gamma_Im*I_m + (1 + a_t_A) * gamma_A*A
 
       return(list(c(dS,dE,dI_s,dI_m,dA,dH,dHbar,dD,dR)))
     })
@@ -157,17 +157,26 @@ run_sir_model = function(state0, params, region_adj, populations, tmax, interven
   out$D.Connecticut    = rowSums(out[,paste0("D.", region_names, sep="")])
   out$R.Connecticut    = rowSums(out[,paste0("R.", region_names, sep="")])
 
+  
+  ## track modified or combined compartments for CT
+  
+  # daily new infections 
   out$dailyI.Connecticut <- params$delta * out$E.Connecticut
+  # daily new hospitalizations
   out$dailyH.Connecticut <- params$q_ins * params$alpha * out$I_s.Connecticut
   
+  # cumulative infections, including those who died
   out$cum_modI.Connecticut <- cumsum(out$dailyI.Connecticut)
+  # cumulative hospitalizations
   out$cum_modH.Connecticut <- cumsum(out$dailyH.Connecticut)
   
   pop_ct = sum(populations)
+  # number and proportion of alive cumulative incidence: sum of currently infected and recovered
   out$alive_cum_incid_num.Connecticut = pop_ct - out$S.Connecticut - out$E.Connecticut - out$D.Connecticut
   out$alive_cum_incid_prop.Connecticut = out$alive_cum_incid_num.Connecticut / (pop_ct - out$D.Connecticut)
 
-  #  Add cumulative for counties
+  
+  # daily and cumulative hospitalizations for counties
   for(i in region_names){
     dailyH <- params$q_ins * params$alpha * out[[paste0("I_s.", i)]]
     out[[paste0("cum_modH.", i)]] <- cumsum(dailyH)
@@ -184,6 +193,7 @@ run_sir_model = function(state0, params, region_adj, populations, tmax, interven
   idx_H_lag = 1:(nrow(out) - H_lag)
   idx_D_lag = 1:(nrow(out) - D_lag)
   
+  # add lagged compartments for CT: deaths, current hospitalizations, cumulative hospitalizations
   out$rD.Connecticut <- out$rH.Connecticut <- out$rHbar.Connecticut <- out$rcum_modH.Connecticut <-  0
   
   for (k in idx_H_lag){
@@ -196,6 +206,7 @@ run_sir_model = function(state0, params, region_adj, populations, tmax, interven
     out$rD.Connecticut[k+D_lag] <- out$D.Connecticut[k]
   }
   
+  # add lagged compartments for counties: deaths and current hospitalizations
   for(i in region_names){
     out[[paste0("rH.", i)]] <- out[[paste0("rHbar.", i)]] <- out[[paste0("rD.", i)]] <- 0
     
@@ -209,21 +220,34 @@ run_sir_model = function(state0, params, region_adj, populations, tmax, interven
     }
   }  
   
+  
   ## intervention patterns ##  
   out$intervention_pattern = contact_intervention_fun(1:(tmax+1))
   out$intervention_schools = interventions$schools(1:(tmax+1))
   out$intervention_lockdown = interventions$lockdown(1:(tmax+1))
   out$intervention_testing = interventions$testing(1:(tmax+1))
 
-  # compute dynamics of R_eff
+  
+  
+  # current number of infections outside of hospitals and nursing homes at the state level; includes asymptomatic and those isolated at home
+  out$isolated_Im.Connecticut = 0
+  for (k in 2:nrow(out)){
+    out$isolated_Im.Connecticut[k] = ( out$I_m.Connecticut[k] * (1 + out$intervention_testing[k] * params$testing_effect_Im) * params$gamma_Im - 
+      out$isolated_Im.Connecticut[k-1] * (1/params$dur_isolation) * (1 + out$intervention_testing[k] * params$testing_effect_Im) )
+  }
+  out$currentI.Connecticut = out$I_m.Connecticut + out$isolated_Im.Connecticut + out$A.Connecticut + params$q_ins * out$I_s.Connecticut
+  
+  
+  
+  # compute dynamics of R_eff at the state level
   # R_eff takes into account social distancing, testing effect in reducing FOI and depletion of susceptibles
   FOI_init <- ( params$q_A * params$k_A / params$gamma_A 
               + params$q_Im / params$gamma_Im 
               + (1 - params$q_Im - params$q_A) * params$q_ins * params$k_Is_ins / params$alpha  
               + (1 - params$q_Im - params$q_A) * (1 - params$q_ins) * params$k_Is_noins / params$gamma_Is )
   
-  FOI_testing = ( params$q_A * params$k_A / ( (1 + params$testing_effect_Im) * params$gamma_A )
-              + params$q_Im / ( (1 + params$testing_effect_A) * params$gamma_Im ) 
+  FOI_testing = ( params$q_A * params$k_A / ( (1 + params$testing_effect_A) * params$gamma_A )
+              + params$q_Im / ( (1 + params$testing_effect_Im) * params$gamma_Im ) 
               + (1 - params$q_Im - params$q_A) * params$q_ins * params$k_Is_ins / params$alpha  
               + (1 - params$q_Im - params$q_A) * (1 - params$q_ins) * params$k_Is_noins / params$gamma_Is )
   

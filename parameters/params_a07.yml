@@ -3,6 +3,7 @@
 # case type distribution
 q_A: 0.7
 q_Im: 0.27
+q_Is: 0.03
 
 # transmissibility
 beta_pre: 2.03
@@ -17,6 +18,7 @@ k_A: 0.375
 
 # FOI from Mild
 gamma_Im: 0.25   # 1/4
+dur_isolation: 7 # average duration of isolation before recovery, days (10-3)
 
 # Severe: proportion going to H/Hbar stream (vs. nursing homes or alike)
 q_ins: 0.58
