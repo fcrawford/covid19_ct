@@ -70,6 +70,17 @@ out <- plot_ct_region(res1$summary, end_day=ymd("2020-06-01"), region_name="New 
 					  which.plot="rD", sentence=FALSE)
 ```
 
+### Plot new trajectories
+```{r, echo=TRUE, include=TRUE}
+out <- plot_ct_region(res1$summary, end_day=mydaymax, region_name="New Haven",
+            which.plot="NH", sentence=FALSE)
+```
+
+```{r, echo=TRUE, include=TRUE}
+out <- plot_ct_region(res1$summary, end_day=mydaymax, region_name="Connecticut",
+            which.plot="currentI_prop", sentence=FALSE)
+```
+
 
 ### Plot maps
 ```{r, echo=TRUE, include=TRUE}
