@@ -74,10 +74,9 @@ get_distancing_stepdown_fun = function(dayseq, distancing_on_date, distancing_st
 ###########################
 
 get_R0 = function(params) {
-  R0 = params$beta_pre * (  params$q_A * params$k_A / params$gamma_A 
-                          + params$q_Im / params$gamma_Im 
-                          + (1 - params$q_Im - params$q_A) * params$q_ins * params$k_Is_ins / params$alpha  
-                          + (1 - params$q_Im - params$q_A) * (1 - params$q_ins) * params$k_Is_noins / params$gamma_Is ) 
+  R0 = params$beta_pre * ( params$q_A * params$k_A / params$alpha_A 
+                          + (1 - params$q_Is - params$q_A) / params$alpha_Im 
+                          + params$q_Is * params$k_Is / params$alpha_Is  ) 
   return(R0)
 }
 
@@ -96,33 +95,33 @@ get_R_lockdown = function(params){
 ######################### 
 
 
-release_age_thresh <- function(threshold_age, lockdown_effect){
-
-  dat <- read.csv('../data/severity.csv', stringsAsFactors=FALSE) 
-
-  # current age proportions
-  ageprops = dat$pr_age
-
-  # avg_severity_prop = ageprops %*% dat$pr_severe # not used
-
-  release_ageprops = ageprops * (dat$max_age<threshold_age) # zero out older proportions 
-  prop_released = sum(release_ageprops) # the proportion being released
-
-  # normalized age proportions to be released
-  release_ageprops_normalized = release_ageprops / prop_released
-
-  # new age proportion not locked down: a mixture of locked down ageprops and the released people in the rest, normalized
-  new_ageprops = (lockdown_effect*ageprops + (1-lockdown_effect)*prop_released*release_ageprops_normalized) / (lockdown_effect + (1-lockdown_effect)*prop_released)
-
-  # our lockdown effect gets bigger (worse)
-  new_lockdown_effect = lockdown_effect + (1-lockdown_effect)*prop_released
-
-  # new average severity for released
-  new_avg_severity_prop = sum(new_ageprops * dat$pr_severe)
-
-  return(list(new_lockdown_effect=new_lockdown_effect, new_avg_severity_prop=new_avg_severity_prop))
-
-}
+# release_age_thresh <- function(threshold_age, lockdown_effect){
+# 
+#   dat <- read.csv('../data/severity.csv', stringsAsFactors=FALSE) 
+# 
+#   # current age proportions
+#   ageprops = dat$pr_age
+# 
+#   # avg_severity_prop = ageprops %*% dat$pr_severe # not used
+# 
+#   release_ageprops = ageprops * (dat$max_age<threshold_age) # zero out older proportions 
+#   prop_released = sum(release_ageprops) # the proportion being released
+# 
+#   # normalized age proportions to be released
+#   release_ageprops_normalized = release_ageprops / prop_released
+# 
+#   # new age proportion not locked down: a mixture of locked down ageprops and the released people in the rest, normalized
+#   new_ageprops = (lockdown_effect*ageprops + (1-lockdown_effect)*prop_released*release_ageprops_normalized) / (lockdown_effect + (1-lockdown_effect)*prop_released)
+# 
+#   # our lockdown effect gets bigger (worse)
+#   new_lockdown_effect = lockdown_effect + (1-lockdown_effect)*prop_released
+# 
+#   # new average severity for released
+#   new_avg_severity_prop = sum(new_ageprops * dat$pr_severe)
+# 
+#   return(list(new_lockdown_effect=new_lockdown_effect, new_avg_severity_prop=new_avg_severity_prop))
+# 
+# }
 
 
 ###########################
