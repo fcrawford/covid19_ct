@@ -161,6 +161,7 @@ plot_ct_region = function(data=NULL,
 
 
   region_summary <- NULL
+  count.min <- count.max <- NA
   if("D" %in% which.plot || "rD" %in% which.plot){
       sir_result_region_sub <- filter(sir_result_region, variable==paste0(which.plot[1],".",region_name))
       count <- sir_result_region_sub$mean[sir_result_region_sub$time==tmax.plot]
