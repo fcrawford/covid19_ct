@@ -26,13 +26,13 @@ source("../functions/intervention_functions.R")
 
 ## Case type distribution
 
-Probability of severe disease that may lead to death among all infections: \textbf{`r round(1 - params_init$q_Im - params_init$q_A, 3)`}. 
+Probability of severe disease that may lead to death among all infections: \textbf{`r round(params_init$q_Is, 3)`}. 
 
-Probability of severe disease among symptomatic patients: \textbf{`r round( (1 - params_init$q_Im - params_init$q_A) / (1 - params_init$q_A), 3)`}. 
+Probability of severe disease among symptomatic patients: \textbf{`r round( params_init$q_Is / (1 - params_init$q_A), 3)`}. 
 
-Proportion of severe infections, which will lead to hospitalization unless there is a hospital overflow: \textbf{`r params_init$q_ins`}. The rest \textbf{`r (1 - params_init$q_ins)`} of severe infections are people in nursing homes, people, who do not have access to hospitalization, or people hospitalized in other states.
+Proportion of severe infections, which will lead to hospitalization unless there is a hospital overflow: \textbf{`r params_init$q_H`}. The rest \textbf{`r (1 - params_init$q_H)`} of severe infections are people in nursing homes, prisons, people, who do not have access to hospitalization, or people hospitalized in other states.
 
-Proportion of all infections (including asymptomatic) that end up hospitalized: \textbf{`r round((1 - params_init$q_Im - params_init$q_A) * params_init$q_ins, 3)`}.
+Proportion of all infections (including asymptomatic) that end up hospitalized: \textbf{`r round( params_init$q_Is * params_init$q_H, 3)`}.
 
 Probability of mild disease that does not require hospitalization and will lead to recovery: \textbf{`r round(params_init$q_Im, 3)`}. 
 
@@ -43,13 +43,13 @@ Probability of asymptomatic infection: \textbf{`r params_init$q_A`}.
 
 CFR among hospitalized: \textbf{`r params_init$m_H`}.
 
-CFR among severe cases in nursing homes or among people with no access to hospitalization: \textbf{`r params_init$m_H * params_init$m_Is_mult`}.
+CFR among severe cases in nursing homes or among people with no access to hospitalization: \textbf{`r params_init$m_H * params_init$m_NH_mult`}.
 
-CFR among all severe cases: \textbf{`r round( with(params_init, q_ins * m_H + (1 - q_ins) * m_H * m_Is_mult ), 2)`}.
+CFR among all severe cases: \textbf{`r round( with(params_init, q_H * m_H + (1 - q_H) * m_H * m_NH_mult ), 2)`}.
 
-CFR among symptomatic infections: \textbf{ `r round( with (params_init, (1 - q_A - q_Im) * (q_ins * m_H + (1 - q_ins) * m_H * m_Is_mult) / (1 - q_A) ), 3) `}.
+CFR among symptomatic infections: \textbf{ `r round( with (params_init, q_Is * (q_H * m_H + (1 - q_H) * m_H * m_NH_mult) / (1 - q_A) ), 3) `}.
 
-CFR among all infections (aka IFR): \textbf{`r round( with (params_init, (1 - q_A - q_Im) * (q_ins * m_H + (1 - q_ins) * m_H * m_Is_mult) ), 3) `}. 
+CFR among all infections (aka IFR): \textbf{`r round( with (params_init, q_Is * (q_H * m_H + (1 - q_H) * m_H * m_NH_mult) ), 3) `}. 
 
 
 ## Reproductive numbers 
@@ -69,112 +69,6 @@ Reproductive number after lockdown lift (no testing effect): \textbf{`r round(ge
 
 
 
-
-```{r, echo=FALSE, include=FALSE}
-params_init = yaml.load_file("../parameters/params_a05.yml") 
-```
-
-
-# Scenario: proportion of asymptomatic infections = \textbf{`r params_init$q_A`}
-
-## Case type distribution
-
-Probability of severe disease that may lead to death among all infections: \textbf{`r round(1 - params_init$q_Im - params_init$q_A, 3)`}. 
-
-Probability of severe disease among symptomatic patients: \textbf{`r round( (1 - params_init$q_Im - params_init$q_A) / (1 - params_init$q_A), 3)`}. 
-
-Proportion of severe infections, which will lead to hospitalization unless there is a hospital overflow: \textbf{`r params_init$q_ins`}. The rest \textbf{`r (1 - params_init$q_ins)`} of severe infections are people in nursing homes, people, who do not have access to hospitalization, or people hospitalized in other states.
-
-Proportion of all infections (including asymptomatic) that end up hospitalized: \textbf{`r round((1 - params_init$q_Im - params_init$q_A) * params_init$q_ins, 3)`}.
-
-Probability of mild disease that does not require hospitalization and will lead to recovery: \textbf{`r round(params_init$q_Im, 3)`}. 
-
-Probability of asymptomatic infection: \textbf{`r params_init$q_A`}. 
-
-
-## CFR: probability of death
-
-CFR among hospitalized: \textbf{`r params_init$m_H`}.
-
-CFR among severe cases in nursing homes or among people with no access to hospitalization: \textbf{`r params_init$m_H * params_init$m_Is_mult`}.
-
-CFR among all severe cases: \textbf{`r round( with(params_init, q_ins * m_H + (1 - q_ins) * m_H * m_Is_mult ), 2)`}.
-
-CFR among symptomatic infections: \textbf{ `r round( with (params_init, (1 - q_A - q_Im) * (q_ins * m_H + (1 - q_ins) * m_H * m_Is_mult) / (1 - q_A) ), 3) `}.
-
-CFR among all infections (aka IFR): \textbf{`r round( with (params_init, (1 - q_A - q_Im) * (q_ins * m_H + (1 - q_ins) * m_H * m_Is_mult) ), 3) `}. 
-
-
-## Reproductive numbers 
-
-"Crude" basic reproductive number: \textbf{`r round(get_R0(params_init), 1)`}.
-
-This value of basic reproductive number is not adjusted for infections "imported" fron NYC at early stages of the epidemic. Assuming that imported infections, in particular in Fairfield, accounted for one third of all infections (equivalently number of imported infections is half of locally acquired), the "adjusted" basic reproductive number equals  \textbf{`r round(get_R0(params_init)/1.5, 1)`}.
-
-Reproductive number after school closure (no testing effect): \textbf{`r round(get_R0(params_init) * (1 - params_init$school_closure_effect), 1)`}.
-
-Reproductive number after school closure and lockdown (no testing effect): \textbf{`r round(get_R0(params_init) * (1 - params_init$school_closure_effect - params_init$lockdown_effect), 2)`}.
-
-Reproductive number after lockdown lift (no testing effect): \textbf{`r round(get_R0(params_init) * (1 - params_init$school_closure_effect - params_init$distancing_effect), 2)`}.
-
-
-
-
-
-
-
-\clearpage
-
-
-
-
-
-```{r, echo=FALSE, include=FALSE}
-params_init = yaml.load_file("../parameters/params_a07.yml") 
-```
-
-
-# Scenario: proportion of asymptomatic infections = \textbf{`r params_init$q_A`}
-
-## Case type distribution
-
-Probability of severe disease that may lead to death among all infections: \textbf{`r round(1 - params_init$q_Im - params_init$q_A, 3)`}. 
-
-Probability of severe disease among symptomatic patients: \textbf{`r round( (1 - params_init$q_Im - params_init$q_A) / (1 - params_init$q_A), 3)`}. 
-
-Proportion of severe infections, which will lead to hospitalization unless there is a hospital overflow: \textbf{`r params_init$q_ins`}. The rest \textbf{`r (1 - params_init$q_ins)`} of severe infections are people in nursing homes, people, who do not have access to hospitalization, or people hospitalized in other states.
-
-Proportion of all infections (including asymptomatic) that end up hospitalized: \textbf{`r round((1 - params_init$q_Im - params_init$q_A) * params_init$q_ins, 3)`}.
-
-Probability of mild disease that does not require hospitalization and will lead to recovery: \textbf{`r round(params_init$q_Im, 3)`}. 
-
-Probability of asymptomatic infection: \textbf{`r params_init$q_A`}. 
-
-
-## CFR: probability of death
-
-CFR among hospitalized: \textbf{`r params_init$m_H`}.
-
-CFR among severe cases in nursing homes or among people with no access to hospitalization: \textbf{`r params_init$m_H * params_init$m_Is_mult`}.
-
-CFR among all severe cases: \textbf{`r round( with(params_init, q_ins * m_H + (1 - q_ins) * m_H * m_Is_mult ), 2)`}.
-
-CFR among symptomatic infections: \textbf{ `r round( with (params_init, (1 - q_A - q_Im) * (q_ins * m_H + (1 - q_ins) * m_H * m_Is_mult) / (1 - q_A) ), 3) `}.
-
-CFR among all infections (aka IFR): \textbf{`r round( with (params_init, (1 - q_A - q_Im) * (q_ins * m_H + (1 - q_ins) * m_H * m_Is_mult) ), 3) `}. 
-
-
-## Reproductive numbers 
-
-"Crude" basic reproductive number: \textbf{`r round(get_R0(params_init), 1)`}.
-
-This value of basic reproductive number is not adjusted for infections "imported" fron NYC at early stages of the epidemic. Assuming that imported infections, in particular in Fairfield, accounted for one third of all infections (equivalently number of imported infections is half of locally acquired), the "adjusted" basic reproductive number equals  \textbf{`r round(get_R0(params_init)/1.5, 1)`}.
-
-Reproductive number after school closure (no testing effect): \textbf{`r round(get_R0(params_init) * (1 - params_init$school_closure_effect), 1)`}.
-
-Reproductive number after school closure and lockdown (no testing effect): \textbf{`r round(get_R0(params_init) * (1 - params_init$school_closure_effect - params_init$lockdown_effect), 2)`}.
-
-Reproductive number after lockdown lift (no testing effect): \textbf{`r round(get_R0(params_init) * (1 - params_init$school_closure_effect - params_init$distancing_effect), 2)`}.
 
 
 
