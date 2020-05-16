@@ -9,7 +9,12 @@ library(ggplot2)
 library(reshape2)
 
 # data_stream <- "4-17-20"
-data_stream <- "5-15-20"
+list <- list.files("../data")
+list <- list[grep("COVID Data Extract", list)]
+dates <- gsub("COVID Data Extract \\(", "", list)
+dates <- gsub("\\).csv", "", dates)
+data_stream <- max(dates)
+print(data_stream)
 raw <- fread(paste0("../data/COVID Data Extract (", data_stream, ").csv"))
 dat <- transpose(raw[,-1])
 colnames(dat) <- as.character(as.matrix(raw)[, 1])
@@ -134,7 +139,7 @@ print(tail(subset(data.frame(new)[,-3], County==dat_4162020$County[8])))
 write.csv(new[,c("Date", "County", "cum_hosp")], 
 		  "../data/ct_cum_hosp.csv", row.names=FALSE, quote=FALSE)
 
-message("\n**** Hospital data updated ****")
+message(paste0("\n**** Hospital data ", data_stream, " updated ****")) 
 }
 
 
