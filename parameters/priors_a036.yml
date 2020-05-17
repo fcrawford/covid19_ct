@@ -3,27 +3,27 @@
 # q_Is: relatively flat, centered around 0.064 = 0.1 * symptomatic
 prior.mean.q_Is : 0.064
 prior.sd.q_Is : 0.012
-prior.lower.q_Is : 0.022
-prior.upper.q_Is : 0.106
+prior.lower.q_Is : 0.024
+prior.upper.q_Is : 0.104
 
 # prop_death_H: proportion of deaths occuring outside hospitals (nursing homes, etc); q_H is calculated from this
 # mean is based on data from hospital association + CT DPH reports with a lag
 prior.mean.prop_death_H : 0.48
 prior.sd.prop_death_H : 0.01
-prior.lower.prop_death_H : 0.44
-prior.upper.prop_death_H : 0.52
+prior.lower.prop_death_H : 0.43
+prior.upper.prop_death_H : 0.53
 
-# beta_pre: flat between 1 and 2, fat tails
-prior.mean.beta_pre: 1.5
-prior.sd.beta_pre: 0.75
-prior.lower.beta_pre: 0.1
-prior.upper.beta_pre: 2.9
+# beta_pre: flat between 0.75 and 1.75, fat tails
+prior.mean.beta_pre: 1.25
+prior.sd.beta_pre: 0.5
+prior.lower.beta_pre: 0.25
+prior.upper.beta_pre: 2.25
 
 # k_A: assume mean of 0.4 (there are no good estimates): largely absorbed in beta
 prior.mean.k_A : 0.4
-prior.sd.k_A : 0.04
-prior.lower.k_A : 0.3
-prior.upper.k_A : 0.5
+prior.sd.k_A : 0.05
+prior.lower.k_A : 0.25
+prior.upper.k_A : 0.55
 
 # k_Is: assume mean of 0.7, largely absorbed in beta
 prior.mean.k_Is : 0.7
@@ -33,36 +33,36 @@ prior.upper.k_Is : 0.85
 
 # gamma_H: mean = 10 days, consistent with different data sources
 prior.mean.gamma_H : 0.1 
-prior.sd.gamma_H : 0.01
-prior.lower.gamma_H : 0.07
-prior.upper.gamma_H : 0.13
+prior.sd.gamma_H : 0.015
+prior.lower.gamma_H : 0.06
+prior.upper.gamma_H : 0.14
 
 # gamma_NH: for now, assume a bit longer than hospital stay (14.3 days) to absorb delay in reporting relative to hospitals
 prior.mean.gamma_NH : 0.07 
-prior.sd.gamma_NH : 0.008
-prior.lower.gamma_NH : 0.04
-prior.upper.gamma_NH : 0.10
+prior.sd.gamma_NH : 0.01
+prior.lower.gamma_NH : 0.03
+prior.upper.gamma_NH : 0.11
 
 # m_H: mean is 0.2, consistent with hospital association and reports from NY and CA
 prior.mean.m_H : 0.2
 prior.sd.m_H : 0.015
-prior.lower.m_H : 0.16
-prior.upper.m_H : 0.24
+prior.lower.m_H : 0.155
+prior.upper.m_H : 0.245
 
 # m_NH_mult: assume 1.5 and update later if better estimate becomes available
 prior.mean.m_NH_mult : 1.5
-prior.sd.m_NH_mult : 0.125
-prior.lower.m_NH_mult : 1.25
-prior.upper.m_NH_mult : 1.75
+prior.sd.m_NH_mult : 0.15
+prior.lower.m_NH_mult : 1.1
+prior.upper.m_NH_mult : 1.9
 
 # school_closure_effect: make relatively narrow, highly correlated with lockdown effect, which is wide
 prior.mean.school_closure_effect : 0.15
 prior.sd.school_closure_effect : 0.015
-prior.lower.school_closure_effect : 0.12
-prior.upper.school_closure_effect : 0.18
+prior.lower.school_closure_effect : 0.1
+prior.upper.school_closure_effect : 0.2
 
 # lockdown_effect: wide and flat
 prior.mean.lockdown_effect : 0.7
 prior.sd.lockdown_effect : 0.05
-prior.lower.lockdown_effect : 0.6
-prior.upper.lockdown_effect : 0.8
+prior.lower.lockdown_effect : 0.58
+prior.upper.lockdown_effect : 0.82

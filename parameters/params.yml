@@ -33,7 +33,7 @@ gamma_H: 0.114   # 1/8.8
 gamma_Hbar: 0.114   
 
 # remaining time until recovery or death, nursing homes
-gamma_NH: 0.073  # 1/10 (total time from infection onset to resolution is X days among nursing home)
+gamma_NH: 0.073  # 1/14 
 
 ## Mild : duration of isolation
 gamma_NI: 0.1428571 # 1/7 (10 days from symptom onset - 3 days in I_m state)
