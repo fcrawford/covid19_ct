@@ -1,60 +1,63 @@
 
 ##### Epi parameters: means 
 # case type distribution
-q_A: 0.7
-q_Im: 0.27
-q_Is: 0.03
+q_A: 0.7 # asymptomatic
+q_Im: 0.27 # mild
+q_Is: 0.03 # severe
+
+# among severe: proportion going to H/Hbar stream (vs. nursing homes or alike)
+q_H: 0.6
 
 # transmissibility
-beta_pre: 2.03
+beta_pre: 2
 
 # latency
 delta: 0.25   # 1/4
 
 ## FOI
 # FOI from Asymptomatic
-gamma_A: 0.1428571   # 1/7
-k_A: 0.375
+alpha_A: 0.1428571   # 1/7 (infectious for 7 days)
+k_A: 0.4
 
 # FOI from Mild
-gamma_Im: 0.25   # 1/4
-dur_isolation: 7 # average duration of isolation before recovery, days (10-3)
+alpha_Im: 0.25   # 1/4 (infectious for 4 days, then isolated)
 
-# Severe: proportion going to H/Hbar stream (vs. nursing homes or alike)
-q_ins: 0.58
+# FOI from Severe
+alpha_Is: 0.1052632    # 1/9.5 (9.5 days between end of latency and hospitalization, 13.5 between infection and hosp)
+k_Is: 0.73        # some severe cases are likely isolated sooner than 9.5 days after infection onset
+                 # but probably more infectious at the beginning 
 
-# FOI from Severe, nursing homes
-gamma_Is: 0.05555556  # 1/18
-k_Is_noins: 0.4
-
-# FOI from Severe, H/Hbar
-alpha: 0.1    # 1/10
-k_Is_ins: 0.6
-
+## Severe
 # length of hospital stay
-gamma_H: 0.13  #1/7.7
-gamma_Hbar: 0.13  # 1/7.7 
+gamma_H: 0.11   # 1/9
+gamma_Hbar: 0.11   
 
-# CFR
-m_H: 0.21 # among hospitalized
-m_Is_mult: 1.75 # RR among severe in nursing homes or alike
+# remaining time until recovery or death, nursing homes
+gamma_NH: 0.077  # 1/13
+
+## Mild : duration of isolation
+gamma_NI: 0.1428571 # 1/7 (10 days from symptom onset - 3 days in I_m state)
+
+## CFR
+m_H: 0.22 # among hospitalized
+m_NH_mult: 1.6 # RR among severe in nursing homes, prisons or alike
 m_Hbar_mult: 1.5 # RR among hospital overflow
 
 # other
 k_n: 0.015 # transmission from adjacent counties
 
-# reporting lag (days): not user-defined
-H_lag: 5 
-D_lag: 12
+# reporting lags (days)
+H_lag: 5
+D_lag: 9
 
 # time point from candidate_state0 that becomes state0
-time_num: 12
+time_num: 11
 
 # the following effects are ADDITIVE and must sum to a number <= 1
 # e.g. an effect of 0.1 reduces the intervention from 1 (full effect) to 0.9. 
 # intervention effects on contact: 
-school_closure_effect: 0.175
-lockdown_effect: 0.7
+school_closure_effect: 0.165
+lockdown_effect: 0.71
 distancing_effect: 0.3
 
 # intervention effect on isolation/recovery for A and I_m
@@ -65,60 +68,25 @@ testing_effect_A: 0.2
 # standard deviations, lower and upper bounds 
 # of model parameters for uncertainty in projections
 sd_beta_pre: 0.05
-lower_beta_pre: 1.93
-upper_beta_pre: 2.13
+lower_beta_pre: 1.9
+upper_beta_pre: 2.1
 
-sd_q_Im: 0.01
-lower_q_Im: 0.255
-upper_q_Im: 0.285
+sd_q_Is: 0.007
+lower_q_Is: 0.01
+upper_q_Is: 0.05
 
 sd_gamma_H: 0.0025
-lower_gamma_H: 0.12
-upper_gamma_H: 0.14
+lower_gamma_H: 0.10
+upper_gamma_H: 0.12
 
 sd_m_H: 0.015
-lower_m_H: 0.18
-upper_m_H: 0.24
+lower_m_H: 0.19
+upper_m_H: 0.25
 
 sd_m_Hbar_mult: 0.25
 lower_m_Hbar_mult: 1.00
 upper_m_Hbar_mult: 2.00
 
 sd_lockdown_effect: 0.02
-lower_lockdown_effect: 0.66
-upper_lockdown_effect: 0.74
-
-
-# not used in simulation at the moment
-sd_q_A: 0.015
-lower_q_A: 0.33
-upper_q_A: 0.39
-
-sd_delta: 0.025
-lower_delta: 0.2
-upper_delta: 0.3
-
-
-### these parameters are likely not used 
-# model timeframe
-#timeframe: 183
-
-# effectiveness of stay-at-home intervention: user-defined
-#effect_intvx: 0.5 # NOT USED
-
-# hospital beds occupancy: user-defined
-bed_occup: 0.65 #default
-
-# increasing hospital capacity
-# capacity ramping time interval (days), not user-defined
-t_C: 10 
-# proportion increase (1.5 means 50 percent increase): user-defined
-k_C: 1 # default
-
-# capacity increase start date
-start_C: 45 #default
-start_C_min: 1
-start_C_max: 180
-
-# speed of jump
-slope: 500
+lower_lockdown_effect: 0.67
+upper_lockdown_effect: 0.75

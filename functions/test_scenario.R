@@ -4,7 +4,7 @@ mydaymax              = ymd("2020-09-01")
 myschools_reopen_date = ymd("2021-09-01") 
 
 
-nsim = 1 #500
+nsim = 500
 
 ####################################
 
@@ -18,20 +18,20 @@ mydistancing_stepdown_dates = seq(ymd("2020-06-01"), ymd("2020-10-01"), length.o
 
 ## choose your scenario and get state0, params and a sample from posterior
 
-# base scenario (low asymptomatic): q_A = 0.36, mean(q_Is) = 0.07
+# base scenario (low asymptomatic): q_A = 0.36, mean(q_Is) = 0.064
 mystate0 = get_state0("../data/ct_init.csv")
 myparams = yaml.load_file("../parameters/params.yml")  
 myposterior = read.csv("../data/posterior_a036.csv", stringsAsFactors=FALSE) 
 
 # alternative scenario 1 (medium asymptomatic): q_A = 0.5, mean(q_Is) = 0.05
-#mystate0 = get_state0("../data/ct_init_a05.csv")
-#myparams = yaml.load_file("../parameters/params_a05.yml")  
-#myposterior = read.csv("../data/posterior_a05.csv", stringsAsFactors=FALSE) 
+mystate0 = get_state0("../data/ct_init_a05.csv")
+myparams = yaml.load_file("../parameters/params_a05.yml")  
+myposterior = read.csv("../data/posterior_a05.csv", stringsAsFactors=FALSE) 
 
 # alternative scenario 2 (high asymptomatic): q_A = 0.7, mean(q_Is) = 0.03
-#mystate0 = get_state0("../data/ct_init_a07.csv")
-#myparams = yaml.load_file("../parameters/params_a07.yml")  
-#myposterior = read.csv("../data/posterior_a07.csv", stringsAsFactors=FALSE) 
+mystate0 = get_state0("../data/ct_init_a07.csv")
+myparams = yaml.load_file("../parameters/params_a07.yml")  
+myposterior = read.csv("../data/posterior_a07.csv", stringsAsFactors=FALSE) 
 
 
 # set testing effects and distancing effect
@@ -42,6 +42,7 @@ myparams$distancing_effect = 0.6
 
 ####################################
 
+ptm = proc.time()
 # run simulation sampling parameters from joint posterior 
 res1 = get_sir_results( daymax=mydaymax,
                         lockdown_end_date=mylockdown_end_date,
@@ -54,7 +55,7 @@ res1 = get_sir_results( daymax=mydaymax,
                         state0 = mystate0,
                         posterior = myposterior,
                         draw_rparams = FALSE )
-
+proc.time() - ptm
 
 ####################################
 
@@ -129,5 +130,5 @@ connecticut_curentI = plot_ct_region(data=res1$summary,
                                      title=str,
                                      region_name="Connecticut", 
                                      which.plot="currentI",
-                                     ymax=NULL, ylab="Effective reproductive number")
+                                     ymax=NULL, ylab="Current infections")
 
