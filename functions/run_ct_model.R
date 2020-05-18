@@ -12,8 +12,12 @@ rparams = function(params) {
   params_tmp$gamma_H = rtruncdist(1, mean=params$gamma_H, sd=params$sd_gamma_H, lower=params$lower_gamma_H, upper=params$upper_gamma_H)
   params_tmp$gamma_Hbar = params_tmp$gamma_H
   params_tmp$m_H = rtruncdist(1, mean=params$m_H, sd=params$sd_m_H, lower=params$lower_m_H, upper=params$upper_m_H)
-  params_tmp$m_Hbar_mult = rtruncdist(1, mean=params$m_Hbar_mult, sd=params$sd_m_Hbar_mult, lower=params$lower_m_Hbar_mult, upper=params$upper_m_Hbar_mult)
   params_tmp$lockdown_effect = rtruncdist(1, mean=params$lockdown_effect, sd=params$sd_lockdown_effect, lower=params$lower_lockdown_effect, upper=params$upper_lockdown_effect)
+  # post-lockdown
+  params_tmp$distancing_effect = rtruncdist(1, mean=params$distancing_effect, sd=params$sd_distancing_effect, lower=params$lower_distancing_effect, upper=params$upper_distancing_effect)
+  params_tmp$testing_effect_Im = rtruncdist(1, mean=params$testing_effect_Im, sd=params$sd_testing_effect_Im, lower=params$lower_testing_effect_Im, upper=params$upper_testing_effect_Im)
+  params_tmp$testing_effect_A = rtruncdist(1, mean=params$testing_effect_A, sd=params$sd_testing_effect_A, lower=params$lower_testing_effect_A, upper=params$upper_testing_effect_A)
+  params_tmp$m_Hbar_mult = rtruncdist(1, mean=params$m_Hbar_mult, sd=params$sd_m_Hbar_mult, lower=params$lower_m_Hbar_mult, upper=params$upper_m_Hbar_mult)
   # params_tmp$q_Im = rtruncdist(1, mean=(params$q_Im), sd=params$sd_q_Im, lower=params$lower_q_Im, upper=params$upper_q_Im)
   # params_tmp$q_A = rtruncdist(1, mean=(params$q_A), sd=params$sd_q_A, lower=params$lower_q_A, upper=params$upper_q_A)
   # params_tmp$delta = rtruncdist(1, mean=params$delta, sd=params$sd_delta, lower=params$lower_delta, upper=params$upper_delta)
@@ -184,6 +188,10 @@ params$school_closure_effect = par_smpl$school_closure_effect
 params$lockdown_effect = par_smpl$lockdown_effect
 
 params$time_num = par_smpl$time_num
+
+params$distancing_effect = par_smpl$distancing_effect
+params$testing_effect_Im = par_smpl$testing_effect_Im
+params$testing_effect_A = par_smpl$testing_effect_A
 
 state0 = get_state0_params(params, E_init_state0, CT_POPULATIONS, CT_ADJ, COUNTY_CAPACITIES)
 

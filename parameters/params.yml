@@ -58,11 +58,12 @@ time_num: 15
 # intervention effects on contact: 
 school_closure_effect: 0.135
 lockdown_effect: 0.7
-distancing_effect: 0.3
+# post-lockdown
+distancing_effect: 0.6
 
 # intervention effect on isolation/recovery for A and I_m
 # this is increase in a rate of transitioning out of infectious compartment 
-testing_effect_Im: 0.3
+testing_effect_Im: 0.5
 testing_effect_A: 0.2
 
 # standard deviations, lower and upper bounds 
@@ -83,13 +84,26 @@ sd_m_H: 0.015
 lower_m_H: 0.18
 upper_m_H: 0.24
 
-sd_m_Hbar_mult: 0.25
-lower_m_Hbar_mult: 1.00
-upper_m_Hbar_mult: 2.00
-
 sd_lockdown_effect: 0.02
 lower_lockdown_effect: 0.66
 upper_lockdown_effect: 0.74
+
+# post-lockdown
+sd_distancing_effect: 0.02
+lower_distancing_effect: 0.56
+upper_distancing_effect: 0.64
+
+sd_testing_effect_Im: 0.02
+lower_testing_effect_Im: 0.45
+upper_testing_effect_Im: 0.55
+
+sd_testing_effect_A: 0.02
+lower_testing_effect_A: 0.15
+upper_testing_effect_A: 0.25
+
+sd_m_Hbar_mult: 0.25
+lower_m_Hbar_mult: 1.00
+upper_m_Hbar_mult: 2.00
 
 
 # not used in simulation at the moment

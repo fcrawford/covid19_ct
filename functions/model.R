@@ -187,11 +187,15 @@ run_sir_model = function(state0, params, region_adj, populations, tmax, interven
   out$dailyI.Connecticut <- params$delta * out$E.Connecticut
   # daily new hospitalizations
   out$dailyH.Connecticut <- params$q_H * params$alpha_Is * out$I_s.Connecticut
+  # daily new severe cases in nursing homes and ALFs
+  out$dailyIs_NH.Connecticut <- (1 - params$q_H) * params$q_Is * params$delta * out$E.Connecticut
   
   # cumulative infections, including those who died
   out$cum_modI.Connecticut <- cumsum(out$dailyI.Connecticut)
   # cumulative hospitalizations
   out$cum_modH.Connecticut <- cumsum(out$dailyH.Connecticut)
+  # cumulative severe cases in nursing homes and ALFs
+  out$cum_Is_NH.Connecticut <- cumsum(out$dailyIs_NH.Connecticut)
   
   pop_ct = sum(populations)
   # number and proportion of alive cumulative incidence: sum of currently infected and recovered

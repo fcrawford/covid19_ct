@@ -4,7 +4,7 @@ mydaymax              = ymd("2020-09-01")
 myschools_reopen_date = ymd("2021-09-01") 
 
 
-nsim = 500
+nsim = 1
 
 ####################################
 
@@ -34,11 +34,18 @@ myparams = yaml.load_file("../parameters/params_a07.yml")
 myposterior = read.csv("../data/posterior_a07.csv", stringsAsFactors=FALSE) 
 
 
-# set testing effects and distancing effect
+# set testing effects and distancing effect for nsim = 1
 myparams$testing_effect_A = 0.2
 myparams$testing_effect_Im = 0.5
 
 myparams$distancing_effect = 0.6
+
+# set testing effects and distancing effect if drawing from posterior
+myposterior$testing_effect_A = rtruncdist(nrow(myposterior), mean=0.2, sd=0.03, lower=0.1, upper=0.3)
+myposterior$testing_effect_Im = rtruncdist(nrow(myposterior), mean=0.5, sd=0.04, lower=0.35, upper=0.65)
+
+myposterior$distancing_effect = rtruncdist(nrow(myposterior), mean=0.6, sd=0.03, lower=0.5, upper=0.7)
+
 
 ####################################
 
@@ -78,21 +85,22 @@ connecticut_summary_dailyI = plot_ct_region(data=res1$summary,
                                              which.plot="dailyI",
                                              ymax=NULL)
 
-
 connecticut_cum_modI = plot_ct_region(data=res1$summary, 
                                              end_day=mydaymax, 
                                              title=str,
                                              region_name="Connecticut", 
                                              which.plot="cum_modI",
                                              ymax=NULL)
-ymax = 3e4
+
+
+ymax = 2e4
 connecticut_summary_hosp1 = plot_ct_region(data=res1$summary, 
                                              end_day=mydaymax, 
                                              title=str,
                                              region_name="Connecticut", 
                                              which.plot="rHsum",
                                              ymax=ymax)
-ymax = 6.5e4
+ymax = 5e4
 connecticut_summary_deaths1 = plot_ct_region(data=res1$summary, 
                                              end_day=mydaymax, 
                                              title=str,
@@ -106,6 +114,7 @@ connecticut_cumulative_incid_prop = plot_ct_region(data=res1$summary,
                                              region_name="Connecticut", 
                                              which.plot="alive_cum_incid_prop",
                                              ymax=NULL)
+
 
 
 

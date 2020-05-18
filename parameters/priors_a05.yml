@@ -66,3 +66,29 @@ prior.mean.lockdown_effect : 0.7
 prior.sd.lockdown_effect : 0.05
 prior.lower.lockdown_effect : 0.58
 prior.upper.lockdown_effect : 0.82
+
+
+## these parameters are not calibrated to data, so prior = posterior
+# m_Hbar_mult: assume a mean of 1.5 and large variance
+mean.m_Hbar_mult : 1.5
+sd.m_Hbar_mult : 0.25
+lower.m_Hbar_mult : 1
+upper.m_Hbar_mult : 2
+
+# distancing_effect: remaining reduction in contact rates after lockdown is lifted
+mean.distancing_effect: 0.6
+sd.distancing_effect: 0.03
+lower.distancing_effect : 0.5
+upper.distancing_effect : 0.7
+
+# testing_effect_Im: increase in the rate of departure from I_m due to faster isolation 
+mean.testing_effect_Im : 0.5
+sd.testing_effect_Im : 0.04
+lower.testing_effect_Im : 0.35
+upper.testing_effect_Im : 0.65
+
+# testing_effect_A: increase in the rate of departure from A due to faster isolation 
+mean.testing_effect_A : 0.2
+sd.testing_effect_A : 0.03
+lower.testing_effect_A : 0.1
+upper.testing_effect_A : 0.3
