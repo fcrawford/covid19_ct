@@ -4,7 +4,7 @@ mydaymax              = ymd("2020-09-01")
 myschools_reopen_date = ymd("2021-09-01") 
 
 
-nsim = 1
+nsim = 300
 
 ####################################
 
@@ -70,7 +70,7 @@ w = 900
 h = 300
 
 
-par(mfrow=c(4,3), mar=c(4,4,1,1))
+par(mfrow=c(3,3), mar=c(4,4,1,1))
 
 
 
