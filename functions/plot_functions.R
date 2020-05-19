@@ -33,7 +33,8 @@ plot_ct_region = function(data=NULL,
                           ymax = NULL,
                           sentence=TRUE,
                           show.data=TRUE, 
-                          title.override=NULL) {
+                          title.override=NULL,
+                          goodness = FALSE) {
 
  
 
@@ -61,15 +62,32 @@ plot_ct_region = function(data=NULL,
   if(which.plot %in% lab.table$compartment == FALSE){
     lab.table <- rbind(lab.table, data.frame(compartment=which.plot, color = "#006d2c", labels=which.plot))
   }
+
+  if(goodness){
+    if(which.plot %in% c("rD", "rH", "rHsum")){
+      end_day <- Sys.Date()
+      ymax <- NULL
+    }else{
+      goodness <- FALSE
+    }
+  }
   
  #dayseq = seq(day0, daymax, by="day")
   start_day = day0
   tmax.plot = as.numeric(difftime(end_day, day0, units="days"))
 
-  monthseq = seq(start_day, end_day, by="month")
-  lab_show = format(monthseq, "%b %Y")
-  lab_where = difftime(monthseq, start_day, units="days")
-
+  if(goodness){
+    monthseq = seq(start_day, end_day, by="weeks")
+    lab_show = format(monthseq, "%b %d")
+    lab_where = difftime(monthseq, start_day, units="days")
+    lab_cex <- 0.65
+  }else{
+    monthseq = seq(start_day, end_day, by="month")
+    lab_show = format(monthseq, "%b %Y")
+    lab_where = difftime(monthseq, start_day, units="days")
+    lab_cex <- 1
+  }
+  
 
   which.plot.ci <- which.plot
   add <- FALSE
@@ -94,8 +112,8 @@ plot_ct_region = function(data=NULL,
 
 
   if(is.null(ymax)) ymax <- max(sir_result_region$upper[sir_result_region$time <= tmax.plot], na.rm=TRUE)
-  
-  if(add){
+
+  if(add && (!goodness)){
     if(region_name %in% names(capacity_func)){
         sub.add <- data.frame(time = 0:tmax.plot, 
                               Capacity = capacity_func[[region_name]](0:tmax.plot))
@@ -110,70 +128,76 @@ plot_ct_region = function(data=NULL,
     }
     ymax <- max(ymax, sub.add$Capacity)
   }
+
+  # get observations
+  if(region_name == "Connecticut") {
+    points.add <- obs_state
+    # points(obs_state$time, obs_state$deaths, pch=16, cex=0.6, col=col.line) 
+  }else{
+    obs.region <- subset(obs_county, county == region_name)
+    obs.region$date <- ymd(obs.region$date)
+    first.region.time <- round(as.numeric(difftime(obs.region$date[1], start_day, units="days")),0)
+    obs.region$time <- c(first.region.time:(nrow(obs.region)+first.region.time-1)) # add time variable that indexes time 
+    points.add <- obs.region
+    # points(obs.region$time, obs.region$deaths, pch=16, cex=0.6, col=col.line)
+  }
+  if("rD" %in% which.plot){
+    points.add$toplot <- points.add$deaths
+    ymax <- max(c(ymax, points.add$toplot), na.rm=TRUE)
+  }
+  if("rH" %in% which.plot || "rHsum" %in% which.plot){
+    points.add$toplot <- points.add$cur_hosp
+    ymax <- max(c(ymax, points.add$toplot), na.rm=TRUE)
+  }
+ 
   if(is.null(xlab)) xlab <- ""
   if(is.null(ylab)) ylab <- "People"
   plot(0, type="n", xlab=xlab, ylab=ylab, main=title, col="black", 
        ylim=c(0,1.05*ymax), xlim=c(0,1.1*tmax.plot), axes=FALSE)
-  axis(1,at=lab_where, lab=lab_show)
+  axis(1,at=lab_where, lab=lab_show, cex.axis=lab_cex)
   axis(2)
 
-  abline(v=Sys.Date()-start_day, col="gray", lty=2)
+  if(!goodness) abline(v=Sys.Date()-start_day, col="gray", lty=2)
 
 
   lab.table$color <- as.character(lab.table$color)
-  for(i in 1:length(which.plot)){
-    col.line <- lab.table$color[which(lab.table$compartment==which.plot[i])]
-    col.polygon <- adjustcolor(col.line, alpha.f = 0.5)
-    sir_result_region_sub <- filter(sir_result_region, variable==paste0(which.plot[i],".",region_name))
-    if(which.plot[i] %in% which.plot.ci){
-      # if(which.plot[i] %in% c("rH", "rHbar", "rHsum")){
-        # time.print <- which.max(sir_result_region_sub$mean)
-      # }else{
-        time.print <- tmax.plot + 0.5
-      # }
-      polygon(c(sir_result_region_sub$time, rev(sir_result_region_sub$time)), c(sir_result_region_sub$lower, rev(sir_result_region_sub$upper)), col=col.polygon, border=NA)
+  col.line <- lab.table$color[which(lab.table$compartment==which.plot)]
+  col.polygon <- adjustcolor(col.line, alpha.f = 0.5 - 0.1*goodness)
+  sir_result_region_sub <- filter(sir_result_region, variable==paste0(which.plot,".",region_name))
+  sir_result_region_sub <- subset(sir_result_region_sub, time <= tmax.plot)
+    time.print <- tmax.plot + 0.5
+    polygon(c(sir_result_region_sub$time, rev(sir_result_region_sub$time)), c(sir_result_region_sub$lower, rev(sir_result_region_sub$upper)), col=col.polygon, border=NA)
+    if(!goodness){
       text(sir_result_region_sub$time[tmax.plot+1], sir_result_region_sub$mean[time.print], format(sir_result_region_sub$mean[time.print],digits=2, big.mark=","), pos=4, col=col.line)
       text(sir_result_region_sub$time[tmax.plot+1], sir_result_region_sub$lower[time.print], format(sir_result_region_sub$lower[time.print],digits=2, big.mark=","), pos=4, col=col.polygon)
       text(sir_result_region_sub$time[tmax.plot+1], sir_result_region_sub$upper[time.print], format(sir_result_region_sub$upper[time.print],digits=2, big.mark=","), pos=4, col=col.polygon)
     }
+  
     lines(sir_result_region_sub$time, sir_result_region_sub$mean, col=col.line)
-  }
+  
 
-  if(add){
+  if(add && (!goodness)){
     lines(sub.add$time, sub.add$Capacity, col='gray30', lty  = 2,  lwd=1.2)
   }
 
   # Add observed deaths
-  col.line <- lab.table$color[which(lab.table$compartment=="D")]
-  if(region_name == "Connecticut" && "rD" %in% which.plot && show.data) {
-    points(obs_state$time, obs_state$deaths, pch=16, cex=0.6, col=col.line) 
-  } else if("rD" %in% which.plot && show.data) {
-    obs.region <- subset(obs_county, county == region_name)
-    obs.region$date <- ymd(obs.region$date)
-    first.region.time <- round(as.numeric(difftime(obs.region$date[1], start_day, units="days")),0)
-    obs.region$time <- c(first.region.time:(nrow(obs.region)+first.region.time-1)) # add time variable that indexes time 
-    #obs.region <- merge(obs.region, date.time, by='date')
-    points(obs.region$time, obs.region$deaths, pch=16, cex=0.6, col=col.line)
+  if(which.plot %in% "rD"){
+    col.line <- lab.table$color[which(lab.table$compartment=="D")]
+    points(points.add$time, points.add$toplot, pch=16, cex=0.6, col=col.line)
+  }
+  if(which.plot %in% c("rH", "rHsum")){
+    col.line <- lab.table$color[which(lab.table$compartment=="H")]
+    points(points.add$time, points.add$toplot, pch=16, cex=0.6, col=col.line)
   }
 
-  # Add observed hospitalization
-  col.line <- lab.table$color[which(lab.table$compartment=="H")]
-  if(region_name == "Connecticut" && ("rH" %in% which.plot || "rHsum" %in% which.plot) && show.data)  {
-      points(obs_state$time, obs_state$cur_hosp, pch=16, cex=0.6, col=col.line) 
-  } else if(("rH" %in% which.plot || "rHsum" %in% which.plot) && show.data) {
-    obs.region <- subset(obs_county, county == region_name)
-    obs.region$date <- ymd(obs.region$date)
-    first.region.time <- round(as.numeric(difftime(obs.region$date[1], start_day, units="days")),0)
-    obs.region$time <- c(first.region.time:(nrow(obs.region)+first.region.time-1)) # add time variable that indexes time 
-    #obs.region <- merge(obs.region, date.time, by='date')
-    points(obs.region$time, obs.region$cur_hosp, pch=16, cex=0.6, col=col.line)
-  }
 
+  if("D" %in% which.plot || "rD" %in% which.plot || "rHsum" %in% which.plot || "dailyI" %in% which.plot){
+      sir_result_region_sub <- filter(sir_result_region, variable==paste0(which.plot[1],".",region_name))
+  }
 
   region_summary <- NULL
   count.min <- count.max <- NA
   if("D" %in% which.plot || "rD" %in% which.plot){
-      sir_result_region_sub <- filter(sir_result_region, variable==paste0(which.plot[1],".",region_name))
       count <- sir_result_region_sub$mean[sir_result_region_sub$time==tmax.plot]
       count.min <- sir_result_region_sub$lower[sir_result_region_sub$time==tmax.plot]
       count.max <- sir_result_region_sub$upper[sir_result_region_sub$time==tmax.plot]
@@ -186,7 +210,6 @@ plot_ct_region = function(data=NULL,
                        sep="")    
   }
   if("rHsum" %in% which.plot || "dailyI" %in% which.plot){
-      sir_result_region_sub <- filter(sir_result_region, variable==paste0(which.plot[1],".",region_name))
       count <- max(sir_result_region_sub$mean, na.rm=TRUE)
       peak <- which.max(sir_result_region_sub$mean)
       count.min <- sir_result_region_sub$lower[peak]
