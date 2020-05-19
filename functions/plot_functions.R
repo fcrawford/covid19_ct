@@ -76,12 +76,12 @@ plot_ct_region = function(data=NULL,
   start_day = day0
   tmax.plot = as.numeric(difftime(end_day, day0, units="days"))
 
-  if(goodness){
-    monthseq = seq(start_day, end_day, by="weeks")
+  if(goodness) {
+    monthseq = seq(start_day, end_day, by="week")
     lab_show = format(monthseq, "%b %d")
     lab_where = difftime(monthseq, start_day, units="days")
-    lab_cex <- 0.7
-  }else{
+    lab_cex <- 1 #0.7
+  } else {
     monthseq = seq(start_day, end_day, by="month")
     lab_show = format(monthseq, "%b %Y")
     lab_where = difftime(monthseq, start_day, units="days")
@@ -94,7 +94,7 @@ plot_ct_region = function(data=NULL,
   if("rH" %in% which.plot) add <- TRUE
   if("rHsum" %in% which.plot) add <- TRUE
 
-  par(mar=c(3,4,3,0), bty="n")
+  par(mar=c(2.5,4,2.5,0), bty="n")
   toplot <- paste(rep(which.plot,each=length(region_name)),
                   rep(region_name, length(which.plot)),sep=".")
   sir_result_region= filter(data, variable%in%toplot)
