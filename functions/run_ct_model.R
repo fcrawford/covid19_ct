@@ -95,7 +95,7 @@ schoolsfun = get_school_in_session_fun(dayseq, schools_reopen_date=schools_reope
 testingfun = get_testing_on_fun(dayseq, testing_on_date=testing_on_date)
 distancingfun = get_distancing_stepdown_fun(dayseq, distancing_on_date=distancing_on_date, distancing_stepdown_dates=distancing_stepdown_dates)
 
-interventions = list(lockdown=lockfun, schools=schoolsfun, testing=testingfun, distancing=distancingfun) 
+interventions = list(lockdown=lockfun, schools=schoolsfun, testing=testingfun, distancing=distancingfun)
 
 E_init = E_init_state0
 I_s_init = rep(0,nregions)
