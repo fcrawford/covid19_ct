@@ -80,7 +80,7 @@ plot_ct_region = function(data=NULL,
     monthseq = seq(start_day, end_day, by="weeks")
     lab_show = format(monthseq, "%b %d")
     lab_where = difftime(monthseq, start_day, units="days")
-    lab_cex <- 0.65
+    lab_cex <- 0.7
   }else{
     monthseq = seq(start_day, end_day, by="month")
     lab_show = format(monthseq, "%b %Y")
