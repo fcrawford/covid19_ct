@@ -114,7 +114,7 @@ dev.off()
 w = 900
 h = 150
 
-pdf("cumincidence.pdf", width=6, height=3)
+pdf(paste("cumincidence_",scenario_name, ".pdf", sep=""), width=6, height=3)
 
 par(mfrow=c(1,1), mar=c(4,4,1,1))
 
