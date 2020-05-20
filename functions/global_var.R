@@ -54,10 +54,10 @@ CT_NAMES <- colnames(CT_ADJ)
 
 # initial numbers exposed in each county: used to generate state0
 E_init_state0 <- c(7.5,    # 1. "Fairfield" 
-                  0.12,    # 2. "New London" 
-                  0.01,    # 3. "Litchfield" 
-                  0.02,    # 4. "Windham"  
-                  0.05,     # 5. "Tolland" 
+                  0.13,    # 2. "New London" 
+                  0,       # 3. "Litchfield" 
+                  0.04,    # 4. "Windham"  
+                  0.05,    # 5. "Tolland" 
                   6.5,     # 6. "Hartford"
                   0.25,    # 7. "Middlesex" 
                   4.5)     # 8. "New Haven"
