@@ -222,7 +222,8 @@ get_sir_results = function(daymax,
                            state0,
                            posterior,
                            draw_rparams = FALSE,
-                           seed = NULL) {
+                           seed = NULL, 
+                           CI = 0.95) {
 
  pars <- list()
  state0s <- list()
@@ -283,8 +284,8 @@ get_sir_results = function(daymax,
   sir_results_summary <- sir_results_long %>% group_by(variable, time) %>% 
 			                     summarise(
                              mean = mean(value),
-			                       lower = quantile(value, 0.05, na.rm=TRUE),
-			                       upper = quantile(value, 0.95, na.rm=TRUE))
+			                       lower = quantile(value, (1-CI)/2, na.rm=TRUE),
+			                       upper = quantile(value, 1-(1-CI)/2, na.rm=TRUE))
   return(list(raw_results=sir_results, summary=sir_results_summary))
 }
 
