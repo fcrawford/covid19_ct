@@ -131,6 +131,12 @@ connecticut_cumulative_incid_prop = plot_ct_region(data=res1$summary,
 dev.off()
 
 
+pdf("calibration.pdf", width=12, height=4)
+par(mfrow = c(1, 2))
+out <-    plot_ct_region(data=res1$summary, region_name="Connecticut", which.plot="rHsum", title.override="Hospitalizations", goodness=TRUE)
+out <-    plot_ct_region(data=res1$summary, region_name="Connecticut", which.plot="rD", title.override="Cumulative deaths", goodness=TRUE)
+dev.off()
+
 
 
 
