@@ -56,7 +56,7 @@ plot_ct_region = function(data=NULL,
                                     "Severe infections","Mild infections",
                                     "Asymptomatic infections", 
                                     "Daily new infections", "Cumulative infections", 
-                                    "Proportion of cumulative incidence",
+                                    "Cumulative incidence proportion", 
                                     "Cumulative incidence among living", "R_eff", "Current Infections"))
 
   if(which.plot %in% lab.table$compartment == FALSE){

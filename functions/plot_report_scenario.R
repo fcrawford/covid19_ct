@@ -107,3 +107,32 @@ connecticut_summary_deaths1 = plot_ct_region(data=res1$summary,
                                              ymax=NULL)
 
 dev.off()
+
+#########################################
+
+
+w = 900
+h = 150
+
+pdf("cumincidence.pdf", width=6, height=3)
+
+par(mfrow=c(1,1), mar=c(4,4,1,1))
+
+
+connecticut_cumulative_incid_prop = plot_ct_region(data=res1$summary, 
+                                             end_day=mydaymax, 
+                                             title=str,
+                                             region_name="Connecticut", 
+                                             which.plot="alive_cum_incid_prop",
+                                             ymax=NULL, 
+                                             ylab="Proportion")
+
+
+dev.off()
+
+
+
+
+
+
+
