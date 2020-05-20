@@ -118,18 +118,18 @@ pdf(paste("cumincidence_",scenario_name, ".pdf", sep=""), width=6, height=3)
 
 par(mfrow=c(1,1), mar=c(4,4,1,1))
 
-
 connecticut_cumulative_incid_prop = plot_ct_region(data=res1$summary, 
                                              end_day=mydaymax, 
                                              title=str,
                                              region_name="Connecticut", 
                                              which.plot="alive_cum_incid_prop",
-                                             ymax=NULL, 
+                                             ymax=1, 
                                              ylab="Proportion")
 
 
 dev.off()
 
+#########################################
 
 pdf("calibration.pdf", width=12, height=4)
 par(mfrow = c(1, 2))
