@@ -6,9 +6,9 @@ myschools_reopen_date = ymd("2021-09-01")
 
 nsim = 3000
 # scenario of releasing contacts 
-scenario_name = c("slow", "fast")[2]
+if(!"scenario_name" %in% ls()) scenario_name = c("slow", "fast")[2]
 # # scenario of asymptomatic proportion
-case_name = c("low", "medium", "high")[2]
+if(!"case_name" %in% ls())     case_name = c("low", "medium", "high")[2]
 
 ####################################
 
@@ -181,7 +181,7 @@ connecticut_cumulative_incid = plot_ct_region(data=res1$summary,
                                              end_day=mydaymax, 
                                              title=str,
                                              region_name="Connecticut", 
-                                             which.plot="alive_cum_incid_num",
+                                             which.plot="alive_cum_incid_prop",
                                              ymax=NULL)
 
 connecticut_R_eff = plot_ct_region(data=res1$summary, 
