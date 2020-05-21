@@ -5,7 +5,7 @@ myschools_reopen_date = ymd("2021-09-01")
 
 
 nsim = 3000
-# scenario of releasing contacts
+# scenario of releasing contacts 
 scenario_name = c("slow", "fast")[2]
 # # scenario of asymptomatic proportion
 case_name = c("low", "medium", "high")[2]
@@ -195,7 +195,7 @@ dev.off()
 
 #########################################
 
-pdf(paste("calibration_", scenario_name, "_", case_name, ".pdf"), width=12, height=4)
+pdf(paste0("calibration_", scenario_name, "_", case_name, ".pdf"), width=12, height=4)
 par(mfrow = c(1, 2))
 out <-    plot_ct_region(data=res1$summary, region_name="Connecticut", which.plot="rHsum", title.override="Hospitalizations", goodness=TRUE)
 out <-    plot_ct_region(data=res1$summary, region_name="Connecticut", which.plot="rD", title.override="Cumulative deaths", goodness=TRUE)
