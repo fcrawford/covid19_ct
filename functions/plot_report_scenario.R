@@ -6,10 +6,12 @@ myschools_reopen_date = ymd("2021-09-01")
 
 nsim = 3000
 # scenario of releasing contacts 
-if(!"scenario_name" %in% ls()) scenario_name = c("slow", "fast")[2]
+if(!"scenario_name" %in% ls()) scenario_name = c("slow", "fast")[1]
 # # scenario of asymptomatic proportion
 if(!"case_name" %in% ls())     case_name = c("low", "medium", "high")[2]
 
+print(scenario_name)
+print(case_name)
 ####################################
 
 mylockdown_end_date   = ymd("2020-05-19") 
