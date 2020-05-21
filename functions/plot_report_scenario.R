@@ -51,14 +51,14 @@ if(case_name == "high"){
 
 
 # set testing effects and distancing effect for nsim = 1
-myparams$testing_effect_A = 0.2
-myparams$testing_effect_Im = 0.5
+#myparams$testing_effect_A = 0.2
+#myparams$testing_effect_Im = 0.5
 
 myparams$distancing_effect = myparams$lockdown_effect
 
 # set testing effects and distancing effect if drawing from posterior
-myposterior$testing_effect_A = rtruncdist(nrow(myposterior), mean=0.2, sd=0.03, lower=0.1, upper=0.3)
-myposterior$testing_effect_Im = rtruncdist(nrow(myposterior), mean=0.5, sd=0.04, lower=0.35, upper=0.65)
+#myposterior$testing_effect_A = rtruncdist(nrow(myposterior), mean=0.2, sd=0.03, lower=0.1, upper=0.3)
+#myposterior$testing_effect_Im = rtruncdist(nrow(myposterior), mean=0.5, sd=0.04, lower=0.35, upper=0.65)
 
 myposterior$distancing_effect = myparams$distancing_effect
 
