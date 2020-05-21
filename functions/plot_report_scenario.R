@@ -148,6 +148,8 @@ pdf(paste(scenario_name, "_", case_name, "_full.pdf", sep=""), width=6*2, height
 
 par(mfrow=c(3,2), mar=c(4,4,1,1))
 
+plot_interventions(res1$raw_results, mydaymax, subtitle=NULL)
+
 
 connecticut_summary_dailyI = plot_ct_region(data=res1$summary, 
                                              end_day=mydaymax, 
@@ -156,12 +158,6 @@ connecticut_summary_dailyI = plot_ct_region(data=res1$summary,
                                              which.plot="dailyI",
                                              ymax=NULL)
 
-connecticut_cum_modI = plot_ct_region(data=res1$summary, 
-                                             end_day=mydaymax, 
-                                             title=str,
-                                             region_name="Connecticut", 
-                                             which.plot="cum_modI",
-                                             ymax=NULL)
 
 connecticut_summary_hosp1 = plot_ct_region(data=res1$summary, 
                                              end_day=mydaymax, 
