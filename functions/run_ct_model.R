@@ -68,12 +68,10 @@ get_state0 = function(init_file_csv){
 # E_init_state0 is a global variable
 
 # get state0 for a given set of parameters
-get_state0_params <- function(params, E_init_state0, populations, adj, county_capacities){
+get_state0_params <- function(params, E_init_state0, interventions, populations, adj, county_capacities){
 
 nregions = length(E_init_state0)
-dmax = day0 + params$time_num + 10
-dayseq = seq(day0, dmax, by="day")
-tmax = params$time_num + 1
+mytmax = params$time_num + 2
 
 params_tmp <- params
 params_tmp$school_closure_effect <- 0
@@ -84,18 +82,6 @@ params_tmp$testing_effect_A <- 0
 params_tmp$H_lag <- 0
 params_tmp$D_lag <- 0
 
-lockdown_end_date <- ymd("2020-06-01")
-schools_reopen_date <- ymd("3000-01-01") # never
-testing_on_date <- ymd("2020-06-01")
-distancing_on_date  = lockdown_end_date + 1 # distancing on at end of lockdown
-distancing_stepdown_dates = seq(ymd(distancing_on_date+1), ymd(ymd("2020-06-01")+30), length.out=2)
-
-lockfun = get_state_lockdown_fun(dayseq, offdate=lockdown_end_date)
-schoolsfun = get_school_in_session_fun(dayseq, schools_reopen_date=schools_reopen_date)
-testingfun = get_testing_on_fun(dayseq, testing_on_date=testing_on_date)
-distancingfun = get_distancing_stepdown_fun(dayseq, distancing_on_date=distancing_on_date, distancing_stepdown_dates=distancing_stepdown_dates)
-
-interventions = list(lockdown=lockfun, schools=schoolsfun, testing=testingfun, distancing=distancingfun)
 
 E_init = E_init_state0
 I_s_init = rep(0,nregions)
@@ -115,7 +101,7 @@ res = run_sir_model(state0=state0,
                     params=params_tmp,  
                     region_adj=adj, 
                     populations=as.numeric(populations), 
-                    tmax=tmax, 
+                    tmax=mytmax, 
                     interventions=interventions, 
                     capacities=county_capacities)
 
@@ -161,7 +147,7 @@ for (k in 1:length(compartments)){
 ## inputs:
 # params: list of parameters representing a chosen scenario
 # posterior: data frame with a sample from joint posterior 
-rposterior = function(params, posterior){
+rposterior = function(params, posterior, interventions){
 
 par_smpl = posterior[sample(c(1:nrow(posterior)), size = 1), ]
 
@@ -193,7 +179,7 @@ params$distancing_effect = par_smpl$distancing_effect
 params$testing_effect_Im = par_smpl$testing_effect_Im
 params$testing_effect_A = par_smpl$testing_effect_A
 
-state0 = get_state0_params(params, E_init_state0, CT_POPULATIONS, CT_ADJ, COUNTY_CAPACITIES)
+state0 = get_state0_params(params, E_init_state0, interventions, CT_POPULATIONS, CT_ADJ, COUNTY_CAPACITIES)
 
 return( list (params, state0) )
 }
@@ -225,6 +211,16 @@ get_sir_results = function(daymax,
                            seed = NULL, 
                            CI = 0.95) {
 
+  dayseq = seq(day0, daymax, by="day")
+  tmax = as.numeric(difftime(daymax, day0, units="days"))
+
+  lockfun = get_state_lockdown_fun(dayseq, offdate=lockdown_end_date)
+  schoolsfun = get_school_in_session_fun(dayseq, schools_reopen_date=schools_reopen_date)
+  testingfun = get_testing_on_fun(dayseq, testing_on_date=testing_on_date)
+  distancingfun = get_distancing_stepdown_fun(dayseq, distancing_on_date=distancing_on_date, distancing_stepdown_dates=distancing_stepdown_dates)
+
+  interventions = list(lockdown=lockfun, schools=schoolsfun, testing=testingfun, distancing=distancingfun) 
+
  pars <- list()
  state0s <- list()
    
@@ -247,26 +243,16 @@ get_sir_results = function(daymax,
      state0s[[1]] = state0
   } else { 
     for(i in 1:nsim){ 
-       rpost_out = rposterior(params, posterior)
+       rpost_out = rposterior(params, posterior, interventions)
        pars[[i]] = rpost_out[[1]]
        state0s[[i]] = rpost_out[[2]]
     }
   } 
 }   
 
-  dayseq = seq(day0, daymax, by="day")
-  tmax = as.numeric(difftime(daymax, day0, units="days"))
-
-  lockfun = get_state_lockdown_fun(dayseq, offdate=lockdown_end_date)
-  schoolsfun = get_school_in_session_fun(dayseq, schools_reopen_date=schools_reopen_date)
-  testingfun = get_testing_on_fun(dayseq, testing_on_date=testing_on_date)
-  distancingfun = get_distancing_stepdown_fun(dayseq, distancing_on_date=distancing_on_date, distancing_stepdown_dates=distancing_stepdown_dates)
-
-  interventions = list(lockdown=lockfun, schools=schoolsfun, testing=testingfun, distancing=distancingfun) 
-
   sir_results = lapply(1:nsim, function(i){
     res = run_sir_model(state0=state0s[[i]], 
-                        params=pars[[i]],  # note: effect_intvx is in params, and is not passed to run_sir_model separately 
+                        params=pars[[i]],   
                         region_adj=CT_ADJ, 
                         populations=CT_POPULATIONS, 
                         tmax=tmax, 

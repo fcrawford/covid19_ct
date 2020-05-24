@@ -12,7 +12,7 @@ run_sir_model = function(state0, params, region_adj, populations, tmax, interven
   }
 
 
-  nregions = nrow(region_adj) # number of counties or towns, whatever. 
+  nregions = nrow(region_adj) # number of counties 
 
   if(length(state0) != nregions*11) stop("length of state0 must be nregions*11")
 
@@ -214,44 +214,32 @@ run_sir_model = function(state0, params, region_adj, populations, tmax, interven
   }
   
   
+  
   # add variables to plot lagged deaths and hospitalizations 
-  out$time_H_lag <- out$time + params$H_lag
-  out$time_D_lag <- out$time + params$D_lag
-
-  H_lag <- params$H_lag
+  lag_shift <- function(v,lg) { c(rep(0,lg), v[1:(length(v) - lg)]) }
+  
   D_lag <- params$D_lag
+  H_lag <- params$H_lag
   
-  idx_H_lag = 1:(nrow(out) - H_lag)
-  idx_D_lag = 1:(nrow(out) - D_lag)
-  
-  # add lagged compartments for CT: deaths, current hospitalizations, cumulative hospitalizations
-  out$rD.Connecticut <- out$rH.Connecticut <- out$rHbar.Connecticut <- out$rcum_modH.Connecticut <-  0
-  
-  for (k in idx_H_lag){
-    out$rH.Connecticut[k+H_lag]    <- out$H.Connecticut[k]
-    out$rHbar.Connecticut[k+H_lag] <- out$Hbar.Connecticut[k]
-    out$rcum_modH.Connecticut[k+H_lag] <- out$cum_modH.Connecticut[k]
-  }
+  # time-shift
+  out$time_D_lag <- out$time + D_lag
+  out$time_H_lag <- out$time + H_lag
 
-  for (k in idx_D_lag){
-    out$rD.Connecticut[k+D_lag] <- out$D.Connecticut[k]
-  }
+  # lagged compartments in Connecticut: deaths, current hospitalizations, cumulative hospitalizations
+  out$rD.Connecticut    = lag_shift(out$D.Connecticu, D_lag)
+  out$rH.Connecticut    = lag_shift(out$H.Connecticut, H_lag)
+  out$rHbar.Connecticut = lag_shift(out$Hbar.Connecticut, H_lag)
+  out$rcum_modH.Connecticut = lag_shift(out$cum_modH.Connecticut, H_lag)
   
-  # add lagged compartments for counties: deaths and current hospitalizations
+  # lagged compartments for counties: deaths and current hospitalizations
   for(i in region_names){
-    out[[paste0("rH.", i)]] <- out[[paste0("rHbar.", i)]] <- out[[paste0("rD.", i)]] <- 0
-    
-    for (k in idx_H_lag){
-      out[[paste0("rH.", i)]][k+H_lag]    <- out[[paste0("H.", i)]][k]
-      out[[paste0("rHbar.", i)]][k+H_lag] <- out[[paste0("Hbar.", i)]][k]
-      }
+   out[[paste0("rD.", i)]]    = lag_shift(out[[paste0("D.", i)]], D_lag) 
+   out[[paste0("rH.", i)]]    = lag_shift(out[[paste0("H.", i)]], H_lag)
+   out[[paste0("rHbar.", i)]] = lag_shift(out[[paste0("Hbar.", i)]], H_lag)
+  }
+  
 
-    for (k in idx_D_lag){
-      out[[paste0("rD.", i)]][k+D_lag] <- out[[paste0("D.", i)]][k]
-    }
-  }  
-  
-  
+
   ## intervention patterns ##  
   out$intervention_pattern = contact_intervention_fun(1:(tmax+1))
   out$intervention_schools = interventions$schools(1:(tmax+1))
