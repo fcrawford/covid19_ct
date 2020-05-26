@@ -2,7 +2,7 @@ source("global_var.R")
 
 mydaymax              = ymd("2020-09-01") 
 myschools_reopen_date = ymd("2021-09-01") 
-
+my_report_date        = ymd("2020-05-20")
 
 nsim = 3000
 # scenario of releasing contacts 
@@ -15,8 +15,7 @@ print(case_name)
 ####################################
 
 mylockdown_end_date   = ymd("2020-05-19") 
-mytesting_on_date  = ymd("2020-05-20")
-
+mytesting_on_date     = ymd("2020-05-20")
 mydistancing_on_date  = mylockdown_end_date+1 # distancing on at end of lockdown
 
 
@@ -96,7 +95,7 @@ pdf(paste(scenario_name, "_", case_name, ".pdf", sep=""), width=12, height=6)
 
 par(mfrow=c(2,2), mar=c(4,4,1,1))
 
-plot_interventions(res1$raw_results, mydaymax, subtitle=NULL)
+plot_interventions(res1$raw_results, mydaymax, subtitle=NULL, ref_day=my_report_date)
 
 
 
@@ -105,21 +104,21 @@ connecticut_summary_dailyI = plot_ct_region(data=res1$summary,
                                              title=str,
                                              region_name="Connecticut", 
                                              which.plot="dailyI",
-                                             ymax=NULL)
+                                             ymax=NULL, ref_day=my_report_date)
 
 connecticut_summary_hosp1 = plot_ct_region(data=res1$summary, 
                                              end_day=mydaymax, 
                                              title=str,
                                              region_name="Connecticut", 
                                              which.plot="rHsum",
-                                             ymax=NULL)
+                                             ymax=NULL, ref_day=my_report_date)
 
 connecticut_summary_deaths1 = plot_ct_region(data=res1$summary, 
                                              end_day=mydaymax, 
                                              title=str,
                                              region_name="Connecticut", 
                                              which.plot="rD",
-                                             ymax=NULL)
+                                             ymax=NULL, ref_day=my_report_date)
 
 dev.off()
 
@@ -139,7 +138,8 @@ connecticut_cumulative_incid_prop = plot_ct_region(data=res1$summary,
                                              region_name="Connecticut", 
                                              which.plot="alive_cum_incid_prop",
                                              ymax=1, 
-                                             ylab="Proportion")
+                                             ylab="Proportion", 
+                                             ref_day=my_report_date)
 
 
 dev.off()
@@ -150,7 +150,7 @@ pdf(paste(scenario_name, "_", case_name, "_full.pdf", sep=""), width=6*2, height
 
 par(mfrow=c(3,2), mar=c(4,4,1,1))
 
-plot_interventions(res1$raw_results, mydaymax, subtitle=NULL)
+plot_interventions(res1$raw_results, mydaymax, subtitle=NULL, ref_day=my_report_date)
 
 
 connecticut_summary_dailyI = plot_ct_region(data=res1$summary, 
@@ -158,7 +158,8 @@ connecticut_summary_dailyI = plot_ct_region(data=res1$summary,
                                              title=str,
                                              region_name="Connecticut", 
                                              which.plot="dailyI",
-                                             ymax=NULL)
+                                             ymax=NULL, 
+                                             ref_day=my_report_date)
 
 
 connecticut_summary_hosp1 = plot_ct_region(data=res1$summary, 
@@ -166,28 +167,32 @@ connecticut_summary_hosp1 = plot_ct_region(data=res1$summary,
                                              title=str,
                                              region_name="Connecticut", 
                                              which.plot="rHsum",
-                                             ymax=NULL)
+                                             ymax=NULL, 
+                                             ref_day=my_report_date)
 
 connecticut_summary_deaths1 = plot_ct_region(data=res1$summary, 
                                              end_day=mydaymax, 
                                              title=str,
                                              region_name="Connecticut", 
                                              which.plot="rD",
-                                             ymax=NULL)
+                                             ymax=NULL, 
+                                             ref_day=my_report_date)
 
 connecticut_cumulative_incid = plot_ct_region(data=res1$summary, 
                                              end_day=mydaymax, 
                                              title=str,
                                              region_name="Connecticut", 
                                              which.plot="alive_cum_incid_prop",
-                                             ymax=NULL)
+                                             ymax=NULL, 
+                                             ref_day=my_report_date)
 
 connecticut_R_eff = plot_ct_region(data=res1$summary, 
                                              end_day=mydaymax, 
                                              title=str,
                                              region_name="Connecticut", 
                                              which.plot="R_eff",
-                                             ymax=NULL, ylab="Effective reproductive number")
+                                             ymax=NULL, ylab="Effective reproductive number", 
+                                             ref_day=my_report_date)
 abline(h=1, lty="dotted", col="gray")
 dev.off()
 

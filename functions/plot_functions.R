@@ -34,7 +34,8 @@ plot_ct_region = function(data=NULL,
                           sentence=TRUE,
                           show.data=TRUE, 
                           title.override=NULL,
-                          goodness = FALSE) {
+                          goodness = FALSE,
+                          ref_day=Sys.Date()) {
 
 lab.table <- data.frame(compartment=c("D","rD", "H","rH",
                                        "Hbar", "rHbar", "rHsum","cum_modH",
@@ -150,7 +151,7 @@ lab.table <- data.frame(compartment=c("D","rD", "H","rH",
   axis(1,at=lab_where, lab=lab_show, cex.axis=lab_cex)
   axis(2)
 
-  if(!goodness) abline(v=Sys.Date()-start_day, col="gray", lty=2)
+  if(!goodness) abline(v=ref_day-start_day, col="gray", lty=2)
 
 
   lab.table$color <- as.character(lab.table$color)
@@ -333,7 +334,7 @@ mapplot_ct_region_list =  function(data, which.plot = "D", label = "Cumulative D
 
 
 
-plot_interventions = function(sir_results, daymax, subtitle=NULL) {
+plot_interventions = function(sir_results, daymax, subtitle=NULL, ref_day=Sys.Date()) {
 
 
   dayseq = seq(day0, daymax, by="day")
@@ -354,5 +355,5 @@ plot_interventions = function(sir_results, daymax, subtitle=NULL) {
   axis(1, at=daymonthseq, lab=monthseq_lab)
   axis(2)
   polygon(c(1,1:(tmax+1), tmax+1), c(0,sir_results[[1]]$intervention_pattern, 0), col="orange", border=NA)
-  abline(v=Sys.Date()-day0, col="gray", lty=2)
+  abline(v=ref_day-day0, col="gray", lty=2)
 }
