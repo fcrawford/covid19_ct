@@ -76,10 +76,10 @@ lower.m_Hbar_mult : 1
 upper.m_Hbar_mult : 2
 
 # distancing_effect: remaining reduction in contact rates after lockdown is lifted
-mean.distancing_effect: 0.6
+mean.distancing_effect: 0.7
 sd.distancing_effect: 0.03
-lower.distancing_effect : 0.5
-upper.distancing_effect : 0.7
+lower.distancing_effect : 0.6
+upper.distancing_effect : 0.8
 
 # testing_effect_Im: increase in the rate of departure from I_m due to faster isolation 
 mean.testing_effect_Im : 0.5

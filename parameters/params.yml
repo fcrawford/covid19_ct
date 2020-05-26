@@ -59,7 +59,7 @@ time_num: 15
 school_closure_effect: 0.135
 lockdown_effect: 0.7
 # post-lockdown
-distancing_effect: 0.6
+distancing_effect: 0.71
 
 # intervention effect on isolation/recovery for A and I_m
 # this is increase in a rate of transitioning out of infectious compartment 
