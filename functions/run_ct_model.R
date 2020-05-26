@@ -346,5 +346,23 @@ get_dashboard_output <- function(data, plot=TRUE, filename=NULL){
 
 
 
+get_snapshot <- function(data, date, where = "Connecticut"){
+  toprint <- unique(data$variable)
+  toprint <- toprint[grep(where, toprint)] 
+  time.toprint <- as.numeric(as.Date(date, "%m/%d/%Y") - day0)
+  out <- NULL
+
+  sir_result_internal <- filter(data, variable%in%toprint) %>% 
+                         filter(time == time.toprint) %>%
+                         ungroup(variable) %>%
+                         mutate(Date = day0 + time) %>%
+                         mutate(variable = gsub(paste0(".",where), "", variable)) %>%
+                         select(variable, time, mean, lower, upper) 
+  return(data.frame(sir_result_internal))
+  return(out)
+}
+
+
+
 
 

@@ -140,3 +140,7 @@ connecticut_curentI = plot_ct_region(data=res1$summary,
                                      which.plot="currentI",
                                      ymax=NULL, ylab="Current infections")
 
+
+# be aware of the date format
+get_snapshot(data=res1$summary, date="05/27/2020")
+get_snapshot(data=res1$summary, date="05/27/2020", where="New Haven")
