@@ -59,7 +59,7 @@ lab.table <- data.frame(compartment=c("D","rD", "H","rH",
 
   if(goodness){
     if(which.plot %in% c("rD", "rH", "rHsum")){
-      end_day <- Sys.Date()
+      end_day <- ref_day
       ymax <- NULL
     }else{
       goodness <- FALSE
