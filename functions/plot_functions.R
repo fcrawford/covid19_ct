@@ -177,10 +177,12 @@ lab.table <- data.frame(compartment=c("D","rD", "H","rH",
   # Add observed deaths
   if(which.plot %in% "rD"){
     col.line <- lab.table$color[which(lab.table$compartment=="D")]
+    points.add <- subset(points.add, time <= ref_day-start_day)
     points(points.add$time, points.add$toplot, pch=16, cex=0.6, col=col.line)
   }
   if(which.plot %in% c("rH", "rHsum")){
     col.line <- lab.table$color[which(lab.table$compartment=="H")]
+    points.add <- subset(points.add, time <= ref_day-start_day)
     points(points.add$time, points.add$toplot, pch=16, cex=0.6, col=col.line)
   }
 
