@@ -90,8 +90,8 @@ upper_lockdown_effect: 0.75
 
 # post-lockdown
 sd_distancing_effect: 0.02
-lower_distancing_effect: 0.56
-upper_distancing_effect: 0.64
+lower_distancing_effect: 0.67
+upper_distancing_effect: 0.75
 
 sd_testing_effect_Im: 0.02
 lower_testing_effect_Im: 0.45
