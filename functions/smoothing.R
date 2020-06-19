@@ -33,9 +33,9 @@ data.test$date <- as.Date(data.test$date, format = "%m/%d/%y")
 if(sum(diff(data.test$date) != 1) > 0) stop("Missing dates")
 data.test$cum_tests <- cumsum(data.test$daily_tests)
 data.test$t <- as.numeric(data.test$date - data.test$date[1]) + 1
-sp <- smooth.spline(data.test$t, log(data.test$cum_tests), nknots=round(max(data.test$t)/15))
-data.test$smooth.cum <- exp(sp$y)
-data.test$smooth <- c(NA, diff(data.test$smooth.cum))
+sp <- smooth.spline(data.test$t, (data.test$cum_tests), nknots=round(max(data.test$t)/15))
+data.test$smooth.cum <- (sp$y)
+data.test$smooth <- c(diff(c(0, data.test$smooth.cum)))
 data.test$smooth[1] <- data.test$smooth[2]
 
 g1 <- ggplot(data.test, aes(x = date, y = daily_tests)) + geom_line(alpha=0.5)+ geom_line(aes(y = smooth), color='red') + theme_bw()
