@@ -41,6 +41,8 @@ ct.hosp$time <- round(as.numeric(difftime(ct.hosp$date, day0, units="days")),0)
 dat_ct_state <- merge(dat_ct_state, ct.hosp, by='time', all=T)
 dat_ct_state$date.y <- NULL
 names(dat_ct_state)[names(dat_ct_state) == "date.x"] <- "date"
+dat_ct_state$total_deaths <- dat_ct_state$deaths
+dat_ct_state$deaths <- dat_ct_state$hosp_death
 
 ## add county-level hospitalization (current counts): this csv file needs to be updated using get_data_capacity.R file ##
 ct.hosp.county <- read.csv('../data/ct_current_hosp.csv')
