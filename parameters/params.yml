@@ -5,19 +5,20 @@ q_A: 0.36 # asymptomatic
 q_Im: 0.576 # mild
 q_Is: 0.064 # severe
 
-# among severe: proportion going to H/Hbar stream (vs. nursing homes or alike)
-q_H: 0.56
+# among severe: proportion going to H/Hbar stream (vs. nursing homes or prisons)
+# the value of 1 corresponds to a community transmission model
+q_H: 1 #0.56
 
 # transmissibility
-beta_pre: 1.26
+beta_pre: 1.2
 
 # latency
 delta: 0.25   # 1/4
 
 ## FOI
-# FOI from Asymptomatic
+# FOI from Asymptomatic in the absence of testing
 alpha_A: 0.1428571   # 1/7 (infectious for 7 days)
-k_A: 0.385
+k_A: 0.385 # relative infectiousness of asymptomatic compared to mildly symptomatic
 
 # FOI from Mild
 alpha_Im: 0.25   # 1/4 (infectious for 4 days, then isolated)
@@ -36,81 +37,44 @@ gamma_Hbar: 0.114
 gamma_NH: 0.073  # 1/14 
 
 ## Mild : duration of isolation
+# replace with an estimate of duration of PCR detectable virus rather than duration of infectiousness
 gamma_NI: 0.1428571 # 1/7 (10 days from symptom onset - 3 days in I_m state)
 
 ## CFR
 m_H: 0.21 # among hospitalized
-m_NH_mult: 1.4 # RR among severe in nursing homes, prisons or alike
+m_NH_mult: 1.4 # RR among severe in nursing homes / prisons
 m_Hbar_mult: 1.5 # RR among hospital overflow
 
 # other
 k_n: 0.015 # transmission from adjacent counties
 
 # reporting lags (days)
-H_lag: 6
-D_lag: 10
+H_lag: 7
+D_lag: 7
 
 # time point from candidate_state0 that becomes state0
 time_num: 15
 
 # the following effects are ADDITIVE and must sum to a number <= 1
 # e.g. an effect of 0.1 reduces the intervention from 1 (full effect) to 0.9. 
-# intervention effects on contact: 
-school_closure_effect: 0.135
+# intervention effects on contact (combined in a list in the code): 
+school_closure_effect: 0.1
 lockdown_effect: 0.7
 # post-lockdown
-distancing_effect: 0.7
+ph1_release_effect: 0.05
+ph2_release_effect: 0
+ph3_release_effect: 0
 
 # intervention effect on isolation/recovery for A and I_m
-# this is increase in a rate of transitioning out of infectious compartment 
-testing_effect_Im: 0.5
-testing_effect_A: 0.2
+# this number times log(daily number of tests) is an increase in the rate of transitioning out of infectious compartment 
+testing_effect: 0.02 # corresponds to compartment I_m
+te_A_mult: 0.5 # relative testing effect among A compared to I_m
+
+
 
 # standard deviations, lower and upper bounds 
 # of model parameters for uncertainty in projections
 sd_beta_pre: 0.05
-lower_beta_pre: 1.16
-upper_beta_pre: 1.36
+lower_beta_pre: 1.1
+upper_beta_pre: 1.3
 
-sd_q_Is: 0.007
-lower_q_Is: 0.044
-upper_q_Is: 0.084
-
-sd_gamma_H: 0.0025
-lower_gamma_H: 0.104
-upper_gamma_H: 0.124
-
-sd_m_H: 0.015
-lower_m_H: 0.18
-upper_m_H: 0.24
-
-sd_lockdown_effect: 0.02
-lower_lockdown_effect: 0.66
-upper_lockdown_effect: 0.74
-
-# post-lockdown
-sd_distancing_effect: 0.02
-lower_distancing_effect: 0.66
-upper_distancing_effect: 0.74
-
-sd_testing_effect_Im: 0.02
-lower_testing_effect_Im: 0.45
-upper_testing_effect_Im: 0.55
-
-sd_testing_effect_A: 0.02
-lower_testing_effect_A: 0.15
-upper_testing_effect_A: 0.25
-
-sd_m_Hbar_mult: 0.25
-lower_m_Hbar_mult: 1.00
-upper_m_Hbar_mult: 2.00
-
-
-# not used in simulation at the moment
-sd_q_A: 0.015
-lower_q_A: 0.33
-upper_q_A: 0.39
-
-sd_delta: 0.025
-lower_delta: 0.2
-upper_delta: 0.3

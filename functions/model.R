@@ -4,13 +4,12 @@
 # region_adj is an adjacency matrix whose row/col labels are 
 
 
-run_sir_model = function(state0, params, region_adj, populations, tmax, interventions, capacities) {
+run_sir_model = function(state0, params, region_adj, populations, tmax, interventions, int_effects, capacities) {
 
-  if(is.null(interventions$lockdown) || is.null(interventions$schools) || 
-     !is.function(interventions$lockdown) || !is.function(interventions$schools)) { 
-    stop("must specify intervention functions for lockdown and schools")
+  if(is.null(interventions$distancing_list) || is.null(interventions$mobility) || is.null(interventions$testing) ||
+     !is.list(interventions$distancing_list) || !is.function(interventions$mobility) || !is.function(interventions$testing)) { 
+    stop("must specify intervention functions for distancing (list of functions), mobility and testing")
   }
-
 
   nregions = nrow(region_adj) # number of counties 
 
@@ -39,19 +38,23 @@ run_sir_model = function(state0, params, region_adj, populations, tmax, interven
   # here we define the intervention function: 
   # note that this function should be <= 1
   # and the effect of different interventions is additive, so coefficients must sum to <= 1.  
-  contact_intervention_fun = function(t_tmp) { 
-    1 - (params$school_closure_effect*(1-interventions$schools(t_tmp)) + 
-         params$lockdown_effect*interventions$lockdown(t_tmp) + 
-         params$distancing_effect*interventions$distancing(t_tmp)
-         )
-    }
-
+  # check that distancing functions list is the same length as intervention effects list
+  if (length(interventions$distancing_list)!=length(int_effects)) {stop("list of effects has to be the same length as list of distancing functions")}
   
+  # contact intervention function
+  contact_intervention_fun = function(t_tmp) {
+    
+    distance = 0
+    for (k in 1:length(interventions$distancing_list)){
+      distance = distance + interventions$distancing_list[[k]](t_tmp) * int_effects[[k]]
+    }
+      return((1 - distance) * interventions$mobility(t_tmp))
+    }
 
   # quick integrity check:
   if(any(contact_intervention_fun(1:(tmax+1))<0)) {
     plot(contact_intervention_fun(1:(tmax+1)))
-    stop("intervention_fun returns negative values. Check that intervention prameters sum to <= 1")
+    stop("contact_intervention_fun returns negative values. Check that intervention prameters sum to <= 1")
   }
 
   # region-wise beta transmission matrix 
@@ -60,6 +63,9 @@ run_sir_model = function(state0, params, region_adj, populations, tmax, interven
   params$m_Hbar = params$m_H * params$m_Hbar_mult
   params$m_NH   = params$m_H * params$m_NH_mult
 
+  # testing effects
+  params$testing_effect_Im = params$testing_effect
+  params$testing_effect_A = params$testing_effect * params$te_A_mult
 
   model <- function(time, state, parameters) {
     with(as.list(c(state, parameters)), {
@@ -242,24 +248,25 @@ run_sir_model = function(state0, params, region_adj, populations, tmax, interven
 
   ## intervention patterns ##  
   out$intervention_pattern = contact_intervention_fun(1:(tmax+1))
-  out$intervention_schools = interventions$schools(1:(tmax+1))
-  out$intervention_lockdown = interventions$lockdown(1:(tmax+1))
+  #out$intervention_schools = interventions$schools(1:(tmax+1))
+  #out$intervention_lockdown = interventions$lockdown(1:(tmax+1))
+  out$mobility = interventions$mobility(1:(tmax+1))
   out$intervention_testing = interventions$testing(1:(tmax+1))
 
   
+  # dynamics of rates of removal from infectious compartments I_m and A
+  out$alpha_Im.t = params$alpha_Im * (1 + params$testing_effect_Im * out$intervention_testing)
+  out$alpha_A.t = params$alpha_A * (1 + params$testing_effect_A * out$intervention_testing)
+    
+  # dynamic of aggregate FOI
+  out$FOI = ( params$q_A * params$k_A / out$alpha_A.t 
+              + (1 - params$q_Is - params$q_A) / out$alpha_Im.t 
+              + params$q_Is * params$k_Is / params$alpha_Is  )
+  
   # compute dynamics of R_eff at the state level
   # R_eff takes into account social distancing, testing effect in reducing FOI and depletion of susceptibles
-  FOI_init <- ( params$q_A * params$k_A / params$alpha_A 
-              + (1 - params$q_Is - params$q_A) / params$alpha_Im 
-              + params$q_Is * params$k_Is / params$alpha_Is  )
-  
-  FOI_testing = ( params$q_A * params$k_A / ( (1 + params$testing_effect_A) * params$alpha_A )
-              + (1 - params$q_Is - params$q_A) / ( (1 + params$testing_effect_Im) * params$alpha_Im ) 
-              + params$q_Is * params$k_Is / params$alpha_Is  )
-  
-  FOI = FOI_init * (1 - out$intervention_testing) + FOI_testing * out$intervention_testing
-  
-  out$R_eff.Connecticut = params$beta_pre * FOI * out$intervention_pattern * out$S.Connecticut / (pop_ct - out$D.Connecticut)
+
+  out$R_eff.Connecticut = params$beta_pre * out$FOI * out$intervention_pattern * out$S.Connecticut / (pop_ct - out$D.Connecticut)
   
   return(out)
 }

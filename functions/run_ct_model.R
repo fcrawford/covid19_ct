@@ -8,20 +8,33 @@ rparams = function(params) {
   params_tmp = params
   # sample new param values
   params_tmp$beta_pre = rtruncdist(1, mean=(params$beta_pre*0.9975), sd=params$sd_beta_pre, lower=params$lower_beta_pre, upper=params$upper_beta_pre)
-  params_tmp$q_Is = rtruncdist(1, mean=(params$q_Is), sd=params$sd_q_Is, lower=params$lower_q_Is, upper=params$upper_q_Is)
-  params_tmp$gamma_H = rtruncdist(1, mean=params$gamma_H, sd=params$sd_gamma_H, lower=params$lower_gamma_H, upper=params$upper_gamma_H)
-  params_tmp$gamma_Hbar = params_tmp$gamma_H
-  params_tmp$m_H = rtruncdist(1, mean=params$m_H, sd=params$sd_m_H, lower=params$lower_m_H, upper=params$upper_m_H)
-  params_tmp$lockdown_effect = rtruncdist(1, mean=params$lockdown_effect, sd=params$sd_lockdown_effect, lower=params$lower_lockdown_effect, upper=params$upper_lockdown_effect)
+  #params_tmp$q_Is = rtruncdist(1, mean=(params$q_Is), sd=params$sd_q_Is, lower=params$lower_q_Is, upper=params$upper_q_Is)
+  #params_tmp$gamma_H = rtruncdist(1, mean=params$gamma_H, sd=params$sd_gamma_H, lower=params$lower_gamma_H, upper=params$upper_gamma_H)
+  #params_tmp$gamma_Hbar = params_tmp$gamma_H
+  #params_tmp$m_H = rtruncdist(1, mean=params$m_H, sd=params$sd_m_H, lower=params$lower_m_H, upper=params$upper_m_H)
+  #params_tmp$lockdown_effect = rtruncdist(1, mean=params$lockdown_effect, sd=params$sd_lockdown_effect, lower=params$lower_lockdown_effect, upper=params$upper_lockdown_effect)
   # post-lockdown
-  params_tmp$distancing_effect = rtruncdist(1, mean=params$distancing_effect, sd=params$sd_distancing_effect, lower=params$lower_distancing_effect, upper=params$upper_distancing_effect)
-  params_tmp$testing_effect_Im = rtruncdist(1, mean=params$testing_effect_Im, sd=params$sd_testing_effect_Im, lower=params$lower_testing_effect_Im, upper=params$upper_testing_effect_Im)
-  params_tmp$testing_effect_A = rtruncdist(1, mean=params$testing_effect_A, sd=params$sd_testing_effect_A, lower=params$lower_testing_effect_A, upper=params$upper_testing_effect_A)
-  params_tmp$m_Hbar_mult = rtruncdist(1, mean=params$m_Hbar_mult, sd=params$sd_m_Hbar_mult, lower=params$lower_m_Hbar_mult, upper=params$upper_m_Hbar_mult)
+  #params_tmp$distancing_effect = rtruncdist(1, mean=params$distancing_effect, sd=params$sd_distancing_effect, lower=params$lower_distancing_effect, upper=params$upper_distancing_effect)
+  #params_tmp$testing_effect_Im = rtruncdist(1, mean=params$testing_effect_Im, sd=params$sd_testing_effect_Im, lower=params$lower_testing_effect_Im, upper=params$upper_testing_effect_Im)
+  #params_tmp$testing_effect_A = rtruncdist(1, mean=params$testing_effect_A, sd=params$sd_testing_effect_A, lower=params$lower_testing_effect_A, upper=params$upper_testing_effect_A)
+  #params_tmp$m_Hbar_mult = rtruncdist(1, mean=params$m_Hbar_mult, sd=params$sd_m_Hbar_mult, lower=params$lower_m_Hbar_mult, upper=params$upper_m_Hbar_mult)
   # params_tmp$q_Im = rtruncdist(1, mean=(params$q_Im), sd=params$sd_q_Im, lower=params$lower_q_Im, upper=params$upper_q_Im)
   # params_tmp$q_A = rtruncdist(1, mean=(params$q_A), sd=params$sd_q_A, lower=params$lower_q_A, upper=params$upper_q_A)
   # params_tmp$delta = rtruncdist(1, mean=params$delta, sd=params$sd_delta, lower=params$lower_delta, upper=params$upper_delta)
   return(params_tmp)
+}
+
+
+
+
+# UPDATE THIS FUNCTION AS WE INCREASE THE NUMBER OF INTERVENTIONS
+# create a list of contact intervention effects from params
+get_intervention_effects = function(params) {
+   
+   return( as.list(c(params$school_closure_effect, 
+                     params$lockdown_effect, 
+                     params$ph1_release_effect, 
+                     params$ph2_release_effect)) )
 }
 
 
@@ -74,11 +87,22 @@ nregions = length(E_init_state0)
 mytmax = params$time_num + 2
 
 params_tmp <- params
+
 params_tmp$school_closure_effect <- 0
 params_tmp$lockdown_effect <- 0
-params_tmp$distancing_effect <- 0
-params_tmp$testing_effect_Im <- 0
-params_tmp$testing_effect_A <- 0
+
+params_tmp$ph1_release_effect <- 0
+params_tmp$ph2_release_effect <- 0
+params_tmp$ph3_release_effect <- 0
+
+params_tmp$testing_effect <- 0
+
+int_num = length(interventions$distancing_list)
+int_effects_tmp = as.list(rep(0, int_num))
+
+mobfun_tmp = approxfun(1:mytmax, rep(1,mytmax) ,method='linear', rule=2)
+interventions$mobility = mobfun_tmp
+
 params_tmp$H_lag <- 0
 params_tmp$D_lag <- 0
 
@@ -103,6 +127,7 @@ res = run_sir_model(state0=state0,
                     populations=as.numeric(populations), 
                     tmax=mytmax, 
                     interventions=interventions, 
+                    int_effects = int_effects_tmp,
                     capacities=county_capacities)
 
 init = matrix(0, ncol=10, nrow=8)
@@ -191,6 +216,7 @@ return( list (params, state0) )
 
 
 
+
 #######################
 ## Run the model 
 # draw_rparams controls uncertainty simulation: 
@@ -198,11 +224,7 @@ return( list (params, state0) )
 # if draw_rparams = TRUE, parameters are drawn from joint posterior supplied as 'posterior'
 
 get_sir_results = function(daymax, 
-                           lockdown_end_date, 
-                           schools_reopen_date,
-                           testing_on_date,
-                           distancing_on_date,
-                           distancing_stepdown_dates,
+                           int_off_dates,
                            nsim=1,
                            params,
                            state0,
@@ -214,12 +236,17 @@ get_sir_results = function(daymax,
   dayseq = seq(day0, daymax, by="day")
   tmax = as.numeric(difftime(daymax, day0, units="days"))
 
-  lockfun = get_state_lockdown_fun(dayseq, offdate=lockdown_end_date)
-  schoolsfun = get_school_in_session_fun(dayseq, schools_reopen_date=schools_reopen_date)
-  testingfun = get_testing_on_fun(dayseq, testing_on_date=testing_on_date)
-  distancingfun = get_distancing_stepdown_fun(dayseq, distancing_on_date=distancing_on_date, distancing_stepdown_dates=distancing_stepdown_dates)
+  # list of contact intervention functions
+   distancingfun_list = get_distancing_fun_list(dayseq, INT_START_DATES, int_off_dates)
 
-  interventions = list(lockdown=lockfun, schools=schoolsfun, testing=testingfun, distancing=distancingfun) 
+   # mobility
+   mobilityfun = get_mobility_fun(dayseq, MOB)
+
+   # testing
+   testingfun = get_testing_fun(dayseq, TESTING)
+
+   # combine in the list of interventions 
+   interventions = list(distancing_list=distancingfun_list, mobility=mobilityfun, testing=testingfun) 
 
  pars <- list()
  state0s <- list()
@@ -257,6 +284,7 @@ get_sir_results = function(daymax,
                         populations=CT_POPULATIONS, 
                         tmax=tmax, 
                         interventions=interventions,
+                        int_effects = get_intervention_effects(pars[[i]]),
                         capacities=COUNTY_CAPACITIES)
     res$sim_id = i
     res

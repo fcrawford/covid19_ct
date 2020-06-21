@@ -90,10 +90,63 @@ for(nm in colnames(adj)) {
   county_capacities[[nm]] = county_cap_fun
 }
 
+
+
+## get smooth mobility data ## 
+file.mobi <- "../data/ct_mobility.csv"
+data.mobi <- read.csv(file.mobi)
+data.mobi$county <- data.mobi$polygon_name
+pop <- read.csv("../data/ct_population.csv")
+pop$population <- pop$population / sum(pop$population)
+data.mobi <- data.mobi %>% 
+			left_join(pop[, -1]) %>%  
+			group_by(ds) %>% 
+			summarize(stay_put = sum(all_day_ratio_single_tile_users * population))
+data.mobi$date <- as.Date(data.mobi$ds)
+data.mobi <- data.mobi[order(data.mobi$date), ]
+bl_mobile_prop = 1 - mean(data.mobi$stay_put[1:7])
+data.mobi$mobile_prop = 1 - data.mobi$stay_put
+data.mobi$relative_mobility = 1 - (bl_mobile_prop - data.mobi$mobile_prop)/bl_mobile_prop
+data.mobi$t <- as.numeric(data.mobi$date - data.mobi$date[1]) + 1
+sp <- smooth.spline(data.mobi$t, data.mobi$relative_mobility, nknots=round(max(data.mobi$t)/15))
+data.mobi$smooth <- sp$y
+mob_state = data.mobi[, c("date", "smooth")]
+
+
+
+
+
+
+## get smooth testing data ## 
+# assume linear increase in daily number of tests between day0 (March 1) and the first day of test numbers reporting
+file.test <- "../data/ct_cum_pcr_tests.csv"
+data.test <- read.csv(file.test)
+data.test$date = ymd(data.test$date)
+if(sum(diff(data.test$date) != 1) > 0) stop("Missing dates")
+
+add.dates = seq(day0, data.test$date[1], by="day")
+b = data.test$cum_tests[1]/(0.5*length(add.dates)*(length(add.dates)+1))
+add_daily_tests = c(1:length(add.dates))*b
+add_cum_tests = cumsum(add_daily_tests)
+
+add.data.tests = tibble(add.dates, add_cum_tests)
+colnames(add.data.tests) = colnames(data.test)
+
+data.test = rbind(add.data.tests, data.test[-1,])
+#data.test$daily_tests = c(diff(c(0, data.test$cum_tests)))
+
+data.test$t <- as.numeric(data.test$date - data.test$date[1]) + 1
+sp <- smooth.spline(data.test$t, log(data.test$cum_tests), nknots=round(max(data.test$t)/15))
+data.test$smooth.cum <- exp(sp$y)
+data.test$smooth <- c(diff(c(0, data.test$smooth.cum)))
+data.test$smooth[1] <- data.test$smooth[2]
+
+testing_state = data.test[, c("date", "smooth")]
+
+# county populations
 pop = read.csv('../data/ct_population.csv', stringsAsFactors=FALSE)
 populations = pop$population[match(colnames(adj), pop$county)]
 
-
-return(list(dat_ct_state=dat_ct_state, dat_ct_county=dat_ct_county, CTmap=CTmap, adj=adj, dat_ct_capacity=dat_ct_capacity, county_capacities=county_capacities, populations=populations))
+return(list(dat_ct_state=dat_ct_state, dat_ct_county=dat_ct_county, CTmap=CTmap, adj=adj, dat_ct_capacity=dat_ct_capacity, county_capacities=county_capacities, mob=mob_state, testing = testing_state, populations=populations))
 }
 

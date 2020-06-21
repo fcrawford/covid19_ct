@@ -12,16 +12,27 @@ library(rgdal)
 library(SUMMER)
 library(ggplot2)
 library(mapproj)
-library(lubridate)
+library(tidyr)
+library(patchwork)
 
 ########################
 # Global variables of set dates: do not change
 # starting day
 day0 = ymd("2020-03-01")
+
 # actual dates: do not change
-state_schools_close = dmy("13/03/2020")
-state_lockdown_order = dmy("20/03/2020") # order date
-state_lockdown_start = dmy("23/03/2020") # actual start date
+state_schools_close = dmy("17/03/2020")
+#state_lockdown_order = dmy("20/03/2020") # order date
+state_lockdown_start = dmy("23/03/2020") # actual lockdown start date
+state_phase1_start = dmy("20/05/2020") # start of phase 1 lockdown release
+state_phase2_start = dmy("17/06/2020") # start of phase 2 lockdown release
+
+INT_START_DATES = as.list(c(state_schools_close=state_schools_close, 
+                      state_lockdown_start=state_lockdown_start, 
+                      state_phase1_start=state_phase1_start, 
+                      state_phase2_start=state_phase2_start))
+
+
 
 ########################
 source("../functions/model.R")
@@ -42,6 +53,10 @@ DAT_CT_STATE <- global_dat$dat_ct_state
 DAT_CT_COUNTY <- global_dat$dat_ct_county
 # County capacity functions, ordered
 COUNTY_CAPACITIES <- global_dat$county_capacities
+# Mobility 
+MOB <- global_dat$mob
+# daily PCR testing
+TESTING <- global_dat$testing
 # Spatial polygons
 CT_MAP <- global_dat$CTmap
 # Spatial adj  matrix
