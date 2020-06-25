@@ -53,10 +53,15 @@ h = 300
 
 par(mfrow=c(3,3), mar=c(4,4,1,1))
 
+# plot_interventions(res1$raw_results, mydaymax, subtitle=NULL)
 
-
-plot_interventions(res1$raw_results, mydaymax, subtitle=NULL)
-
+connecticut_summary_intx = plot_ct_region(data=res1$summary, 
+                                             end_day=mydaymax, 
+                                             title=str,
+                                             region_name=NULL, 
+                                             which.plot="intervention_pattern",
+                                             ylab="",
+                                             ymax=NULL)
 
 
 connecticut_summary_dailyI = plot_ct_region(data=res1$summary, 

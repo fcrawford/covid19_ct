@@ -41,20 +41,32 @@ lab.table <- data.frame(compartment=c("D","rD", "H","rH",
                                        "Hbar", "rHbar", "rHsum","cum_modH",
                                        "S","E","I_s","I_m",
                                        "A", "dailyI", "cum_modI", "alive_cum_incid_prop", 
-                                       "alive_cum_incid_num", "R_eff", "currentI"),
+                                       "alive_cum_incid_num", "R_eff", "currentI", 
+                                       "intervention_pattern"),
                           color=c('#e41a1c','#e41a1c','#377eb8','#377eb8', 
                                   '#4daf4a','#4daf4a','#377eb8', '#984ea3',
                                   '#ff7f00','#ffff33', '#a65628','#f781bf',
                                   '#999999', '#a65628', '#ff7f00', "#006d2c", 
-                                  "#00441b", "#6a3d9a", "#fdbf6f"),
+                                  "#00441b", "#6a3d9a", "#fdbf6f", 
+                                  "#ff7f00"),
                           labels=c("Cumulative deaths", "Cumulative deaths",  "Hospitalizations", "Hospitalizations",
                                     "Hospital overflow", "Hospital overflow",  "Required hospitalizations",  "Cumulative hospitalizations",
                                     "Susceptible population", "Exposed population", "Severe infections", "Mild infections",
                                     "Asymptomatic infections",   "Daily new infections", "Cumulative infections",  "Cumulative incidence proportion", 
-                                    "Cumulative incidence among living", "R_eff", "Current Infections"))
+                                    "Cumulative incidence among living", "R_eff", "Current Infections", 
+                                    "Overall contact intervention"))
 
   if(which.plot %in% lab.table$compartment == FALSE){
     lab.table <- rbind(lab.table, data.frame(compartment=which.plot, color = "#006d2c", labels=which.plot))
+  }
+  if(!is.null(region_name)){
+    variable_name = paste0(which.plot,".",region_name)
+    toplot <- paste(rep(which.plot,each=length(region_name)),
+                rep(region_name, length(which.plot)),sep=".")
+  }else{
+    variable_name = which.plot
+    region_name = ""
+    toplot <- which.plot
   }
 
   if(goodness){
@@ -89,12 +101,10 @@ lab.table <- data.frame(compartment=c("D","rD", "H","rH",
   if("rHsum" %in% which.plot) add <- TRUE
 
   par(mar=c(2.5,4,2.5,0), bty="n")
-  toplot <- paste(rep(which.plot,each=length(region_name)),
-                  rep(region_name, length(which.plot)),sep=".")
   sir_result_region= filter(data, variable%in%toplot)
 
-  if(is.null(title)){
-    title <- paste0(lab.table$labels[lab.table$compartment==which.plot[1]], " in ", region_name)
+  if(region_name == ""){
+    title <- paste0(lab.table$labels[lab.table$compartment==which.plot[1]])
   } else {
     title <- paste0(lab.table$labels[lab.table$compartment==which.plot[1]], " in ", region_name, " ", title)
   }
@@ -127,7 +137,7 @@ lab.table <- data.frame(compartment=c("D","rD", "H","rH",
   if(region_name == "Connecticut") {
     points.add <- obs_state
     # points(obs_state$time, obs_state$deaths, pch=16, cex=0.6, col=col.line) 
-  }else{
+  }else if(region_name != "") {
     obs.region <- subset(obs_county, county == region_name)
     obs.region$date <- ymd(obs.region$date)
     first.region.time <- round(as.numeric(difftime(obs.region$date[1], start_day, units="days")),0)
@@ -157,7 +167,7 @@ lab.table <- data.frame(compartment=c("D","rD", "H","rH",
   lab.table$color <- as.character(lab.table$color)
   col.line <- lab.table$color[which(lab.table$compartment==which.plot)]
   col.polygon <- adjustcolor(col.line, alpha.f = 0.5 - 0.1*goodness)
-  sir_result_region_sub <- filter(sir_result_region, variable==paste0(which.plot,".",region_name))
+  sir_result_region_sub <- filter(sir_result_region, variable==variable_name)
   sir_result_region_sub <- subset(sir_result_region_sub, time <= tmax.plot)
     time.print <- tmax.plot + 0.5
     polygon(c(sir_result_region_sub$time, rev(sir_result_region_sub$time)), c(sir_result_region_sub$lower, rev(sir_result_region_sub$upper)), col=col.polygon, border=NA)
@@ -188,7 +198,7 @@ lab.table <- data.frame(compartment=c("D","rD", "H","rH",
 
 
   if("D" %in% which.plot || "rD" %in% which.plot || "rHsum" %in% which.plot || "dailyI" %in% which.plot){
-      sir_result_region_sub <- filter(sir_result_region, variable==paste0(which.plot[1],".",region_name))
+      sir_result_region_sub <- filter(sir_result_region, variable==variable_name)
   }
 
   region_summary <- NULL
