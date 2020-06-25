@@ -6,13 +6,6 @@ prior.sd.q_Is : 0.013
 prior.lower.q_Is : 0.014
 prior.upper.q_Is : 0.114
 
-# prop_death_H: proportion of deaths occuring outside hospitals (nursing homes, etc); q_H is calculated from this
-# mean is based on data from hospital association + CT DPH reports with a lag
-prior.mean.prop_death_H : 0.48
-prior.sd.prop_death_H : 0.012
-prior.lower.prop_death_H : 0.36
-prior.upper.prop_death_H : 0.6
-
 # beta_pre: flat between 0.75 and 1.75, fat tails
 prior.mean.beta_pre: 1.25
 prior.sd.beta_pre: 0.5
@@ -25,23 +18,11 @@ prior.sd.k_A : 0.05
 prior.lower.k_A : 0.2
 prior.upper.k_A : 0.6
 
-# k_Is: assume mean of 0.7, largely absorbed in beta
-prior.mean.k_Is : 0.7
-prior.sd.k_Is : 0.05
-prior.lower.k_Is : 0.5
-prior.upper.k_Is : 0.9
-
 # gamma_H: mean = 10 days, consistent with different data sources
 prior.mean.gamma_H : 0.1 
 prior.sd.gamma_H : 0.015
 prior.lower.gamma_H : 0.04
 prior.upper.gamma_H : 0.16
-
-# gamma_NH: for now, assume a bit longer than hospital stay (14.3 days) to absorb delay in reporting relative to hospitals
-prior.mean.gamma_NH : 0.07 
-prior.sd.gamma_NH : 0.01
-prior.lower.gamma_NH : 0.03
-prior.upper.gamma_NH : 0.11
 
 # m_H: mean is 0.2, consistent with hospital association and reports from NY and CA
 prior.mean.m_H : 0.2
@@ -49,23 +30,33 @@ prior.sd.m_H : 0.015
 prior.lower.m_H : 0.1
 prior.upper.m_H : 0.3
 
-# m_NH_mult: assume 1.5 and update later if better estimate becomes available
-prior.mean.m_NH_mult : 1.5
-prior.sd.m_NH_mult : 0.15
-prior.lower.m_NH_mult : 1
-prior.upper.m_NH_mult : 2
+# total lockdown_effect: school closure effect + lockdown effect
+prior.mean.tot_lockdown_effect : 0.75
+prior.sd.tot_lockdown_effect : 0.12
+prior.lower.tot_lockdown_effect : 0.4
+prior.upper.tot_lockdown_effect : 0.99
 
-# school_closure_effect: make relatively narrow, highly correlated with lockdown effect, which is wide
-prior.mean.school_closure_effect : 0.15
-prior.sd.school_closure_effect : 0.015
-prior.lower.school_closure_effect : 0.1
-prior.upper.school_closure_effect : 0.2
+# school_closure_prop: proportion of total lockdown due to school closure
+prior.mean.school_closure_prop : 0.2
+prior.sd.school_closure_prop : 0.1
+prior.lower.school_closure_prop : 0
+prior.upper.school_closure_prop : 0.7
 
-# lockdown_effect: wide and flat
-prior.mean.lockdown_effect : 0.7
-prior.sd.lockdown_effect : 0.05
-prior.lower.lockdown_effect : 0.55
-prior.upper.lockdown_effect : 0.85
+
+# ph1_release_effect: wide and flat
+prior.mean.ph1_release_effect : 0
+prior.sd.ph1_release_effect : 0.08
+prior.lower.ph1_release_effect : -0.2
+prior.upper.ph1_release_effect : 0.2
+
+# testing_effect: increase in the rate of departure from I_m due to faster isolation per log increase in testing 
+prior.mean.testing_effect_Im : 0.03
+prior.sd.testing_effect_Im : 0.02
+prior.lower.testing_effect_Im : 0
+prior.upper.testing_effect_Im : 0.2
+
+
+
 
 # lambda: variance parameter of beta distribution used in data likelihood
 prior.shape.lam : 4
@@ -79,20 +70,55 @@ sd.m_Hbar_mult : 0.25
 lower.m_Hbar_mult : 1
 upper.m_Hbar_mult : 2
 
+
+
+# prop_death_H: proportion of deaths occuring outside hospitals (nursing homes, etc); q_H is calculated from this
+# mean is based on data from hospital association + CT DPH reports with a lag
+prior.mean.prop_death_H : 0.48
+prior.sd.prop_death_H : 0.012
+prior.lower.prop_death_H : 0.36
+prior.upper.prop_death_H : 0.6
+
+
+# k_Is: assume mean of 0.7, largely absorbed in beta
+prior.mean.k_Is : 0.7
+prior.sd.k_Is : 0.05
+prior.lower.k_Is : 0.5
+prior.upper.k_Is : 0.9
+
+
+# gamma_NH: for now, assume a bit longer than hospital stay (14.3 days) to absorb delay in reporting relative to hospitals
+prior.mean.gamma_NH : 0.07 
+prior.sd.gamma_NH : 0.01
+prior.lower.gamma_NH : 0.03
+prior.upper.gamma_NH : 0.11
+
+
+# m_NH_mult: assume 1.5 and update later if better estimate becomes available
+prior.mean.m_NH_mult : 1.5
+prior.sd.m_NH_mult : 0.15
+prior.lower.m_NH_mult : 1
+prior.upper.m_NH_mult : 2
+
+
+
 # distancing_effect: remaining reduction in contact rates after lockdown is lifted
 mean.distancing_effect: 0.7
 sd.distancing_effect: 0.03
 lower.distancing_effect : 0.6
 upper.distancing_effect : 0.8
 
-# testing_effect_Im: increase in the rate of departure from I_m due to faster isolation 
-mean.testing_effect_Im : 0.5
-sd.testing_effect_Im : 0.04
-lower.testing_effect_Im : 0.35
-upper.testing_effect_Im : 0.65
 
-# testing_effect_A: increase in the rate of departure from A due to faster isolation 
-mean.testing_effect_A : 0.2
-sd.testing_effect_A : 0.03
-lower.testing_effect_A : 0.1
-upper.testing_effect_A : 0.3
+# school_closure_effect: make relatively narrow, highly correlated with lockdown effect, which is wide
+prior.mean.school_closure_effect : 0.15
+prior.sd.school_closure_effect : 0.05
+prior.lower.school_closure_effect : 0.025
+prior.upper.school_closure_effect : 0.2775
+
+# lockdown_effect: wide and flat
+prior.mean.lockdown_effect : 0.7
+prior.sd.lockdown_effect : 0.08
+prior.lower.lockdown_effect : 0.5
+prior.upper.lockdown_effect : 0.9
+
+

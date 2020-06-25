@@ -178,18 +178,18 @@ par_smpl = posterior[sample(c(1:nrow(posterior)), size = 1), ]
 
 params$q_Is = par_smpl$q_Is
 params$q_Im = 1 - params$q_A - params$q_Is
-params$q_H = par_smpl$q_H
+#params$q_H = par_smpl$q_H
 
 params$beta_pre = par_smpl$beta_pre 
 params$k_A = par_smpl$k_A
-params$k_Is = par_smpl$k_Is
+#params$k_Is = par_smpl$k_Is
 
 params$gamma_H = par_smpl$gamma_H
 params$gamma_Hbar = par_smpl$gamma_H
-params$gamma_NH = par_smpl$gamma_NH
+#params$gamma_NH = par_smpl$gamma_NH
    
 params$m_H = par_smpl$m_H
-params$m_NH_mult = par_smpl$m_NH_mult
+#params$m_NH_mult = par_smpl$m_NH_mult
 params$m_Hbar_mult = par_smpl$m_Hbar_mult
    
 params$H_lag = par_smpl$H_lag
@@ -198,11 +198,15 @@ params$D_lag = par_smpl$D_lag
 params$school_closure_effect = par_smpl$school_closure_effect
 params$lockdown_effect = par_smpl$lockdown_effect
 
+params$ph1_release_effect = par_smpl$ph1_release_effect
+   
+params$testing_effect = par_smpl$testing_effect
+
 params$time_num = par_smpl$time_num
 
-params$distancing_effect = par_smpl$distancing_effect
-params$testing_effect_Im = par_smpl$testing_effect_Im
-params$testing_effect_A = par_smpl$testing_effect_A
+#params$distancing_effect = par_smpl$distancing_effect
+#params$testing_effect_Im = par_smpl$testing_effect_Im
+#params$testing_effect_A = par_smpl$testing_effect_A
 
 state0 = get_state0_params(params, E_init_state0, interventions, CT_POPULATIONS, CT_ADJ, COUNTY_CAPACITIES)
 

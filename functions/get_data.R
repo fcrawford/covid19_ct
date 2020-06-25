@@ -44,6 +44,8 @@ names(dat_ct_state)[names(dat_ct_state) == "date.x"] <- "date"
 dat_ct_state$total_deaths <- dat_ct_state$deaths
 dat_ct_state$deaths <- dat_ct_state$hosp_death
 
+
+
 ## add county-level hospitalization (current counts): this csv file needs to be updated using get_data_capacity.R file ##
 ct.hosp.county <- read.csv('../data/ct_current_hosp.csv')
 ct.hosp.county$time <- round(as.numeric(difftime(ymd(ct.hosp.county$Date), day0, units="days")),0)
@@ -94,6 +96,15 @@ for(nm in colnames(adj)) {
 
 
 
+
+
+
+
+
+
+
+
+
 ## get smooth mobility data ## 
 file.mobi <- "../data/ct_mobility.csv"
 data.mobi <- read.csv(file.mobi)
@@ -105,14 +116,45 @@ data.mobi <- data.mobi %>%
 			group_by(ds) %>% 
 			summarize(stay_put = sum(all_day_ratio_single_tile_users * population))
 data.mobi$date <- as.Date(data.mobi$ds)
+data.mobi$ds = NULL
 data.mobi <- data.mobi[order(data.mobi$date), ]
+
+date_range <- seq(min(data.mobi$date), max(data.mobi$date), by = 1) 
+missing_dates = date_range[!date_range %in% data.mobi$date] 
+
+for (k in 1:length(missing_dates)){
+  data.mobi[nrow(data.mobi) + k,] = list(NA, ymd(missing_dates[k]))
+}
+
+data.mobi <- data.mobi[order(data.mobi$date), ]
+data.mobi = na_interpolation(data.mobi)
+
 bl_mobile_prop = 1 - mean(data.mobi$stay_put[1:7])
 data.mobi$mobile_prop = 1 - data.mobi$stay_put
 data.mobi$relative_mobility = 1 - (bl_mobile_prop - data.mobi$mobile_prop)/bl_mobile_prop
 data.mobi$t <- as.numeric(data.mobi$date - data.mobi$date[1]) + 1
-sp <- smooth.spline(data.mobi$t, data.mobi$relative_mobility, nknots=round(max(data.mobi$t)/15))
+
+# spline
+#sp <- smooth.spline(data.mobi$t, data.mobi$relative_mobility, nknots=round(max(data.mobi$t)/15))
+#data.mobi$smooth <- sp$y
+
+# 7-day moving average smoothed by spline with weekly knots
+sp <- forecast::ma(data.mobi$relative_mobility, order = 7)
+sp[1:3] = sp[4]
+sp[(length(sp)-2):length(sp)] = sp[(length(sp)-3)]
+
+data.mobi$movavg <- sp
+
+sp <- smooth.spline(data.mobi$t, data.mobi$movavg, nknots=round(max(data.mobi$t)/7))
 data.mobi$smooth <- sp$y
-mob_state = data.mobi[, c("date", "smooth")]
+
+data.mobi$time <- round(as.numeric(difftime(ymd(data.mobi$date), day0, units="days")),0)
+
+mob_state = data.mobi[, c("time", "date", "relative_mobility", "movavg", "smooth")]
+
+
+
+
 
 
 
@@ -124,7 +166,6 @@ mob_state = data.mobi[, c("date", "smooth")]
 file.test <- "../data/ct_cum_pcr_tests.csv"
 data.test <- read.csv(file.test)
 data.test$date = ymd(data.test$date)
-if(sum(diff(data.test$date) != 1) > 0) stop("Missing dates")
 
 add.dates = seq(day0, data.test$date[1], by="day")
 b = data.test$cum_tests[1]/(0.5*length(add.dates)*(length(add.dates)+1))
@@ -135,19 +176,62 @@ add.data.tests = tibble(add.dates, add_cum_tests)
 colnames(add.data.tests) = colnames(data.test)
 
 data.test = rbind(add.data.tests, data.test[-1,])
-#data.test$daily_tests = c(diff(c(0, data.test$cum_tests)))
+data.test$daily_tests = c(NA, diff(data.test$cum_tests))
+data.test$daily_tests[1] = data.test$cum_tests[1]
 
 data.test$t <- as.numeric(data.test$date - data.test$date[1]) + 1
-sp <- smooth.spline(data.test$t, log(data.test$cum_tests), nknots=round(max(data.test$t)/15))
-data.test$smooth.cum <- exp(sp$y)
-data.test$smooth <- c(diff(c(0, data.test$smooth.cum)))
-data.test$smooth[1] <- data.test$smooth[2]
 
-testing_state = data.test[, c("date", "smooth")]
+# spline
+#sp <- smooth.spline(data.test$t, log(data.test$cum_tests), nknots=round(max(data.test$t)/15))
+#data.test$smooth.cum <- exp(sp$y)
+
+# 7-day moving average smoothed by spline with weekly knots
+cum_tests = c(c(0,0,0), data.test$cum_tests)
+sp <- forecast::ma(cum_tests, order = 7)
+
+sp = sp[4:length(sp)]
+last_daily = sp[length(sp)-3] - sp[length(sp)-4]
+sp[(length(sp)-2):length(sp)] = sp[(length(sp)-3)] + last_daily*c(1,2,3)
+
+data.test$movavg <- sp
+data.test$daily_movavg = c(diff(c(0, data.test$movavg)))
+data.test$daily_movavg[1] = data.test$daily_tests[1]
+
+sp <- smooth.spline(data.test$t, log(data.test$movavg), nknots=round(max(data.test$t)/7))
+data.test$smooth.cum <- exp(sp$y)
+
+data.test$smooth <- c(diff(c(0, data.test$smooth.cum)))
+data.test$smooth[1:3] <- data.test$daily_tests[1:3]
+
+#data.test$smooth.cum <- sp[4:length(sp)]
+
+#data.test$smooth <- c(diff(c(0, data.test$smooth.cum)))
+#data.test$smooth[1:3] <- data.test$daily_tests[1:3]
+
+#data.test$smooth[(nrow(data.test)-2):nrow(data.test)] = data.test$smooth[(nrow(data.test)-3)]
+
+data.test$time <- round(as.numeric(difftime(ymd(data.test$date), day0, units="days")),0)
+
+testing_state = data.test[, c("time", "date", "daily_tests", "daily_movavg", "smooth")]
+
+
+
+
+
+
+
+
 
 # county populations
 pop = read.csv('../data/ct_population.csv', stringsAsFactors=FALSE)
 populations = pop$population[match(colnames(adj), pop$county)]
+
+
+# state hospitalizations and deaths as proportion of the population
+dat_ct_state$total_deaths.prop = dat_ct_state$total_deaths/sum(populations)
+dat_ct_state$hosp_deaths.prop = dat_ct_state$hosp_death/sum(populations)
+dat_ct_state$cur_hosp.prop = dat_ct_state$cur_hosp/sum(populations)
+
 
 return(list(dat_ct_state=dat_ct_state, dat_ct_county=dat_ct_county, CTmap=CTmap, adj=adj, dat_ct_capacity=dat_ct_capacity, county_capacities=county_capacities, mob=mob_state, testing = testing_state, populations=populations))
 }

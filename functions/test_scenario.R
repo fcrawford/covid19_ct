@@ -17,7 +17,7 @@ myint_off_dates = as.list(c(schools_reopen_date = myschools_reopen_date,
                       ph2_release_end_date = myph2_release_end_date))
 
 
-nsim = 10
+nsim = 1000
 
 ####################################
 
@@ -42,7 +42,7 @@ res1 = get_sir_results( daymax=mydaymax,
                         params = myparams,
                         state0 = mystate0,
                         posterior = myposterior,
-                        draw_rparams = TRUE )
+                        draw_rparams = FALSE )
 proc.time() - ptm
 
 ####################################
