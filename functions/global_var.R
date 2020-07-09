@@ -26,6 +26,8 @@ day0 = ymd("2020-03-01")
 state_schools_close = dmy("17/03/2020")
 #state_lockdown_order = dmy("20/03/2020") # order date
 state_lockdown_start = dmy("23/03/2020") # actual lockdown start date
+state_mask_start = dmy("20/04/2020") # start of order requiring mask wearing in public: used in lockdown ramping time calculation
+
 state_phase1_start = dmy("20/05/2020") # start of phase 1 lockdown release
 state_phase2_start = dmy("17/06/2020") # start of phase 2 lockdown release
 
@@ -59,22 +61,43 @@ COUNTY_CAPACITIES <- global_dat$county_capacities
 MOB <- global_dat$mob
 # daily PCR testing
 TESTING <- global_dat$testing
+# testing results: proportion testing positive
+POS_TESTING <- global_dat$positive_tests
 # Spatial polygons
 CT_MAP <- global_dat$CTmap
 # Spatial adj  matrix
 CT_ADJ <- global_dat$adj
 # Population count vector in the same order as CT_ADJ
 CT_POPULATIONS <- global_dat$populations
+CT_POP = sum(CT_POPULATIONS) # total CT population
 # County names in the correct order
 CT_NAMES <- colnames(CT_ADJ)
+# Number of regions
+nregions <- length(CT_NAMES)
 
 
-# initial numbers exposed in each county: used to generate state0
-E_init_state0 <- c(7.5,    # 1. "Fairfield" 
-                  0.13,    # 2. "New London" 
-                  0,       # 3. "Litchfield" 
-                  0.04,    # 4. "Windham"  
-                  0.05,    # 5. "Tolland" 
-                  6.5,     # 6. "Hartford"
-                  0.25,    # 7. "Middlesex" 
-                  4.5)     # 8. "New Haven"
+# distribution of initial numbers exposed by county: used to calculate state0 on day0
+E_INIT_COUNTY <- c(0.4,    # 1. "Fairfield" 
+                   0,      # 2. "New London" 
+                   0,      # 3. "Litchfield" 
+                   0,      # 4. "Windham"  
+                   0,      # 5. "Tolland" 
+                   0.35,   # 6. "Hartford"
+                   0,      # 7. "Middlesex" 
+                   0.25)   # 8. "New Haven"
+
+
+
+# initial numbers exposed in each county from v1
+# E_init_state0 <- c(7.5,    # 1. "Fairfield" 
+#                  0.13,    # 2. "New London" 
+#                  0,       # 3. "Litchfield" 
+#                  0.04,    # 4. "Windham"  
+#                  0.05,    # 5. "Tolland" 
+#                  6.5,     # 6. "Hartford"
+#                  0.25,    # 7. "Middlesex" 
+#                  4.5)     # 8. "New Haven"
+
+
+
+

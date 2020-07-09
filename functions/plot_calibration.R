@@ -25,7 +25,9 @@ res1 = get_sir_results(daymax=mydaymax,
 
 pdf("calibration.pdf", width=12, height=4)
 par(mfrow = c(1, 2))
+#par(mfrow = c(1, 3))
 out <-    plot_ct_region(data=res1$summary, region_name="Connecticut", which.plot="rHsum", title.override="Hospitalizations", goodness=TRUE)
 out <-    plot_ct_region(data=res1$summary, region_name="Connecticut", which.plot="rD", title.override="Cumulative deaths", goodness=TRUE)
+#out <-    plot_ct_region(data=res1$summary, region_name="Connecticut", which.plot="rcum_modH", title.override="Cumulative hospitalizations", goodness=TRUE)
 dev.off()
 

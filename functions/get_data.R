@@ -32,7 +32,7 @@ dat_ct_state$deaths[dat_ct_state$date == "2020-05-03"] <- 2495
 #   nyt_ct$new_deaths[i] <- nyt_ct$deaths[i] - nyt_ct$deaths[i-1]
 # }
 
-## add state-level hospitalizations (current counts): this csv file needs to be updated manually ##
+## add state-level hospitalizations and deaths: this csv file needs to be updated manually ##
 ct.hosp <- read.csv('../data/ct_hosp.csv')
 ct.hosp$date <- mdy(ct.hosp$date)
 ct.hosp$time <- round(as.numeric(difftime(ct.hosp$date, day0, units="days")),0)
@@ -122,16 +122,18 @@ data.mobi <- data.mobi[order(data.mobi$date), ]
 date_range <- seq(min(data.mobi$date), max(data.mobi$date), by = 1) 
 missing_dates = date_range[!date_range %in% data.mobi$date] 
 
+if (length(missing_dates)>0){
 for (k in 1:length(missing_dates)){
   data.mobi[nrow(data.mobi) + k,] = list(NA, ymd(missing_dates[k]))
 }
-
+   
 data.mobi <- data.mobi[order(data.mobi$date), ]
 data.mobi = na_interpolation(data.mobi)
+}
 
 bl_mobile_prop = 1 - mean(data.mobi$stay_put[1:7])
 data.mobi$mobile_prop = 1 - data.mobi$stay_put
-data.mobi$relative_mobility = 1 - (bl_mobile_prop - data.mobi$mobile_prop)/bl_mobile_prop
+data.mobi$relative_mobility = data.mobi$mobile_prop/bl_mobile_prop
 data.mobi$t <- as.numeric(data.mobi$date - data.mobi$date[1]) + 1
 
 # spline
@@ -216,8 +218,10 @@ testing_state = data.test[, c("time", "date", "daily_tests", "daily_movavg", "sm
 
 
 
-
-
+# get testing results data (positive proportion)
+file.positive_tests <- "../data/ct_pcr_test_results.csv"
+data.positive_tests = read.csv(file.positive_tests)
+data.positive_tests$date = ymd(data.positive_tests$date)
 
 
 
@@ -231,8 +235,10 @@ populations = pop$population[match(colnames(adj), pop$county)]
 dat_ct_state$total_deaths.prop = dat_ct_state$total_deaths/sum(populations)
 dat_ct_state$hosp_deaths.prop = dat_ct_state$hosp_death/sum(populations)
 dat_ct_state$cur_hosp.prop = dat_ct_state$cur_hosp/sum(populations)
+dat_ct_state$cum_hosp.prop = dat_ct_state$cum_hosp/sum(populations)
 
 
-return(list(dat_ct_state=dat_ct_state, dat_ct_county=dat_ct_county, CTmap=CTmap, adj=adj, dat_ct_capacity=dat_ct_capacity, county_capacities=county_capacities, mob=mob_state, testing = testing_state, populations=populations))
+return(list(dat_ct_state=dat_ct_state, dat_ct_county=dat_ct_county, CTmap=CTmap, adj=adj, dat_ct_capacity=dat_ct_capacity, county_capacities=county_capacities, 
+            mob=mob_state, testing = testing_state, positive_tests = data.positive_tests, populations=populations))
 }
 

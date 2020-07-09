@@ -10,13 +10,19 @@
 
 # generic function for switching contact interventions on and off
 
-get_contact_intervention_fun = function(dayseq, startdate, offdate) {
+
+##########################
+get_contact_intervention_fun = function(dayseq, startdate, offdate, ramping) {
   if(offdate<startdate) {stop("off date cannot be before start date")}
 
   tmax = as.numeric(max(dayseq)-day0)
-
+  ramping_end_date = as.Date(startdate + ramping)
+  
+  if(ramping_end_date>offdate) {stop("ramping value too large")}
+  
   cont_int = sapply(dayseq,function(dy) {
     if(dy<startdate) {0}
+    else if(dy<ramping_end_date) {as.numeric(dy-startdate)/as.numeric(ramping_end_date-startdate)}
     else if(dy<offdate) {1}
     else {0}
   })
@@ -26,21 +32,22 @@ get_contact_intervention_fun = function(dayseq, startdate, offdate) {
 
 
 
-
 ##########################
 
 # list of functions to calculate aggregate distancing function
 
 # startdates and offdates are lists of the same length
-get_distancing_fun_list = function(dayseq, startdates, offdates) {
+get_distancing_fun_list = function(dayseq, startdates, offdates, rampings) {
   if(length(startdates)!=length(offdates)) {stop("list of start dates has to be the same length as list of off dates")}
+  if(length(startdates)!=length(rampings)) {stop("list of start dates has to be the same length as list of ramping times")}   
 
   distancing_fun_list = list()
   for (k in 1:length(startdates)){
-   distancing_fun_list[[k]] = get_contact_intervention_fun(dayseq, startdates[[k]], offdates[[k]]) 
+   distancing_fun_list[[k]] = get_contact_intervention_fun(dayseq, startdates[[k]], offdates[[k]], rampings[[k]]) 
   }
   return(distancing_fun_list)
 }
+
 
 
 

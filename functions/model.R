@@ -226,6 +226,7 @@ run_sir_model = function(state0, params, region_adj, populations, tmax, interven
   
   D_lag <- params$D_lag
   H_lag <- params$H_lag
+  detection_lag <- params$detect_lag
   
   # time-shift
   out$time_D_lag <- out$time + D_lag
@@ -236,6 +237,7 @@ run_sir_model = function(state0, params, region_adj, populations, tmax, interven
   out$rH.Connecticut    = lag_shift(out$H.Connecticut, H_lag)
   out$rHbar.Connecticut = lag_shift(out$Hbar.Connecticut, H_lag)
   out$rcum_modH.Connecticut = lag_shift(out$cum_modH.Connecticut, H_lag)
+  out$detectE.Connecticut = lag_shift(out$E.Connecticut, detection_lag)
   
   # lagged compartments for counties: deaths and current hospitalizations
   for(i in region_names){

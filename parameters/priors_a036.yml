@@ -3,20 +3,20 @@
 # q_Is: relatively flat, centered around 0.064 = 0.1 * symptomatic
 prior.mean.q_Is : 0.064
 prior.sd.q_Is : 0.013
-prior.lower.q_Is : 0.014
-prior.upper.q_Is : 0.114
+prior.lower.q_Is : 0.004
+prior.upper.q_Is : 0.124
 
 # beta_pre: flat between 0.75 and 1.75, fat tails
-prior.mean.beta_pre: 1.25
+prior.mean.beta_pre: 1.1
 prior.sd.beta_pre: 0.5
-prior.lower.beta_pre: 0.25
-prior.upper.beta_pre: 2.25
+prior.lower.beta_pre: 0.1
+prior.upper.beta_pre: 2.1
 
 # k_A: assume mean of 0.4 (there are no good estimates): largely absorbed in beta
 prior.mean.k_A : 0.4
 prior.sd.k_A : 0.05
-prior.lower.k_A : 0.2
-prior.upper.k_A : 0.6
+prior.lower.k_A : 0.1
+prior.upper.k_A : 0.7
 
 # gamma_H: mean = 10 days, consistent with different data sources
 prior.mean.gamma_H : 0.1 
@@ -27,25 +27,25 @@ prior.upper.gamma_H : 0.16
 # m_H: mean is 0.2, consistent with hospital association and reports from NY and CA
 prior.mean.m_H : 0.2
 prior.sd.m_H : 0.015
-prior.lower.m_H : 0.1
-prior.upper.m_H : 0.3
+prior.lower.m_H : 0.05
+prior.upper.m_H : 0.35
 
 # total lockdown_effect: school closure effect + lockdown effect
-prior.mean.tot_lockdown_effect : 0.75
+prior.mean.tot_lockdown_effect : 0.8
 prior.sd.tot_lockdown_effect : 0.12
 prior.lower.tot_lockdown_effect : 0.4
 prior.upper.tot_lockdown_effect : 0.99
 
 # school_closure_prop: proportion of total lockdown due to school closure
 prior.mean.school_closure_prop : 0.2
-prior.sd.school_closure_prop : 0.1
+prior.sd.school_closure_prop : 0.12
 prior.lower.school_closure_prop : 0
 prior.upper.school_closure_prop : 0.7
 
 
 # ph1_release_effect: wide and flat
 prior.mean.ph1_release_effect : 0
-prior.sd.ph1_release_effect : 0.08
+prior.sd.ph1_release_effect : 0.05
 prior.lower.ph1_release_effect : -0.2
 prior.upper.ph1_release_effect : 0.2
 
@@ -55,12 +55,20 @@ prior.sd.testing_effect_Im : 0.02
 prior.lower.testing_effect_Im : 0
 prior.upper.testing_effect_Im : 0.2
 
-
-
+# E_init: initial number exposed on (day0 - time_num), does not need to be integer
+prior.mean.E_init: 20
+prior.sd.E_init: 4
+prior.lower.E_init: 1
+prior.upper.E_init: 50
 
 # lambda: variance parameter of beta distribution used in data likelihood
-prior.shape.lam : 4
-prior.rate.lam : 0.0002
+prior.shape.lam : 6
+prior.rate.lam : 0.0003
+
+# sd_e: variance of normal distribution used in data likelihood 
+prior.shape.sd_e : 2 
+prior.rate.sd_e : 20
+
 
 
 ## these parameters are not calibrated to data, so prior = posterior
@@ -71,6 +79,9 @@ lower.m_Hbar_mult : 1
 upper.m_Hbar_mult : 2
 
 
+
+# OLD: not used in current version
+####################################
 
 # prop_death_H: proportion of deaths occuring outside hospitals (nursing homes, etc); q_H is calculated from this
 # mean is based on data from hospital association + CT DPH reports with a lag

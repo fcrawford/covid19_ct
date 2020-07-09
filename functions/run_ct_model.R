@@ -38,9 +38,21 @@ get_intervention_effects = function(params) {
 }
 
 
+# create a list of intervention ramping times from params
+get_ramping_times = function(params) {
+   
+   return( as.list(c(1,  # ramping time for school closure
+                     params$ramp_time, # ramping time for lockdown
+                     round(params$ramp_time/2, 0),  # ramping time for phase 1 release
+                     round(params$ramp_time/2, 0)) ) ) # ramping time for phase 2 release
+}
+
+
+
+
 
 ########################
-# function: get state0 from initial confitions
+# function: get state0 from initial confitions csv file
 get_state0 = function(init_file_csv){
       init <- read.csv(init_file_csv, stringsAsFactors=FALSE) 
       # double double check order
@@ -72,15 +84,12 @@ get_state0 = function(init_file_csv){
 
 
 
-########################
+###################################
 ## draw params from joint posterior 
-
+###################################
 # some supporting functions
 
-# initial numbers exposed in each county: used to generate state0
-# E_init_state0 is a global variable
-
-# get state0 for a given set of parameters
+# get state0 on day0 for a given set of parameters
 get_state0_params <- function(params, E_init_state0, interventions, populations, adj, county_capacities){
 
 nregions = length(E_init_state0)
@@ -174,44 +183,40 @@ for (k in 1:length(compartments)){
 # posterior: data frame with a sample from joint posterior 
 rposterior = function(params, posterior, interventions){
 
-par_smpl = posterior[sample(c(1:nrow(posterior)), size = 1), ]
+par_smpl = as.list(posterior[sample(c(1:nrow(posterior)), size = 1), ])
 
-params$q_Is = par_smpl$q_Is
-params$q_Im = 1 - params$q_A - params$q_Is
-#params$q_H = par_smpl$q_H
+var_names = c('q_Is', 
+             'beta_pre',
+             'k_A',
+             'gamma_H',
+             'm_H',
+             'H_lag',
+             'D_lag',
+             'school_closure_effect',
+             'lockdown_effect',
+             'ph1_release_effect',
+             'testing_effect',
+             'E_init',
+             'time_num', 
+             'ramp_time',
+             'm_Hbar_mult')
 
-params$beta_pre = par_smpl$beta_pre 
-params$k_A = par_smpl$k_A
-#params$k_Is = par_smpl$k_Is
+  for (k in var_names){
+    params[[k]] = par_smpl[[k]]
+  }
 
-params$gamma_H = par_smpl$gamma_H
-params$gamma_Hbar = par_smpl$gamma_H
-#params$gamma_NH = par_smpl$gamma_NH
-   
-params$m_H = par_smpl$m_H
-#params$m_NH_mult = par_smpl$m_NH_mult
-params$m_Hbar_mult = par_smpl$m_Hbar_mult
-   
-params$H_lag = par_smpl$H_lag
-params$D_lag = par_smpl$D_lag
+  params$q_Im = 1 - params$q_A - params$q_Is
+  params$gamma_Hbar = params$gamma_H
   
-params$school_closure_effect = par_smpl$school_closure_effect
-params$lockdown_effect = par_smpl$lockdown_effect
+  E_init_state0 = params$E_init * E_INIT_COUNTY
 
-params$ph1_release_effect = par_smpl$ph1_release_effect
-   
-params$testing_effect = par_smpl$testing_effect
+  state0 = get_state0_params(params, E_init_state0, interventions, CT_POPULATIONS, CT_ADJ, COUNTY_CAPACITIES)
 
-params$time_num = par_smpl$time_num
-
-#params$distancing_effect = par_smpl$distancing_effect
-#params$testing_effect_Im = par_smpl$testing_effect_Im
-#params$testing_effect_A = par_smpl$testing_effect_A
-
-state0 = get_state0_params(params, E_init_state0, interventions, CT_POPULATIONS, CT_ADJ, COUNTY_CAPACITIES)
-
-return( list (params, state0) )
+  return( list (params, state0) )
 }
+
+
+
 
 
 
@@ -240,8 +245,11 @@ get_sir_results = function(daymax,
   dayseq = seq(day0, daymax, by="day")
   tmax = as.numeric(difftime(daymax, day0, units="days"))
 
-  # list of contact intervention functions
-   distancingfun_list = get_distancing_fun_list(dayseq, INT_START_DATES, int_off_dates)
+  # get a list of intervetion ramping times from default params
+  int_ramping_times = get_ramping_times(params)
+  
+   # list of contact intervention functions 
+   distancingfun_list = get_distancing_fun_list(dayseq, INT_START_DATES, int_off_dates, int_ramping_times)
 
    # mobility
    mobilityfun = get_mobility_fun(dayseq, MOB)
@@ -254,7 +262,8 @@ get_sir_results = function(daymax,
 
  pars <- list()
  state0s <- list()
-   
+ interventions_list <- list()  
+ 
 # parameters, set seed if given
   if(!is.null(seed)) set.seed(seed)
   
@@ -262,22 +271,30 @@ get_sir_results = function(daymax,
        if(nsim == 1){
      pars[[1]] = params 
      state0s[[1]] = state0
+     interventions_list[[1]] = interventions
   } else { 
     for(i in 1:nsim){ 
        pars[[i]] = rparams(params)
        state0s[[i]] = state0
+       interventions_list[[i]] = interventions
     }
   } 
 } else {
   if(nsim == 1){
      pars[[1]] = params
      state0s[[1]] = state0
+     interventions_list[[1]] = interventions
   } else { 
     for(i in 1:nsim){ 
        rpost_out = rposterior(params, posterior, interventions)
        pars[[i]] = rpost_out[[1]]
        state0s[[i]] = rpost_out[[2]]
-    }
+       
+      # update interventions with ramping times from posterior
+       ramping_upd = get_ramping_times(pars[[i]])
+       distancingfun_list_upd = get_distancing_fun_list(dayseq, INT_START_DATES, int_off_dates, ramping_upd)
+       interventions_list[[i]] = list(distancing_list=distancingfun_list_upd, mobility=mobilityfun, testing=testingfun)
+       }
   } 
 }   
 
@@ -287,7 +304,7 @@ get_sir_results = function(daymax,
                         region_adj=CT_ADJ, 
                         populations=CT_POPULATIONS, 
                         tmax=tmax, 
-                        interventions=interventions,
+                        interventions=interventions_list[[i]],
                         int_effects = get_intervention_effects(pars[[i]]),
                         capacities=COUNTY_CAPACITIES)
     res$sim_id = i

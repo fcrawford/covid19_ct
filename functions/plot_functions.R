@@ -38,7 +38,7 @@ plot_ct_region = function(data=NULL,
                           ref_day=Sys.Date()) {
 
 lab.table <- data.frame(compartment=c("D","rD", "H","rH",
-                                       "Hbar", "rHbar", "rHsum","cum_modH",
+                                       "Hbar", "rHbar", "rHsum","rcum_modH",
                                        "S","E","I_s","I_m",
                                        "A", "dailyI", "cum_modI", "alive_cum_incid_prop", 
                                        "alive_cum_incid_num", "R_eff", "currentI", 
@@ -54,7 +54,7 @@ lab.table <- data.frame(compartment=c("D","rD", "H","rH",
                                     "Susceptible population", "Exposed population", "Severe infections", "Mild infections",
                                     "Asymptomatic infections",   "Daily new infections", "Cumulative infections",  "Cumulative incidence proportion", 
                                     "Cumulative incidence among living", "R_eff", "Current Infections", 
-                                    "Overall contact intervention"))
+                                    "Overall contact pattern"))
 
   if(which.plot %in% lab.table$compartment == FALSE){
     lab.table <- rbind(lab.table, data.frame(compartment=which.plot, color = "#006d2c", labels=which.plot))
@@ -70,7 +70,7 @@ lab.table <- data.frame(compartment=c("D","rD", "H","rH",
   }
 
   if(goodness){
-    if(which.plot %in% c("rD", "rH", "rHsum")){
+    if(which.plot %in% c("rD", "rH", "rHsum", "rcum_modH")){
       end_day <- ref_day
       ymax <- NULL
     }else{
@@ -153,7 +153,12 @@ lab.table <- data.frame(compartment=c("D","rD", "H","rH",
     points.add$toplot <- points.add$cur_hosp
     ymax <- max(c(ymax, points.add$toplot), na.rm=TRUE)
   }
- 
+   if("rcum_modH" %in% which.plot){
+    points.add$toplot <- points.add$cum_hosp
+    ymax <- max(c(ymax, points.add$toplot), na.rm=TRUE)
+  }
+
+  
   if(is.null(xlab)) xlab <- ""
   if(is.null(ylab)) ylab <- "People"
   plot(0, type="n", xlab=xlab, ylab=ylab, main=title, col="black", 
@@ -192,6 +197,11 @@ lab.table <- data.frame(compartment=c("D","rD", "H","rH",
   }
   if(which.plot %in% c("rH", "rHsum")){
     col.line <- lab.table$color[which(lab.table$compartment=="H")]
+    points.add <- subset(points.add, time <= ref_day-start_day)
+    points(points.add$time, points.add$toplot, pch=16, cex=0.6, col=col.line)
+  }
+  if(which.plot %in% "rcum_modH"){
+    col.line <- lab.table$color[which(lab.table$compartment=="rcum_modH")]
     points.add <- subset(points.add, time <= ref_day-start_day)
     points(points.add$time, points.add$toplot, pch=16, cex=0.6, col=col.line)
   }
