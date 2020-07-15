@@ -63,6 +63,8 @@ MOB <- global_dat$mob
 TESTING <- global_dat$testing
 # testing results: proportion testing positive
 POS_TESTING <- global_dat$positive_tests
+# relative change in hospital death hazard
+DEATH_HAZ <- global_dat$smooth_hdeath_haz
 # Spatial polygons
 CT_MAP <- global_dat$CTmap
 # Spatial adj  matrix
@@ -78,13 +80,13 @@ nregions <- length(CT_NAMES)
 
 # distribution of initial numbers exposed by county: used to calculate state0 on day0
 E_INIT_COUNTY <- c(0.4,    # 1. "Fairfield" 
-                   0,      # 2. "New London" 
+                   0.003,  # 2. "New London" 
                    0,      # 3. "Litchfield" 
-                   0,      # 4. "Windham"  
-                   0,      # 5. "Tolland" 
+                   0.001,  # 4. "Windham"  
+                   0.001,  # 5. "Tolland" 
                    0.35,   # 6. "Hartford"
-                   0,      # 7. "Middlesex" 
-                   0.25)   # 8. "New Haven"
+                   0.005,  # 7. "Middlesex" 
+                   0.24)   # 8. "New Haven"
 
 
 

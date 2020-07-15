@@ -39,8 +39,8 @@ ct.hosp$time <- round(as.numeric(difftime(ct.hosp$date, day0, units="days")),0)
 
 # merge cases and death counts from NYT with hospitalization data
 dat_ct_state <- merge(dat_ct_state, ct.hosp, by='time', all=T)
-dat_ct_state$date.y <- NULL
-names(dat_ct_state)[names(dat_ct_state) == "date.x"] <- "date"
+dat_ct_state$date.x <- NULL
+names(dat_ct_state)[names(dat_ct_state) == "date.y"] <- "date"
 dat_ct_state$total_deaths <- dat_ct_state$deaths
 dat_ct_state$deaths <- dat_ct_state$hosp_death
 
@@ -96,6 +96,57 @@ for(nm in colnames(adj)) {
 
 
 
+
+
+
+
+
+
+
+## get smooth hospital death hazard
+if (length(which(is.na(dat_ct_state$cur_hosp) ) ) > 0){
+d = dat_ct_state[1:( min(which(is.na(dat_ct_state$cur_hosp))) -1 ), ]
+} else
+{d = dat_ct_state}
+d$daily_hdeath = c(diff(c(0, d$hosp_death)))
+
+# smooth cumulative deaths
+sp <- smooth.spline(d$time, d$hosp_death, nknots=round(nrow(d)/7))
+d$smooth.cum_hdeath <- sp$y
+#ggplot(d, aes(x = time, y = hosp_death)) + geom_line(alpha = 0.5) + geom_line(aes(y = smooth.cum_hdeath), color='red')+ theme_bw()
+
+# smooth daily deaths
+d$smooth.daily_hdeath <- c(diff(c(0, d$smooth.cum_hdeath)))
+#ggplot(d, aes(x = time, y = daily_hosp_death)) + geom_line(alpha = 0.5) + geom_line(aes(y = smooth.daily_hdeath), color='red')+ theme_bw()
+
+# remove the initial observations with small counts
+d = subset(d, time > 20) # pick between 19 / 20 / 21
+
+# compute hospital death hazard
+d$haz = NA
+for (k in 2:nrow(d)){
+   d$haz[k] = d$smooth.daily_hdeath[k]/d$cur_hosp[k-1]
+}
+d$haz[1] = d$haz[2]
+
+#d$movavg_haz <- forecast::ma(d$haz, order = 10)
+#d$movavg_haz[1:5] = d$movavg_haz[6]
+#d$movavg_haz[is.na(d$movavg_haz)] = d$movavg_haz[(nrow(d)-5)]
+#ggplot(d, aes(x = time, y = haz)) + geom_line(alpha = 0.5) + geom_line(aes(y = movavg_haz), color='red')+ theme_bw()
+#sp <- smooth.spline(d$time, d$movavg_haz, nknots=round(nrow(d)/30))
+
+# smooth hospital death hazard 
+sp <- smooth.spline(d$time, d$haz, nknots=round(nrow(d)/30))
+d$smooth.haz = sp$y
+#ggplot(d, aes(x = time, y = haz)) + geom_line(alpha = 0.5) + geom_line(aes(y = smooth.haz), color='red')+ theme_bw()
+
+# compute relative hospital death hazard: relative to the average of first 15 days
+d$rel_haz = d$haz / mean(d$haz[1:15])
+d$smooth.rel_haz = d$smooth.haz / mean(d$smooth.haz[1:15])
+
+smooth_hdeath_haz = subset(d, select=c(time, date, daily_hdeath, smooth.daily_hdeath, haz, smooth.haz, rel_haz, smooth.rel_haz))
+
+#ggplot(smooth_hdeath_haz, aes(x = time, y = rel_haz)) + geom_line(alpha = 0.5) + geom_line(aes(y = smooth.rel_haz), color='red')+ theme_bw()
 
 
 
@@ -219,7 +270,8 @@ testing_state = data.test[, c("time", "date", "daily_tests", "daily_movavg", "sm
 
 
 # get testing results data (positive proportion)
-file.positive_tests <- "../data/ct_pcr_test_results.csv"
+# specify data source: all vs community testing
+file.positive_tests <- "../data/ct_pcr_test_results_com.csv"
 data.positive_tests = read.csv(file.positive_tests)
 data.positive_tests$date = ymd(data.positive_tests$date)
 
@@ -239,6 +291,6 @@ dat_ct_state$cum_hosp.prop = dat_ct_state$cum_hosp/sum(populations)
 
 
 return(list(dat_ct_state=dat_ct_state, dat_ct_county=dat_ct_county, CTmap=CTmap, adj=adj, dat_ct_capacity=dat_ct_capacity, county_capacities=county_capacities, 
-            mob=mob_state, testing = testing_state, positive_tests = data.positive_tests, populations=populations))
+            mob=mob_state, testing = testing_state, positive_tests = data.positive_tests, smooth_hdeath_haz = smooth_hdeath_haz, populations=populations))
 }
 

@@ -72,9 +72,9 @@ get_mobility_fun = function(dayseq, mob.data){
      else {mob.data$smooth[nrow(mob.data)] }
    })
    
-   time0 = as.numeric(day0 - mob_day0)
- 
-   return(approxfun(time0:(tmax+time0), mob, method="linear", rule=2))
+   #time0 = as.numeric(day0 - mob_day0)
+   #return(approxfun(time0:(tmax+time0), mob, method="linear", rule=2))
+   return(approxfun(0:tmax, mob, method="linear", rule=2))
 }
 
 
@@ -101,10 +101,54 @@ get_testing_fun = function(dayseq, test.data){
      else { log(test.data$smooth[nrow(test.data)] ) }
    })
    
-   time0 = as.numeric(day0 - test_day0)
- 
-   return(approxfun(time0:(tmax+time0), testing, method="linear", rule=2))
+   #time0 = as.numeric(day0 - test_day0)
+   #return(approxfun(time0:(tmax+time0), testing, method="linear", rule=2))
+   return(approxfun(0:tmax, testing, method="linear", rule=2))
 }
+
+
+
+
+
+
+
+
+
+#################################
+ 
+# relative change in hospital CFR
+
+# returns 1 at the beginning
+# smoothed daily death hazard for dates when data is available
+# the latest available relative hazard into the future
+
+
+get_death_fun = function(dayseq, dhaz.data){
+  
+  tmax = as.numeric(max(dayseq)-day0)
+  
+  dhaz_day0 = ymd(dhaz.data$date[1])
+  dhaz_daymax = ymd(dhaz.data$date[nrow(dhaz.data)])
+  
+  dhaz = sapply(dayseq, function(dy) {
+     if (dy <= dhaz_day0) {dhaz.data$smooth.rel_haz[1]}
+     else if(dy < dhaz_daymax) {dhaz.data$smooth.rel_haz[which( ymd(dhaz.data$date) == dy)]} 
+     else {dhaz.data$smooth.rel_haz[nrow(dhaz.data)] }
+   })
+   
+   #time0 = as.numeric(d_day0 - day0)
+ 
+   return(approxfun(0:tmax, dhaz, method="linear", rule=2))
+}
+
+
+
+
+
+
+
+
+
 
 
 

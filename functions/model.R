@@ -4,7 +4,7 @@
 # region_adj is an adjacency matrix whose row/col labels are 
 
 
-run_sir_model = function(state0, params, region_adj, populations, tmax, interventions, int_effects, capacities) {
+run_sir_model = function(state0, params, region_adj, populations, tmax, interventions, int_effects, capacities, deathfun) {
 
   if(is.null(interventions$distancing_list) || is.null(interventions$mobility) || is.null(interventions$testing) ||
      !is.list(interventions$distancing_list) || !is.function(interventions$mobility) || !is.function(interventions$testing)) { 
@@ -60,8 +60,9 @@ run_sir_model = function(state0, params, region_adj, populations, tmax, interven
   # region-wise beta transmission matrix 
   beta_matrix  = ( (1-params$k_n)*diag(1,nregions) + params$k_n*(1/region_adj_num)*region_adj ) * beta_pre 
 
-  params$m_Hbar = params$m_H * params$m_Hbar_mult
-  params$m_NH   = params$m_H * params$m_NH_mult
+  # CFR
+  #params$m_Hbar = params$m_H * params$m_Hbar_mult
+  #params$m_NH   = params$m_H * params$m_NH_mult
 
   # testing effects
   params$testing_effect_Im = params$testing_effect
@@ -85,9 +86,14 @@ run_sir_model = function(state0, params, region_adj, populations, tmax, interven
       # and the intervention function evaluated at the current time
       beta = beta_matrix * contact_intervention_fun(time)
 
+      # fatality ratios
+      m_H_cur = m_H * deathfun(time)
+      m_Hbar = m_H_cur * m_Hbar_mult
+      m_NH = m_H_cur * m_NH_mult
+  
       # effect of testing on early isolation / recovery for mild  and asymptomatic 
-      a_t_Im = interventions$testing(time) * params$testing_effect_Im
-      a_t_A  = interventions$testing(time) * params$testing_effect_A
+      a_t_Im = interventions$testing(time) * testing_effect_Im
+      a_t_A  = interventions$testing(time) * testing_effect_A
 
       # update gamma_NI to account for earlier isolation
       red_im_dur = 1/alpha_Im - 1/( (1 + a_t_Im) * alpha_Im ) # reduction in duration of infectiousness before isolation
@@ -148,9 +154,9 @@ run_sir_model = function(state0, params, region_adj, populations, tmax, interven
       
       dNI   <-  (1 + a_t_Im) * alpha_Im * I_m - gamma_NI * NI 
       
-      dD    <-  gamma_H * m_H * H     + gamma_Hbar * m_Hbar * Hbar     + gamma_NH * m_NH * NH
+      dD    <-  gamma_H * m_H_cur * H     + gamma_Hbar * m_Hbar * Hbar     + gamma_NH * m_NH * NH
       
-      dR    <-  gamma_H * (1-m_H) * H + gamma_Hbar * (1-m_Hbar) * Hbar + gamma_NH * (1-m_NH) * NH + gamma_NI * NI + (1 + a_t_A) * alpha_A * A
+      dR    <-  gamma_H * (1-m_H_cur) * H + gamma_Hbar * (1-m_Hbar) * Hbar + gamma_NH * (1-m_NH) * NH + gamma_NI * NI + (1 + a_t_A) * alpha_A * A
 
       return(list(c(dS,dE,dI_s,dI_m,dA,dH,dHbar,dNH,dNI,dD,dR)))
     })
@@ -254,7 +260,9 @@ run_sir_model = function(state0, params, region_adj, populations, tmax, interven
   #out$intervention_lockdown = interventions$lockdown(1:(tmax+1))
   out$mobility = interventions$mobility(1:(tmax+1))
   out$intervention_testing = interventions$testing(1:(tmax+1))
-
+  
+  # dynamics of hospital CFR
+  out$hCFR = params$m_H * deathfun(1:(tmax+1))
   
   # dynamics of rates of removal from infectious compartments I_m and A
   out$alpha_Im.t = params$alpha_Im * (1 + params$testing_effect_Im * out$intervention_testing)

@@ -19,14 +19,14 @@ prior.lower.k_A : 0.1
 prior.upper.k_A : 0.7
 
 # gamma_H: mean = 10 days, consistent with different data sources
-prior.mean.gamma_H : 0.1 
-prior.sd.gamma_H : 0.015
-prior.lower.gamma_H : 0.04
-prior.upper.gamma_H : 0.16
+prior.mean.gamma_H : 0.11 
+prior.sd.gamma_H : 0.03
+prior.lower.gamma_H : 0.01
+prior.upper.gamma_H : 0.21
 
 # m_H: mean is 0.2, consistent with hospital association and reports from NY and CA
 prior.mean.m_H : 0.2
-prior.sd.m_H : 0.015
+prior.sd.m_H : 0.03
 prior.lower.m_H : 0.05
 prior.upper.m_H : 0.35
 
@@ -57,7 +57,7 @@ prior.upper.testing_effect_Im : 0.2
 
 # E_init: initial number exposed on (day0 - time_num), does not need to be integer
 prior.mean.E_init: 20
-prior.sd.E_init: 4
+prior.sd.E_init: 5
 prior.lower.E_init: 1
 prior.upper.E_init: 50
 

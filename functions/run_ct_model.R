@@ -112,6 +112,8 @@ int_effects_tmp = as.list(rep(0, int_num))
 mobfun_tmp = approxfun(1:mytmax, rep(1,mytmax) ,method='linear', rule=2)
 interventions$mobility = mobfun_tmp
 
+deathfun_tmp = approxfun(1:mytmax, rep(DEATH_HAZ$smooth.rel_haz[1],mytmax) ,method='linear', rule=2)
+
 params_tmp$H_lag <- 0
 params_tmp$D_lag <- 0
 
@@ -137,7 +139,8 @@ res = run_sir_model(state0=state0,
                     tmax=mytmax, 
                     interventions=interventions, 
                     int_effects = int_effects_tmp,
-                    capacities=county_capacities)
+                    capacities=county_capacities,
+                    deathfun=deathfun_tmp)
 
 init = matrix(0, ncol=10, nrow=8)
 compartments <- c("E", "I_s", "I_m", "A", "H", "NH", "NI", "D", "R" )
@@ -260,6 +263,9 @@ get_sir_results = function(daymax,
    # combine in the list of interventions 
    interventions = list(distancing_list=distancingfun_list, mobility=mobilityfun, testing=testingfun) 
 
+   # hospital death hazard function
+   deathfun = get_death_fun(dayseq, DEATH_HAZ)
+
  pars <- list()
  state0s <- list()
  interventions_list <- list()  
@@ -306,7 +312,8 @@ get_sir_results = function(daymax,
                         tmax=tmax, 
                         interventions=interventions_list[[i]],
                         int_effects = get_intervention_effects(pars[[i]]),
-                        capacities=COUNTY_CAPACITIES)
+                        capacities=COUNTY_CAPACITIES,
+                        deathfun=deathfun)
     res$sim_id = i
     res
   })

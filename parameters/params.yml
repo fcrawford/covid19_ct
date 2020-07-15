@@ -41,7 +41,7 @@ gamma_NH: 0.073  # 1/14
 gamma_NI: 0.1428571 # 1/7 (10 days from symptom onset - 3 days in I_m state)
 
 ## CFR
-m_H: 0.21 # among hospitalized
+m_H: 0.2 # among hospitalized
 m_NH_mult: 1.4 # RR among severe in nursing homes / prisons
 m_Hbar_mult: 1.5 # RR among hospital overflow
 
