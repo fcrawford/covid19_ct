@@ -175,7 +175,7 @@ missing_dates = date_range[!date_range %in% data.mobi$date]
 
 if (length(missing_dates)>0){
 for (k in 1:length(missing_dates)){
-  data.mobi[nrow(data.mobi) + k,] = list(NA, ymd(missing_dates[k]))
+  data.mobi[nrow(data.mobi) + 1,] = list(NA, ymd(missing_dates[k]))
 }
    
 data.mobi <- data.mobi[order(data.mobi$date), ]
