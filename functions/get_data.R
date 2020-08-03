@@ -277,6 +277,13 @@ data.positive_tests$date = ymd(data.positive_tests$date)
 
 
 
+# get combined testing positive proportion and CLI ED visits data
+# this is a combined measure of incidence
+file.incidence = "../data/ct_incidence.csv"
+data.incidence = read.csv(file.incidence)
+data.incidence$date = ymd(data.incidence$date)
+
+
 
 # county populations
 pop = read.csv('../data/ct_population.csv', stringsAsFactors=FALSE)
@@ -291,6 +298,7 @@ dat_ct_state$cum_hosp.prop = dat_ct_state$cum_hosp/sum(populations)
 
 
 return(list(dat_ct_state=dat_ct_state, dat_ct_county=dat_ct_county, CTmap=CTmap, adj=adj, dat_ct_capacity=dat_ct_capacity, county_capacities=county_capacities, 
-            mob=mob_state, testing = testing_state, positive_tests = data.positive_tests, smooth_hdeath_haz = smooth_hdeath_haz, populations=populations))
+            mob=mob_state, testing = testing_state, positive_tests = data.positive_tests, incidence = data.incidence,
+            smooth_hdeath_haz = smooth_hdeath_haz, populations=populations))
 }
 

@@ -19,7 +19,7 @@ myint_off_dates = as.list(c(schools_reopen_date = myschools_reopen_date,
 
 
 # number of simulations 
-nsim = 500
+nsim = 1000
 
 ####################################
 
@@ -32,6 +32,7 @@ str = "\ntest"
 mystate0 = get_state0("../data/ct_init.csv")
 myparams = yaml.load_file("../parameters/params.yml")  
 myposterior = read.csv("../data/posterior_a036.csv", stringsAsFactors=FALSE) 
+myposterior = post.save
 
 ####################################
 
