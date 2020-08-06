@@ -70,6 +70,16 @@ dat.long$value[is.na(dat.long$value)] <- 0
 
 dat.capacity <- subset(dat.long, variable %in% "Total available beds")
 dat.capacity$Capacity <- dat.capacity$value
+
+# Fix 07/22
+for(i in 1:length(unique(dat.capacity$County))){
+	zero <- which(dat.capacity$County == unique(dat.capacity$County)[i] & dat.capacity$Date == '2020-07-22')
+	if(dat.capacity$Capacity[zero] == 0){
+		prev <- which(dat.capacity$County == unique(dat.capacity$County)[i] & dat.capacity$Date == '2020-07-21')
+		dat.capacity$Capacity[zero] <- dat.capacity$Capacity[prev]
+	}
+}
+
 write.csv(dat.capacity[, c("Date", "County", "Capacity")], 
 		  "../data/ct_hosp_cap.csv", row.names=FALSE, quote=FALSE)
 # ggplot(dat.capacity) + geom_line(aes(x = Date, y = `Total available beds`), color =  "blue")+ geom_line(aes(x = Date, y = `Addition surge beds`), color =  "darkgreen") + geom_line(aes(x = Date, y = Capacity), color =  "red") + facet_wrap(~County, ncol =  4, scale='free') 
