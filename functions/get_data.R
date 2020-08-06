@@ -157,6 +157,7 @@ smooth_hdeath_haz = subset(d, select=c(time, date, daily_hdeath, smooth.daily_hd
 
 
 ## get smooth mobility data ## 
+##############################
 file.mobi <- "../data/ct_mobility.csv"
 data.mobi <- read.csv(file.mobi)
 data.mobi$county <- data.mobi$polygon_name
@@ -191,14 +192,15 @@ data.mobi$t <- as.numeric(data.mobi$date - data.mobi$date[1]) + 1
 #sp <- smooth.spline(data.mobi$t, data.mobi$relative_mobility, nknots=round(max(data.mobi$t)/15))
 #data.mobi$smooth <- sp$y
 
-# 7-day moving average smoothed by spline with weekly knots
+# 7-day moving average smoothed by spline with biweekly knots
 sp <- forecast::ma(data.mobi$relative_mobility, order = 7)
 sp[1:3] = sp[4]
 sp[(length(sp)-2):length(sp)] = sp[(length(sp)-3)]
 
 data.mobi$movavg <- sp
 
-sp <- smooth.spline(data.mobi$t, data.mobi$movavg, nknots=round(max(data.mobi$t)/7))
+# smooth moving average with spline
+sp <- smooth.spline(data.mobi$t, data.mobi$movavg, nknots=round(max(data.mobi$t)/14))
 data.mobi$smooth <- sp$y
 
 data.mobi$time <- round(as.numeric(difftime(ymd(data.mobi$date), day0, units="days")),0)
@@ -215,11 +217,12 @@ mob_state = data.mobi[, c("time", "date", "relative_mobility", "movavg", "smooth
 
 
 ## get smooth testing data ## 
-# assume linear increase in daily number of tests between day0 (March 1) and the first day of test numbers reporting
+#############################
 file.test <- "../data/ct_cum_pcr_tests.csv"
 data.test <- read.csv(file.test)
 data.test$date = ymd(data.test$date)
 
+# assume linear increase in daily number of tests between day0 (March 1) and the first day of test numbers reporting
 add.dates = seq(day0, data.test$date[1], by="day")
 b = data.test$cum_tests[1]/(0.5*length(add.dates)*(length(add.dates)+1))
 add_daily_tests = c(1:length(add.dates))*b
@@ -229,6 +232,8 @@ add.data.tests = tibble(add.dates, add_cum_tests)
 colnames(add.data.tests) = colnames(data.test)
 
 data.test = rbind(add.data.tests, data.test[-1,])
+
+# compute daily number of tests
 data.test$daily_tests = c(NA, diff(data.test$cum_tests))
 data.test$daily_tests[1] = data.test$cum_tests[1]
 
@@ -238,7 +243,7 @@ data.test$t <- as.numeric(data.test$date - data.test$date[1]) + 1
 #sp <- smooth.spline(data.test$t, log(data.test$cum_tests), nknots=round(max(data.test$t)/15))
 #data.test$smooth.cum <- exp(sp$y)
 
-# 7-day moving average smoothed by spline with weekly knots
+# 7-day moving average smoothed by spline with biweekly knots
 cum_tests = c(c(0,0,0), data.test$cum_tests)
 sp <- forecast::ma(cum_tests, order = 7)
 
@@ -250,18 +255,13 @@ data.test$movavg <- sp
 data.test$daily_movavg = c(diff(c(0, data.test$movavg)))
 data.test$daily_movavg[1] = data.test$daily_tests[1]
 
-sp <- smooth.spline(data.test$t, log(data.test$movavg), nknots=round(max(data.test$t)/7))
+# smooth moving average with spline
+sp <- smooth.spline(data.test$t, log(data.test$movavg), nknots=round(max(data.test$t)/14))
 data.test$smooth.cum <- exp(sp$y)
 
 data.test$smooth <- c(diff(c(0, data.test$smooth.cum)))
 data.test$smooth[1:3] <- data.test$daily_tests[1:3]
 
-#data.test$smooth.cum <- sp[4:length(sp)]
-
-#data.test$smooth <- c(diff(c(0, data.test$smooth.cum)))
-#data.test$smooth[1:3] <- data.test$daily_tests[1:3]
-
-#data.test$smooth[(nrow(data.test)-2):nrow(data.test)] = data.test$smooth[(nrow(data.test)-3)]
 
 data.test$time <- round(as.numeric(difftime(ymd(data.test$date), day0, units="days")),0)
 
@@ -269,11 +269,19 @@ testing_state = data.test[, c("time", "date", "daily_tests", "daily_movavg", "sm
 
 
 
+
+
+
+
+
+
+
+
 # get testing results data (positive proportion)
 # specify data source: all vs community testing
-file.positive_tests <- "../data/ct_pcr_test_results_com.csv"
-data.positive_tests = read.csv(file.positive_tests)
-data.positive_tests$date = ymd(data.positive_tests$date)
+# file.positive_tests <- "../data/ct_pcr_test_results_com.csv"
+# data.positive_tests = read.csv(file.positive_tests)
+# data.positive_tests$date = ymd(data.positive_tests$date)
 
 
 
@@ -298,7 +306,7 @@ dat_ct_state$cum_hosp.prop = dat_ct_state$cum_hosp/sum(populations)
 
 
 return(list(dat_ct_state=dat_ct_state, dat_ct_county=dat_ct_county, CTmap=CTmap, adj=adj, dat_ct_capacity=dat_ct_capacity, county_capacities=county_capacities, 
-            mob=mob_state, testing = testing_state, positive_tests = data.positive_tests, incidence = data.incidence,
+            mob=mob_state, testing = testing_state, incidence = data.incidence,
             smooth_hdeath_haz = smooth_hdeath_haz, populations=populations))
 }
 
