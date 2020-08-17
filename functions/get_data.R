@@ -24,25 +24,21 @@ dat_ct_state$deaths[dat_ct_state$date == "2020-05-02"] <- 2436
 dat_ct_state$deaths[dat_ct_state$date == "2020-05-03"] <- 2495
 
 
-# calculate daily new reported cases and deaths 
-#nyt_ct$new_cases <- nyt_ct$new_deaths <- 0
-#nyt_ct$new_cases[1] <- nyt_ct$cases[1] 
-#for (i in 2:nrow(nyt_ct)){
-#   nyt_ct$new_cases[i] <- nyt_ct$cases[i] - nyt_ct$cases[i-1]
-#   nyt_ct$new_deaths[i] <- nyt_ct$deaths[i] - nyt_ct$deaths[i-1]
-# }
 
-## add state-level hospitalizations and deaths: this csv file needs to be updated manually ##
+## add state-level hospitalizations and deaths: this csv file needs to be updated  from CHA reports ##
 ct.hosp <- read.csv('../data/ct_hosp.csv')
 ct.hosp$date <- mdy(ct.hosp$date)
 ct.hosp$time <- round(as.numeric(difftime(ct.hosp$date, day0, units="days")),0)
 
+
+
 # merge cases and death counts from NYT with hospitalization data
+if ( max(dat_ct_state$time) > max(ct.hosp$time) ) {ct.hosp$date = NULL} else {dat_ct_state$date = NULL}
 dat_ct_state <- merge(dat_ct_state, ct.hosp, by='time', all=T)
-dat_ct_state$date.x <- NULL
-names(dat_ct_state)[names(dat_ct_state) == "date.y"] <- "date"
 dat_ct_state$total_deaths <- dat_ct_state$deaths
 dat_ct_state$deaths <- dat_ct_state$hosp_death
+dat_ct_state = subset(dat_ct_state, select = c('time', 'date', 'cases', 'total_deaths', 'deaths', 'hosp_death', 'cur_hosp', 'cum_hosp'))
+
 
 
 
