@@ -27,7 +27,7 @@ dat_ct_state$deaths[dat_ct_state$date == "2020-05-03"] <- 2495
 
 ## add state-level hospitalizations and deaths: this csv file needs to be updated  from CHA reports ##
 ct.hosp <- read.csv('../data/ct_hosp.csv')
-ct.hosp$date <- mdy(ct.hosp$date)
+ct.hosp$date <- ymd(ct.hosp$date)
 ct.hosp$time <- round(as.numeric(difftime(ct.hosp$date, day0, units="days")),0)
 
 
