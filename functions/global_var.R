@@ -23,18 +23,25 @@ library(imputeTS)
 day0 = ymd("2020-03-01")
 
 # actual dates: do not change
-state_schools_close = dmy("17/03/2020")
+
+lockdown_start_date = ymd("2020-03-17") # lockdown effect starts with school closure 
+schools_reopen_date = ymd("2020-09-01") # school reopening
+
+INT_START_DATES = as.list(c(lockdown_start_date = lockdown_start_date, schools_reopen_date = schools_reopen_date))
+
+
+#state_schools_close = dmy("17/03/2020")
 #state_lockdown_order = dmy("20/03/2020") # order date
-state_lockdown_start = dmy("23/03/2020") # actual lockdown start date
-state_mask_start = dmy("20/04/2020") # start of order requiring mask wearing in public: used in lockdown ramping time calculation
+#state_lockdown_start = dmy("23/03/2020") # actual lockdown start date
+#state_mask_start = dmy("20/04/2020") # start of order requiring mask wearing in public: used in lockdown ramping time calculation
 
-state_phase1_start = dmy("20/05/2020") # start of phase 1 lockdown release
-state_phase2_start = dmy("17/06/2020") # start of phase 2 lockdown release
+#state_phase1_start = dmy("20/05/2020") # start of phase 1 lockdown release
+#state_phase2_start = dmy("17/06/2020") # start of phase 2 lockdown release
 
-INT_START_DATES = as.list(c(state_schools_close=state_schools_close, 
-                      state_lockdown_start=state_lockdown_start, 
-                      state_phase1_start=state_phase1_start, 
-                      state_phase2_start=state_phase2_start))
+#INT_START_DATES = as.list(c(state_schools_close=state_schools_close, 
+#                      state_lockdown_start=state_lockdown_start, 
+#                      state_phase1_start=state_phase1_start, 
+#                      state_phase2_start=state_phase2_start))
 
 
 
@@ -52,17 +59,19 @@ source("../functions/plot_functions.R")
 ####################################################
 global_dat <- get_ct_data(day0=day0)
 
-# State and county observed data, for plotting purposes only
+# State and county observed data
 DAT_CT_STATE <- global_dat$dat_ct_state
 DAT_CT_COUNTY <- global_dat$dat_ct_county
+# Estimated hospitalizations from congregate settings
+HOSP_CONG <- global_dat$hosp_cong
+# incidence measures: positive testing (community) and CLI ED visits
+INCIDENCE <- global_dat$incidence
 # County capacity functions, ordered
 COUNTY_CAPACITIES <- global_dat$county_capacities
 # Mobility 
 MOB <- global_dat$mob
 # daily PCR testing
 TESTING <- global_dat$testing
-# testing results: proportion testing positive
-POS_TESTING <- global_dat$positive_tests
 # relative change in hospital death hazard
 DEATH_HAZ <- global_dat$smooth_hdeath_haz
 # Spatial polygons
@@ -87,8 +96,6 @@ E_INIT_COUNTY <- c(0.4,    # 1. "Fairfield"
                    0.35,   # 6. "Hartford"
                    0.005,  # 7. "Middlesex" 
                    0.24)   # 8. "New Haven"
-
-
 
 # initial numbers exposed in each county from v1
 # E_init_state0 <- c(7.5,    # 1. "Fairfield" 

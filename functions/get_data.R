@@ -33,11 +33,39 @@ ct.hosp$time <- round(as.numeric(difftime(ct.hosp$date, day0, units="days")),0)
 
 
 # merge cases and death counts from NYT with hospitalization data
-if ( max(dat_ct_state$time) > max(ct.hosp$time) ) {ct.hosp$date = NULL} else {dat_ct_state$date = NULL}
-dat_ct_state <- merge(dat_ct_state, ct.hosp, by='time', all=T)
+# if dataset contain different number of observations, use all hospitalizations data
+dat_ct_state$date = NULL
+# if ( max(dat_ct_state$time) > max(ct.hosp$time) ) {ct.hosp$date = NULL} else {dat_ct_state$date = NULL}
+dat_ct_state <- merge(ct.hosp, dat_ct_state, by='time', all=F)
 dat_ct_state$total_deaths <- dat_ct_state$deaths
 dat_ct_state$deaths <- dat_ct_state$hosp_death
 dat_ct_state = subset(dat_ct_state, select = c('time', 'date', 'cases', 'total_deaths', 'deaths', 'hosp_death', 'cur_hosp', 'cum_hosp'))
+
+
+
+
+
+# estimated hospitalizations and deaths coming from congregate settings
+hosp_cong = read.csv("../data/estimate_congregate_hospitalizations.csv", stringsAsFactors = FALSE)
+hosp_cong$date = ymd(hosp_cong$date)
+
+# number of data points in hosp_cong should be the same as dat_ct_state: repeat forward the last entry  
+time_range <- seq(min(dat_ct_state$time), max(dat_ct_state$time), by = 1) 
+missing_times = time_range[!time_range %in% hosp_cong$time] 
+missing_dates = dat_ct_state$date[dat_ct_state$time %in% missing_times]
+last_data = as.matrix(hosp_cong[nrow(hosp_cong),3:6])
+ 
+if (length(missing_times)>0){
+    for (k in 1:length(missing_times)){
+      hosp_cong[nrow(hosp_cong) + 1,] = list(missing_times[k], ymd(missing_dates[k]), NA, NA, NA, NA)
+      hosp_cong[nrow(hosp_cong), 3:6] = last_data
+    }
+  }
+
+
+
+
+
 
 
 
@@ -116,7 +144,7 @@ d$smooth.daily_hdeath <- c(diff(c(0, d$smooth.cum_hdeath)))
 #ggplot(d, aes(x = time, y = daily_hosp_death)) + geom_line(alpha = 0.5) + geom_line(aes(y = smooth.daily_hdeath), color='red')+ theme_bw()
 
 # remove the initial observations with small counts
-d = subset(d, time > 20) # pick between 19 / 20 / 21
+d = subset(d, time > 20) 
 
 # compute hospital death hazard
 d$haz = NA
@@ -212,8 +240,8 @@ mob_state = data.mobi[, c("time", "date", "relative_mobility", "movavg", "smooth
 
 
 
-## get smooth testing data ## 
-#############################
+## get smooth testing volume data ## 
+####################################
 file.test <- "../data/ct_cum_pcr_tests.csv"
 data.test <- read.csv(file.test)
 data.test$date = ymd(data.test$date)
@@ -273,12 +301,6 @@ testing_state = data.test[, c("time", "date", "daily_tests", "daily_movavg", "sm
 
 
 
-# get testing results data (positive proportion)
-# specify data source: all vs community testing
-# file.positive_tests <- "../data/ct_pcr_test_results_com.csv"
-# data.positive_tests = read.csv(file.positive_tests)
-# data.positive_tests$date = ymd(data.positive_tests$date)
-
 
 
 # get combined testing positive proportion and CLI ED visits data
@@ -295,13 +317,14 @@ populations = pop$population[match(colnames(adj), pop$county)]
 
 
 # state hospitalizations and deaths as proportion of the population
-dat_ct_state$total_deaths.prop = dat_ct_state$total_deaths/sum(populations)
-dat_ct_state$hosp_deaths.prop = dat_ct_state$hosp_death/sum(populations)
-dat_ct_state$cur_hosp.prop = dat_ct_state$cur_hosp/sum(populations)
-dat_ct_state$cum_hosp.prop = dat_ct_state$cum_hosp/sum(populations)
+# dat_ct_state$total_deaths.prop = dat_ct_state$total_deaths/sum(populations)
+# dat_ct_state$hosp_deaths.prop = dat_ct_state$hosp_death/sum(populations)
+# dat_ct_state$cur_hosp.prop = dat_ct_state$cur_hosp/sum(populations)
+# dat_ct_state$cum_hosp.prop = dat_ct_state$cum_hosp/sum(populations)
 
 
-return(list(dat_ct_state=dat_ct_state, dat_ct_county=dat_ct_county, CTmap=CTmap, adj=adj, dat_ct_capacity=dat_ct_capacity, county_capacities=county_capacities, 
+return(list(dat_ct_state=dat_ct_state, dat_ct_county=dat_ct_county, hosp_cong=hosp_cong,
+            CTmap=CTmap, adj=adj, dat_ct_capacity=dat_ct_capacity, county_capacities=county_capacities, 
             mob=mob_state, testing = testing_state, incidence = data.incidence,
             smooth_hdeath_haz = smooth_hdeath_haz, populations=populations))
 }
