@@ -11,6 +11,10 @@ run_sir_model = function(state0, params, region_adj, populations, tmax, interven
     stop("must specify intervention functions for distancing (list of functions), mobility and testing")
   }
 
+  # check that distancing functions list is the same length as intervention effects list
+  if (length(interventions$distancing_list)!=length(int_effects)) {stop("list of effects has to be the same length as list of distancing functions")}
+  
+  
   nregions = nrow(region_adj) # number of counties 
 
   if(length(state0) != nregions*11) stop("length of state0 must be nregions*11")
@@ -33,29 +37,31 @@ run_sir_model = function(state0, params, region_adj, populations, tmax, interven
   # number of adjacent regions for each region: use to keep overall beta the same for each county
   region_adj_num <- rowSums(region_adj)
 
+  # beta0
   beta_pre = params$beta_pre
-
-  # here we define the intervention function: 
-  # note that this function should be <= 1
-  # and the effect of different interventions is additive, so coefficients must sum to <= 1.  
-  # check that distancing functions list is the same length as intervention effects list
-  if (length(interventions$distancing_list)!=length(int_effects)) {stop("list of effects has to be the same length as list of distancing functions")}
   
   # contact intervention function
+  # Multiplied by exponentiated random effects
   contact_intervention_fun = function(t_tmp) {
     
-    distance = 0
+    main_effects = 0
     for (k in 1:length(interventions$distancing_list)){
-      distance = distance + interventions$distancing_list[[k]](t_tmp) * int_effects[[k]]
+      main_effects = main_effects + interventions$distancing_list[[k]](t_tmp) * int_effects[[k]]
     }
-      return((1 - distance) * interventions$mobility(t_tmp))
-    }
+    # if(distance > 1){
+    #   message("contact intervention function sum > 1")
+    #   for (k in 1:length(interventions$distancing_list)){
+    #     print(interventions$distancing_list[[k]](t_tmp) * int_effects[[k]])
+    #   }
+    #   distance <- 0.99
+    # }
+    return( interventions$mobility(t_tmp) * exp( main_effects + interventions$random_effect(t_tmp) ))
+  }
 
   # quick integrity check:
-  if(any(contact_intervention_fun(1:(tmax+1))<0)) {
-    plot(contact_intervention_fun(1:(tmax+1)))
-    stop("contact_intervention_fun returns negative values. Check that intervention prameters sum to <= 1")
-  }
+  #if(any(contact_intervention_fun(1:(tmax+1))<0)) {
+  #  stop("contact_intervention_fun returns negative values. Check that intervention prameters sum to <= 1")
+  #}
 
   # region-wise beta transmission matrix 
   beta_matrix  = ( (1-params$k_n)*diag(1,nregions) + params$k_n*(1/region_adj_num)*region_adj ) * beta_pre 
@@ -68,6 +74,11 @@ run_sir_model = function(state0, params, region_adj, populations, tmax, interven
   params$testing_effect_Im = params$testing_effect
   params$testing_effect_A = params$testing_effect * params$te_A_mult
 
+  
+  ###############
+  ## ODE model ##
+  ###############
+  
   model <- function(time, state, parameters) {
     with(as.list(c(state, parameters)), {
       S = state[S_idx]
@@ -146,9 +157,9 @@ run_sir_model = function(state0, params, region_adj, populations, tmax, interven
       
       dA    <-  q_A * delta*E - (1 + a_t_A) * alpha_A * A
       
-      dH    <-  q_H * alpha_Is * I_s * (1-Hospital_capacities_breached) - gamma_H * H
+      dH    <-  q_H * (1-Hospital_capacities_breached) * (alpha_Is * I_s ) - gamma_H * H
       
-      dHbar <-  q_H * alpha_Is * I_s * Hospital_capacities_breached - gamma_Hbar * Hbar
+      dHbar <-  q_H * Hospital_capacities_breached * (alpha_Is * I_s ) - gamma_Hbar * Hbar
       
       dNH   <-  (1 - q_H) * alpha_Is * I_s - gamma_NH * NH
       
@@ -200,14 +211,14 @@ run_sir_model = function(state0, params, region_adj, populations, tmax, interven
   # daily new hospitalizations
   out$dailyH.Connecticut <- params$q_H * params$alpha_Is * out$I_s.Connecticut
   # daily new severe cases in nursing homes and ALFs
-  out$dailyIs_NH.Connecticut <- (1 - params$q_H) * params$q_Is * params$delta * out$E.Connecticut
+  # out$dailyIs_NH.Connecticut <- (1 - params$q_H) * params$q_Is * params$delta * out$E.Connecticut
   
   # cumulative infections, including those who died
   out$cum_modI.Connecticut <- cumsum(out$dailyI.Connecticut)
   # cumulative hospitalizations
   out$cum_modH.Connecticut <- cumsum(out$dailyH.Connecticut)
   # cumulative severe cases in nursing homes and ALFs
-  out$cum_Is_NH.Connecticut <- cumsum(out$dailyIs_NH.Connecticut)
+  # out$cum_Is_NH.Connecticut <- cumsum(out$dailyIs_NH.Connecticut)
   
   pop_ct = sum(populations)
   # number and proportion of alive cumulative incidence: sum of currently infected and recovered
@@ -220,16 +231,23 @@ run_sir_model = function(state0, params, region_adj, populations, tmax, interven
   
   
   # daily and cumulative hospitalizations for counties
-  for(i in region_names){
-    dailyH <- params$q_H * params$alpha_Is * out[[paste0("I_s.", i)]]
-    out[[paste0("cum_modH.", i)]] <- cumsum(dailyH)
-  }
+  # for(i in region_names){
+  #  dailyH <- params$q_H * params$alpha_Is * out[[paste0("I_s.", i)]]
+  #  out[[paste0("cum_modH.", i)]] <- cumsum(dailyH)
+  #}
   
   
   
   # add variables to plot lagged deaths and hospitalizations 
-  lag_shift <- function(v,lg) { c(rep(0,lg), v[1:(length(v) - lg)]) }
+  # lag_shift <- function(v,lg) { c(rep(0,lg), v[1:(length(v) - lg)]) }
   
+  lag_shift <- function(v,lg) { 
+    if (lg > 0){c(rep(0,lg), v[1:(length(v) - lg)])} 
+  else if (lg < 0)
+    {c( v[ (1-lg) : length(v) ] , rep(NA,-lg) )}
+    else {v}
+  }
+    
   D_lag <- params$D_lag
   H_lag <- params$H_lag
   detection_lag <- params$detect_lag
@@ -243,19 +261,21 @@ run_sir_model = function(state0, params, region_adj, populations, tmax, interven
   out$rH.Connecticut    = lag_shift(out$H.Connecticut, H_lag)
   out$rHbar.Connecticut = lag_shift(out$Hbar.Connecticut, H_lag)
   out$rcum_modH.Connecticut = lag_shift(out$cum_modH.Connecticut, H_lag)
+ 
+  # lagged compartment E: detection lag
   out$detectE.Connecticut = lag_shift(out$E.Connecticut, detection_lag)
   
   # lagged compartments for counties: deaths and current hospitalizations
-  for(i in region_names){
-   out[[paste0("rD.", i)]]    = lag_shift(out[[paste0("D.", i)]], D_lag) 
-   out[[paste0("rH.", i)]]    = lag_shift(out[[paste0("H.", i)]], H_lag)
-   out[[paste0("rHbar.", i)]] = lag_shift(out[[paste0("Hbar.", i)]], H_lag)
-  }
+  # for(i in region_names){
+  #   out[[paste0("rD.", i)]]    = lag_shift(out[[paste0("D.", i)]], D_lag) 
+  #   out[[paste0("rH.", i)]]    = lag_shift(out[[paste0("H.", i)]], H_lag)
+  #   out[[paste0("rHbar.", i)]] = lag_shift(out[[paste0("Hbar.", i)]], H_lag)
+  # }
   
 
 
-  ## intervention patterns ##  
-  out$intervention_pattern = contact_intervention_fun(1:(tmax+1))
+  ## contact, mobility, testing patterns ##  
+  out$contact_pattern = contact_intervention_fun(1:(tmax+1))
   #out$intervention_schools = interventions$schools(1:(tmax+1))
   #out$intervention_lockdown = interventions$lockdown(1:(tmax+1))
   out$mobility = interventions$mobility(1:(tmax+1))
@@ -268,7 +288,7 @@ run_sir_model = function(state0, params, region_adj, populations, tmax, interven
   out$alpha_Im.t = params$alpha_Im * (1 + params$testing_effect_Im * out$intervention_testing)
   out$alpha_A.t = params$alpha_A * (1 + params$testing_effect_A * out$intervention_testing)
     
-  # dynamic of aggregate FOI
+  # dynamics of aggregate FOI
   out$FOI = ( params$q_A * params$k_A / out$alpha_A.t 
               + (1 - params$q_Is - params$q_A) / out$alpha_Im.t 
               + params$q_Is * params$k_Is / params$alpha_Is  )
@@ -276,7 +296,7 @@ run_sir_model = function(state0, params, region_adj, populations, tmax, interven
   # compute dynamics of R_eff at the state level
   # R_eff takes into account social distancing, testing effect in reducing FOI and depletion of susceptibles
 
-  out$R_eff.Connecticut = params$beta_pre * out$FOI * out$intervention_pattern * out$S.Connecticut / (pop_ct - out$D.Connecticut)
+  out$R_eff.Connecticut = params$beta_pre * out$FOI * out$contact_pattern * out$S.Connecticut / (pop_ct - out$D.Connecticut)
   
   return(out)
 }

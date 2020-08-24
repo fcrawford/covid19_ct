@@ -35,6 +35,7 @@ plot_ct_region = function(data=NULL,
                           show.data=TRUE, 
                           title.override=NULL,
                           goodness = FALSE,
+                          add.cong = FALSE,
                           ref_day=Sys.Date()) {
 
 lab.table <- data.frame(compartment=c("D","rD", "H","rH",
@@ -42,13 +43,13 @@ lab.table <- data.frame(compartment=c("D","rD", "H","rH",
                                        "S","E","I_s","I_m",
                                        "A", "dailyI", "cum_modI", "alive_cum_incid_prop", 
                                        "alive_cum_incid_num", "R_eff", "currentI", 
-                                       "intervention_pattern"),
+                                       "contact_pattern"),
                           color=c('#e41a1c','#e41a1c','#377eb8','#377eb8', 
                                   '#4daf4a','#4daf4a','#377eb8', '#984ea3',
                                   '#ff7f00','#ffff33', '#a65628','#f781bf',
-                                  '#999999', '#a65628', '#ff7f00', "#006d2c", 
-                                  "#00441b", "#6a3d9a", "#fdbf6f", 
-                                  "#ff7f00"),
+                                  '#999999', '#a65628', '#388a72', "#006d2c", 
+                                  "#09543e", "#6a3d9a", "#ff7f00", 
+                                  "#a34e7e"),
                           labels=c("Cumulative deaths", "Cumulative deaths",  "Hospitalizations", "Hospitalizations",
                                     "Hospital overflow", "Hospital overflow",  "Required hospitalizations",  "Cumulative hospitalizations",
                                     "Susceptible population", "Exposed population", "Severe infections", "Mild infections",
@@ -70,9 +71,9 @@ lab.table <- data.frame(compartment=c("D","rD", "H","rH",
   }
 
   if(goodness){
-    if(which.plot %in% c("rD", "rH", "rHsum", "rcum_modH")){
+    if(which.plot %in% c("rD", "rH", "rHsum", "rcum_modH", "Inc")){
       end_day <- ref_day
-      ymax <- NULL
+      # ymax <- NULL
     }else{
       goodness <- FALSE
     }
@@ -103,10 +104,17 @@ lab.table <- data.frame(compartment=c("D","rD", "H","rH",
   par(mar=c(2.5,4,2.5,0), bty="n")
   sir_result_region= filter(data, variable%in%toplot)
 
-  if(region_name == ""){
-    title <- paste0(lab.table$labels[lab.table$compartment==which.plot[1]])
-  } else {
-    title <- paste0(lab.table$labels[lab.table$compartment==which.plot[1]], " in ", region_name, " ", title)
+  comm <- ifelse(add.cong, "", "Community ")
+  if(!add.cong){
+    title0 <- paste0("Community ", tolower(lab.table$labels[lab.table$compartment==which.plot[1]]))
+  }else{
+    title0 <- paste0(lab.table$labels[lab.table$compartment==which.plot[1]])
+  }
+
+  if(region_name != ""){
+    title <- paste0(title0, " in ", region_name, " ", title)
+  }else{
+    title <- title0
   }
 
   if(!is.null(title.override)) {
@@ -114,8 +122,9 @@ lab.table <- data.frame(compartment=c("D","rD", "H","rH",
   }
 
 
-
-  if(is.null(ymax)) ymax <- max(sir_result_region$upper[sir_result_region$time <= tmax.plot], na.rm=TRUE)
+  tmin.plot <- 0
+  if("Inc" %in% which.plot && goodness) tmin.plot <- min(obs_state$time[obs_state$rel_inc > 0])
+    
 
   if(add && (!goodness)){
     if(region_name %in% names(capacity_func)){
@@ -130,7 +139,7 @@ lab.table <- data.frame(compartment=c("D","rD", "H","rH",
     }else{
       stop(paste0(region_name, " not recognized in capacity function"))
     }
-    ymax <- max(ymax, sub.add$Capacity)
+    # ymax <- max(ymax, sub.add$Capacity)
   }
 
   # get observations
@@ -145,8 +154,50 @@ lab.table <- data.frame(compartment=c("D","rD", "H","rH",
     points.add <- obs.region
     # points(obs.region$time, obs.region$deaths, pch=16, cex=0.6, col=col.line)
   }
+
+
+
+  lab.table$color <- as.character(lab.table$color)
+  col.line <- lab.table$color[which(lab.table$compartment==which.plot)]
+  col.polygon <- adjustcolor(col.line, alpha.f = 0.5 - 0.1*goodness)
+  sir_result_region_sub <- filter(sir_result_region, variable==variable_name)
+  sir_result_region_sub <- subset(sir_result_region_sub, time <= tmax.plot)
+  
+  if(add.cong && which.plot == "rHsum"){
+    for(i in 1:dim(sir_result_region_sub)[1]){
+      cong <- HOSP_CONG$cur_hosp_cong[which(HOSP_CONG$time == sir_result_region_sub$time[i])]
+      if(length(cong) == 0) cong <- 0
+
+      sir_result_region_sub[i, "mean"] <- sir_result_region_sub[i, "mean"] + cong
+      sir_result_region_sub[i, "lower"] <- sir_result_region_sub[i, "lower"] + cong
+      sir_result_region_sub[i, "upper"] <- sir_result_region_sub[i, "upper"] + cong
+    }
+  }
+
+
+  if(add.cong && which.plot == "rD"){
+    cong.data <- data.frame(HOSP_CONG[, c("hosp_death_cong", "time")]) 
+    tmp <- data.frame(time = DAT_CT_STATE$time, 
+                      diff = DAT_CT_STATE$total_deaths - DAT_CT_STATE$hosp_death)
+    cong.data <- merge(cong.data, tmp, by = "time", all.x = TRUE)
+    cong.data$diff[is.na(cong.data$diff)] <- 0
+    cong.data$cong <- cong.data$hosp_death_cong + cong.data$diff
+
+
+    for(i in 1:dim(sir_result_region_sub)[1]){
+      cong <- cong.data$cong[which(cong.data$time == sir_result_region_sub$time[i])]
+      if(length(cong) == 0) cong <- cong.data$cong[which.max(cong.data$time)]
+
+      sir_result_region_sub[i, "mean"] <- sir_result_region_sub[i, "mean"] + cong
+      sir_result_region_sub[i, "lower"] <- sir_result_region_sub[i, "lower"] + cong
+      sir_result_region_sub[i, "upper"] <- sir_result_region_sub[i, "upper"] + cong
+    }
+  }
+
+  if(is.null(ymax)) ymax <- max(sir_result_region_sub$upper[sir_result_region$time <= tmax.plot & sir_result_region$time >= tmin.plot], na.rm=TRUE)
+
   if("rD" %in% which.plot){
-    points.add$toplot <- points.add$deaths
+    points.add$toplot <- points.add$total_deaths
     ymax <- max(c(ymax, points.add$toplot), na.rm=TRUE)
   }
   if("rH" %in% which.plot || "rHsum" %in% which.plot){
@@ -157,23 +208,21 @@ lab.table <- data.frame(compartment=c("D","rD", "H","rH",
     points.add$toplot <- points.add$cum_hosp
     ymax <- max(c(ymax, points.add$toplot), na.rm=TRUE)
   }
-
-  
-  if(is.null(xlab)) xlab <- ""
-  if(is.null(ylab)) ylab <- "People"
-  plot(0, type="n", xlab=xlab, ylab=ylab, main=title, col="black", 
-       ylim=c(0,1.05*ymax), xlim=c(0,1.1*tmax.plot), axes=FALSE)
-  axis(1,at=lab_where, lab=lab_show, cex.axis=lab_cex)
-  axis(2)
-
-  if(!goodness) abline(v=ref_day-start_day, col="gray", lty=2)
+   if("Inc" %in% which.plot){
+    points.add$toplot <- points.add$rel_inc
+    ymax <- max(c(ymax, points.add$toplot[points.add$rel_inc > 0]), na.rm=TRUE)
+  }
 
 
-  lab.table$color <- as.character(lab.table$color)
-  col.line <- lab.table$color[which(lab.table$compartment==which.plot)]
-  col.polygon <- adjustcolor(col.line, alpha.f = 0.5 - 0.1*goodness)
-  sir_result_region_sub <- filter(sir_result_region, variable==variable_name)
-  sir_result_region_sub <- subset(sir_result_region_sub, time <= tmax.plot)
+   if(is.null(xlab)) xlab <- ""
+   if(is.null(ylab)) ylab <- "People"
+    plot(0, type="n", xlab=xlab, ylab=ylab, main=title, col="black", 
+         ylim=c(0,1.05*ymax), xlim=c(tmin.plot,1.1*tmax.plot), axes=FALSE)
+    axis(1,at=lab_where, lab=lab_show, cex.axis=lab_cex)
+    axis(2)
+
+    if(!goodness) abline(v=ref_day-start_day, col="gray", lty=2)
+
     time.print <- tmax.plot + 0.5
     polygon(c(sir_result_region_sub$time, rev(sir_result_region_sub$time)), c(sir_result_region_sub$lower, rev(sir_result_region_sub$upper)), col=col.polygon, border=NA)
     if(!goodness){
@@ -191,23 +240,28 @@ lab.table <- data.frame(compartment=c("D","rD", "H","rH",
 
   # Add observed deaths
   if(which.plot %in% "rD"){
-    col.line <- lab.table$color[which(lab.table$compartment=="D")]
+    # col.line <- lab.table$color[which(lab.table$compartment=="D")]
     points.add <- subset(points.add, time <= ref_day-start_day)
     points(points.add$time, points.add$toplot, pch=16, cex=0.6, col=col.line)
   }
   if(which.plot %in% c("rH", "rHsum")){
-    col.line <- lab.table$color[which(lab.table$compartment=="H")]
+    # col.line <- lab.table$color[which(lab.table$compartment=="H")]
     points.add <- subset(points.add, time <= ref_day-start_day)
     points(points.add$time, points.add$toplot, pch=16, cex=0.6, col=col.line)
   }
   if(which.plot %in% "rcum_modH"){
-    col.line <- lab.table$color[which(lab.table$compartment=="rcum_modH")]
+    # col.line <- lab.table$color[which(lab.table$compartment=="rcum_modH")]
+    points.add <- subset(points.add, time <= ref_day-start_day)
+    points(points.add$time, points.add$toplot, pch=16, cex=0.6, col=col.line)
+  }
+ if(which.plot %in% "Inc"){
+    # col.line <- lab.table$color[which(lab.table$compartment=="currentI")]
     points.add <- subset(points.add, time <= ref_day-start_day)
     points(points.add$time, points.add$toplot, pch=16, cex=0.6, col=col.line)
   }
 
 
-  if("D" %in% which.plot || "rD" %in% which.plot || "rHsum" %in% which.plot || "dailyI" %in% which.plot){
+  if("D" %in% which.plot || "rD" %in% which.plot || "rHsum" %in% which.plot || "dailyI" %in% which.plot || "Inc" %in% which.plot){
       sir_result_region_sub <- filter(sir_result_region, variable==variable_name)
   }
 

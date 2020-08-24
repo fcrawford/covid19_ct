@@ -10,24 +10,24 @@
 
 # generic function for switching contact interventions on and off
 
-
-##########################
 get_contact_intervention_fun = function(dayseq, startdate, offdate, ramping) {
-  if(offdate<startdate) {stop("off date cannot be before start date")}
+  if(offdate < startdate) {stop("off date cannot be before start date")}
 
   tmax = as.numeric(max(dayseq)-day0)
   ramping_end_date = as.Date(startdate + ramping)
-  
+
   if(ramping_end_date>offdate) {stop("ramping value too large")}
-  
+
   cont_int = sapply(dayseq,function(dy) {
     if(dy<startdate) {0}
-    else if(dy<ramping_end_date) {as.numeric(dy-startdate)/as.numeric(ramping_end_date-startdate)}
+    else if(dy<ramping_end_date) {as.numeric(dy-startdate)/ramping}
     else if(dy<offdate) {1}
     else {0}
   })
-  return(approxfun(1:(tmax+1), cont_int, method="linear", rule=2))
+  #return(approxfun(1:(tmax+1), cont_int, method="linear", rule=2))
+  return(approxfun(0:tmax, cont_int, method="linear", rule=2))
 }
+
 
 
 
@@ -37,16 +37,40 @@ get_contact_intervention_fun = function(dayseq, startdate, offdate, ramping) {
 # list of functions to calculate aggregate distancing function
 
 # startdates and offdates are lists of the same length
+
+# keep the list function, may be useful in the future
+# in the model with random effects, use a list of length 1
+# schools reopening intervention added on 08/17 for projections
+
 get_distancing_fun_list = function(dayseq, startdates, offdates, rampings) {
   if(length(startdates)!=length(offdates)) {stop("list of start dates has to be the same length as list of off dates")}
-  if(length(startdates)!=length(rampings)) {stop("list of start dates has to be the same length as list of ramping times")}   
+  if(length(startdates)!=length(rampings)) {stop("list of start dates has to be the same length as list of ramping times")}
 
   distancing_fun_list = list()
   for (k in 1:length(startdates)){
-   distancing_fun_list[[k]] = get_contact_intervention_fun(dayseq, startdates[[k]], offdates[[k]], rampings[[k]]) 
+   distancing_fun_list[[k]] = get_contact_intervention_fun(dayseq, startdates[[k]], offdates[[k]], rampings[[k]])
   }
   return(distancing_fun_list)
 }
+
+
+
+
+
+
+#################################
+# linear interpolation between the dates at which random effects are evaluated
+# prior to the first random effect date, function should return 0
+
+get_random_effect_fun = function(dayseq, random_effect_at, random_effect_values){
+  
+  re1_at = random_effect_at[1]
+  random_effect_at = c((re1_at-1), random_effect_at)
+  random_effect_values = c(0, random_effect_values)
+  
+  return(approxfun(random_effect_at, random_effect_values, method="linear", rule=2))
+}
+
 
 
 
@@ -76,6 +100,8 @@ get_mobility_fun = function(dayseq, mob.data){
    #return(approxfun(time0:(tmax+time0), mob, method="linear", rule=2))
    return(approxfun(0:tmax, mob, method="linear", rule=2))
 }
+
+
 
 
 
@@ -152,19 +178,51 @@ get_death_fun = function(dayseq, dhaz.data){
 
 
 
+######################################
+
+# current hospitalizations coming from congregate settings
+
+get_current_congregate_hosp_fun = function(dayseq, hosp_cong.data){
+  
+  tmax = as.numeric(max(dayseq)-day0)
+  
+  dat_day0 = ymd(hosp_cong.data$date[1])
+  dat_daymax = ymd(hosp_cong.data$date[nrow(hosp_cong.data)])
+  
+  d = sapply(dayseq, function(dy){
+    if (dy < dat_day0) {0}
+    else if (dy < dat_daymax) {hosp_cong.data$cur_hosp_cong[ which (ymd(hosp_cong.data$date) == dy)] }
+    else {0}
+  })
+  
+  return( approxfun(0:tmax, d, method="linear", rule=2))
+}
 
 
 
 
-###########################
 
-# R0 based on beta and FOI parameters
 
-get_R0 = function(params) {
-  R0 = params$beta_pre * ( params$q_A * params$k_A / params$alpha_A 
-                          + (1 - params$q_Is - params$q_A) / params$alpha_Im 
-                          + params$q_Is * params$k_Is / params$alpha_Is  ) 
-  return(R0)
+
+
+######################################
+
+# arrival hospitalizations coming from congregate settings
+
+get_arrival_congregate_hosp_fun = function(dayseq, hosp_cong.data){
+  
+  tmax = as.numeric(max(dayseq)-day0)
+  
+  dat_day0 = ymd(hosp_cong.data$date[1])
+  dat_daymax = ymd(hosp_cong.data$date[nrow(hosp_cong.data)])
+  
+  d = sapply(dayseq, function(dy){
+    if (dy < dat_day0) {0}
+    else if (dy < dat_daymax) {hosp_cong.data$arrival_hosp_cong[ which (ymd(hosp_cong.data$date) == dy)] }
+    else {0}
+  })
+  
+  return( approxfun(0:tmax, d, method="linear", rule=2))
 }
 
 
@@ -180,7 +238,44 @@ get_R0 = function(params) {
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 ############################
+### not in use currently ###
+############################
+
+###########################
+
+# R0 based on beta and FOI parameters
+
+#get_R0 = function(params) {
+#  R0 = params$beta_pre * ( params$q_A * params$k_A / params$alpha_A 
+#                          + (1 - params$q_Is - params$q_A) / params$alpha_Im 
+#                          + params$q_Is * params$k_Is / params$alpha_Is  ) 
+#  return(R0)
+#}
+
+
+
+
 #get_state_lockdown_fun = function(dayseq, offdate) {
 #  if(offdate<state_lockdown_start) {stop("off date cannot be before lockdown start")}
 
@@ -297,7 +392,7 @@ get_R0 = function(params) {
 
 
 ###########################
-# testing
+# test how functions look
 
 #par(mfrow=c(3,1), mar=c(3,4,3,0),bty="n")
 

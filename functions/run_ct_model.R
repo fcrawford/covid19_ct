@@ -28,23 +28,22 @@ rparams = function(params) {
 
 
 # UPDATE THIS FUNCTION AS WE INCREASE THE NUMBER OF INTERVENTIONS
+## currently 2 interventions that are not captured by random effects:
+# lockdown
+# school reopening (for projections)
+################################################## 
 # create a list of contact intervention effects from params
 get_intervention_effects = function(params) {
    
-   return( as.list(c(params$school_closure_effect, 
-                     params$lockdown_effect, 
-                     params$ph1_release_effect, 
-                     params$ph2_release_effect)) )
+   return( as.list(c(params$lockdown_effect, params$school_reopening_effect)) )
 }
 
 
-# create a list of intervention ramping times from params
+# first value is ramping time for lockdown effect
+# second value is raming time for school reopening effect
 get_ramping_times = function(params) {
    
-   return( as.list(c(1,  # ramping time for school closure
-                     params$ramp_time, # ramping time for lockdown
-                     round(params$ramp_time/2, 0),  # ramping time for phase 1 release
-                     round(params$ramp_time/2, 0)) ) ) # ramping time for phase 2 release
+   return( as.list(c(14, 2)) )
 }
 
 
@@ -90,34 +89,36 @@ get_state0 = function(init_file_csv){
 # some supporting functions
 
 # get state0 on day0 for a given set of parameters
-get_state0_params <- function(params, E_init_state0, interventions, populations, adj, county_capacities){
+get_state0_params <- function(params, interventions, populations, adj, county_capacities){
+
+# initial number exposed
+E_init_state0 = params$E_init * E_INIT_COUNTY
 
 nregions = length(E_init_state0)
-mytmax = params$time_num + 2
+mytmax = params$time_num + 1
 
 params_tmp <- params
 
-params_tmp$school_closure_effect <- 0
+# no interventions and no changes to any inputs to contact pattern
 params_tmp$lockdown_effect <- 0
-
-params_tmp$ph1_release_effect <- 0
-params_tmp$ph2_release_effect <- 0
-params_tmp$ph3_release_effect <- 0
-
-params_tmp$testing_effect <- 0
 
 int_num = length(interventions$distancing_list)
 int_effects_tmp = as.list(rep(0, int_num))
+
+re_fun_tmp = approxfun(1:mytmax, rep(0,mytmax) ,method='linear', rule=2)
+interventions$random_effect = re_fun_tmp
+
+params_tmp$testing_effect <- 0
+
+params_tmp$H_lag <- 0
+params_tmp$D_lag <- 0
 
 mobfun_tmp = approxfun(1:mytmax, rep(1,mytmax) ,method='linear', rule=2)
 interventions$mobility = mobfun_tmp
 
 deathfun_tmp = approxfun(1:mytmax, rep(DEATH_HAZ$smooth.rel_haz[1],mytmax) ,method='linear', rule=2)
 
-params_tmp$H_lag <- 0
-params_tmp$D_lag <- 0
-
-
+# initial conditions at time day0 - time_num
 E_init = E_init_state0
 I_s_init = rep(0,nregions)
 I_m_init = rep(0,nregions)
@@ -142,6 +143,7 @@ res = run_sir_model(state0=state0,
                     capacities=county_capacities,
                     deathfun=deathfun_tmp)
 
+# get initial conditions corresponding to params, E_init, and time_num
 init = matrix(0, ncol=10, nrow=8)
 compartments <- c("E", "I_s", "I_m", "A", "H", "NH", "NI", "D", "R" )
   
@@ -180,42 +182,23 @@ for (k in 1:length(compartments)){
 
 
 
+
+
 # return a list of params and state0 for a random draw from joint posterior
 ## inputs:
 # params: list of parameters representing a chosen scenario
 # posterior: data frame with a sample from joint posterior 
 rposterior = function(params, posterior, interventions){
 
-par_smpl = as.list(posterior[sample(c(1:nrow(posterior)), size = 1), ])
+   index <- sample(c(1:nrow(posterior)), size = 1)
+   
+   par_smpl = as.list(posterior[index, ])
+   
+   params = set_params_mcmc(params, par_smpl)
+   
+   state0 = get_state0_params(params, interventions, CT_POPULATIONS, CT_ADJ, COUNTY_CAPACITIES)
 
-var_names = c('q_Is', 
-             'beta_pre',
-             'k_A',
-             'gamma_H',
-             'm_H',
-             'H_lag',
-             'D_lag',
-             'school_closure_effect',
-             'lockdown_effect',
-             'ph1_release_effect',
-             'testing_effect',
-             'E_init',
-             'time_num', 
-             'ramp_time',
-             'm_Hbar_mult')
-
-  for (k in var_names){
-    params[[k]] = par_smpl[[k]]
-  }
-
-  params$q_Im = 1 - params$q_A - params$q_Is
-  params$gamma_Hbar = params$gamma_H
-  
-  E_init_state0 = params$E_init * E_INIT_COUNTY
-
-  state0 = get_state0_params(params, E_init_state0, interventions, CT_POPULATIONS, CT_ADJ, COUNTY_CAPACITIES)
-
-  return( list (params, state0) )
+  return( list (params, state0, index) )
 }
 
 
@@ -241,6 +224,7 @@ get_sir_results = function(daymax,
                            params,
                            state0,
                            posterior,
+                           posterior.re = NULL,
                            draw_rparams = FALSE,
                            seed = NULL, 
                            CI = 0.95) {
@@ -248,20 +232,31 @@ get_sir_results = function(daymax,
   dayseq = seq(day0, daymax, by="day")
   tmax = as.numeric(difftime(daymax, day0, units="days"))
 
-  # get a list of intervetion ramping times from default params
-  int_ramping_times = get_ramping_times(params)
   
-   # list of contact intervention functions 
-   distancingfun_list = get_distancing_fun_list(dayseq, INT_START_DATES, int_off_dates, int_ramping_times)
+  # 
+  if(!is.null(INTERVENTIONS)){interventions <- INTERVENTIONS} else {
+     stop("INTERVENTIONS must be defined globally")
+  }
+ 
+  
+  # # get a list of intervetion ramping times from default params
+  # int_ramping_times = get_ramping_times(params)
+  # 
+  #  # list of contact intervention functions 
+  #  distancingfun_list = get_distancing_fun_list(dayseq, INT_START_DATES, int_off_dates, int_ramping_times)
+  # 
+  #  # mobility
+  #  mobilityfun = get_mobility_fun(dayseq, MOB)
+  # 
+  #  # testing
+  #  testingfun = get_testing_fun(dayseq, TESTING)
+  # 
+  #  # combine in the list of interventions 
+  #  interventions = list(distancing_list=distancingfun_list, mobility=mobilityfun, testing=testingfun, random_effect = function(x){0}) 
 
-   # mobility
-   mobilityfun = get_mobility_fun(dayseq, MOB)
-
-   # testing
-   testingfun = get_testing_fun(dayseq, TESTING)
-
-   # combine in the list of interventions 
-   interventions = list(distancing_list=distancingfun_list, mobility=mobilityfun, testing=testingfun) 
+   if(!is.null(posterior.re)){
+       random_effect_at = as.numeric(gsub("time", "", colnames(posterior.re)))
+   }
 
    # hospital death hazard function
    deathfun = get_death_fun(dayseq, DEATH_HAZ)
@@ -270,42 +265,49 @@ get_sir_results = function(daymax,
  state0s <- list()
  interventions_list <- list()  
  
-# parameters, set seed if given
+  # parameters, set seed if given
   if(!is.null(seed)) set.seed(seed)
   
   if (draw_rparams == TRUE){
        if(nsim == 1){
-     pars[[1]] = params 
-     state0s[[1]] = state0
-     interventions_list[[1]] = interventions
-  } else { 
-    for(i in 1:nsim){ 
-       pars[[i]] = rparams(params)
-       state0s[[i]] = state0
-       interventions_list[[i]] = interventions
-    }
-  } 
-} else {
-  if(nsim == 1){
-     pars[[1]] = params
-     state0s[[1]] = state0
-     interventions_list[[1]] = interventions
-  } else { 
-    for(i in 1:nsim){ 
-       rpost_out = rposterior(params, posterior, interventions)
-       pars[[i]] = rpost_out[[1]]
-       state0s[[i]] = rpost_out[[2]]
-       
-      # update interventions with ramping times from posterior
-       ramping_upd = get_ramping_times(pars[[i]])
-       distancingfun_list_upd = get_distancing_fun_list(dayseq, INT_START_DATES, int_off_dates, ramping_upd)
-       interventions_list[[i]] = list(distancing_list=distancingfun_list_upd, mobility=mobilityfun, testing=testingfun)
-       }
-  } 
-}   
+           pars[[1]] = params 
+           state0s[[1]] = state0
+           interventions_list[[1]] = interventions
+        } else { 
+          for(i in 1:nsim){ 
+             pars[[i]] = rparams(params)
+             state0s[[i]] = state0
+             interventions_list[[i]] = interventions
+          }
+        } 
+  } else {
+      if(nsim == 1){
+         pars[[1]] = params
+         state0s[[1]] = state0
+         interventions_list[[1]] = interventions
+      } else { 
+        for(i in 1:nsim){ 
+           rpost_out = rposterior(params, posterior, interventions)
+           pars[[i]] = rpost_out[[1]]
+           state0s[[i]] = rpost_out[[2]]
+           index <- rpost_out[[3]]
+           
+          # update interventions with ramping times from posterior
+           #ramping_upd = get_ramping_times(pars[[i]])
+           #distancingfun_list_upd = get_distancing_fun_list(dayseq, INT_START_DATES, int_off_dates, ramping_upd)
+           #interventions_list[[i]] = list(distancing_list=distancingfun_list_upd, mobility=mobilityfun, testing=testingfun)
+           interventions_list[[i]] = interventions
+           if(!is.null(posterior.re)){
+               random_effect_fun = get_random_effect_fun(dayseq, random_effect_at, 
+                                                         posterior.re[index, ])
+               interventions_list[[i]]$random_effect = random_effect_fun
+           }
+        }
+      } 
+  }   
 
   sir_results = lapply(1:nsim, function(i){
-    res = run_sir_model(state0=state0s[[i]], 
+   res = run_sir_model(state0=state0s[[i]], 
                         params=pars[[i]],   
                         region_adj=CT_ADJ, 
                         populations=CT_POPULATIONS, 
@@ -319,15 +321,19 @@ get_sir_results = function(daymax,
   })
 
   sir_results_all = ldply(sir_results, rbind)
-  for(nm in c("Connecticut", colnames(CT_ADJ))){
-    sir_results_all[, paste0("rHsum.", nm)] <-  sir_results_all[,paste0("rH.", nm)]+sir_results_all[,paste0("rHbar.", nm)]
-  }
+  
+  sir_results_all[,"rHsum.Connecticut"] <- sir_results_all[,"rH.Connecticut"]+sir_results_all[,"rHbar.Connecticut"]
+  
+  #for(nm in c("Connecticut", colnames(CT_ADJ))){
+   #    sir_results_all[, paste0("rHsum.", nm)] <-  sir_results_all[,paste0("rH.", nm)]+sir_results_all[,paste0("rHbar.", nm)]
+   #  }
+  
   sir_results_long <- melt(sir_results_all, id.vars = c("time", "sim_id"))
   sir_results_summary <- sir_results_long %>% group_by(variable, time) %>% 
-			                     summarise(
+                           summarise(
                              mean = mean(value),
-			                       lower = quantile(value, (1-CI)/2, na.rm=TRUE),
-			                       upper = quantile(value, 1-(1-CI)/2, na.rm=TRUE))
+                             lower = quantile(value, (1-CI)/2, na.rm=TRUE),
+                             upper = quantile(value, 1-(1-CI)/2, na.rm=TRUE))
   return(list(raw_results=sir_results, summary=sir_results_summary))
 }
 
