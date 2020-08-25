@@ -49,7 +49,6 @@ source("../functions/get_data.R")
 source("../functions/intervention_functions.R")
 source("../functions/truncated_distributions.R")
 source("../functions/plot_functions.R")
-source("../functions/calibration_functions.R")
 
 #################################################### 
 # Other global variables that should not be changed

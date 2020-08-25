@@ -206,6 +206,28 @@ rposterior = function(params, posterior, interventions){
 
 
 
+# update parameter values that can vary
+################################################## 
+set_params_mcmc = function(myparams, varparams){
+  
+  # names of params to be updated
+  var_names = names(varparams)
+    
+  # update these params
+  for (k in var_names){
+    myparams[[k]] = varparams[[k]]
+  }
+  
+  # update calculated params  
+  myparams$q_Im = 1 - myparams$q_A - myparams$q_Is
+  myparams$gamma_Hbar = myparams$gamma_H
+  
+  #myparams$school_closure_effect = varparams$tot_lockdown_effect * varparams$school_closure_prop
+  #myparams$lockdown_effect = varparams$tot_lockdown_effect * (1 - varparams$school_closure_prop)
+
+  return(myparams)
+}
+
 
 
 

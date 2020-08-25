@@ -1,3 +1,7 @@
+##
+## The working directory of this file is functions/ folder.
+##
+
 source("../functions/global_var.R")
 source("../functions/run_ct_model.R")
 source("../functions/plot_functions.R")
@@ -72,7 +76,7 @@ if(school_effect == 0){
 
 
 ## plots: set 1 ##
-pdf(paste0("test_scenario_", round(school_effect*100), ".pdf"), width=11.2, height=7.2)
+pdf(paste0("../figures/test_scenario_", round(school_effect*100), ".pdf"), width=11.2, height=7.2)
 
 par(mfrow=c(2, 2), mar=c(4,4,1,1))
 ##   Row 1
