@@ -1,73 +1,54 @@
 # use rtuncdist to make flat priors for some params
 
 # q_Is: relatively flat, centered around 0.064 = 0.1 * symptomatic
-prior.mean.q_Is : 0.064
-prior.sd.q_Is : 0.013
-prior.lower.q_Is : 0.004
-prior.upper.q_Is : 0.124
+prior.mean.q_Is : 0.04
+prior.sd.q_Is : 0.007
+prior.lower.q_Is : 0.01
+prior.upper.q_Is : 0.07
 
 # beta_pre: flat between 0.75 and 1.75, fat tails
-prior.mean.beta_pre: 1.1
+prior.mean.beta_pre: 1.2
 prior.sd.beta_pre: 0.5
-prior.lower.beta_pre: 0.1
-prior.upper.beta_pre: 2.1
-
-# k_A: assume mean of 0.4 (there are no good estimates): largely absorbed in beta
-prior.mean.k_A : 0.4
-prior.sd.k_A : 0.05
-prior.lower.k_A : 0.1
-prior.upper.k_A : 0.7
+prior.lower.beta_pre: 0.01
+prior.upper.beta_pre: 2.4
 
 # gamma_H: mean = 10 days, consistent with different data sources
-prior.mean.gamma_H : 0.11 
+prior.mean.gamma_H : 0.125 
 prior.sd.gamma_H : 0.03
-prior.lower.gamma_H : 0.01
-prior.upper.gamma_H : 0.21
+prior.lower.gamma_H : 0.03
+prior.upper.gamma_H : 0.23
 
 # m_H: mean is 0.2, consistent with hospital association and reports from NY and CA
-prior.mean.m_H : 0.2
+prior.mean.m_H : 0.15
 prior.sd.m_H : 0.03
 prior.lower.m_H : 0.05
-prior.upper.m_H : 0.35
+prior.upper.m_H : 0.25
 
-# total lockdown_effect: school closure effect + lockdown effect
-prior.mean.tot_lockdown_effect : 0.8
-prior.sd.tot_lockdown_effect : 0.12
-prior.lower.tot_lockdown_effect : 0.4
-prior.upper.tot_lockdown_effect : 0.99
-
-# school_closure_prop: proportion of total lockdown due to school closure
-prior.mean.school_closure_prop : 0.2
-prior.sd.school_closure_prop : 0.12
-prior.lower.school_closure_prop : 0
-prior.upper.school_closure_prop : 0.7
-
-
-# ph1_release_effect: wide and flat
-prior.mean.ph1_release_effect : 0
-prior.sd.ph1_release_effect : 0.05
-prior.lower.ph1_release_effect : -0.2
-prior.upper.ph1_release_effect : 0.2
+# total lockdown_effect: school closure effect + lockdown effect on log scale
+prior.mean.lockdown_effect : -1.55
+prior.sd.lockdown_effect : 0.15
+prior.lower.lockdown_effect : -4.6
+prior.upper.lockdown_effect : -0.5
 
 # testing_effect: increase in the rate of departure from I_m due to faster isolation per log increase in testing 
-prior.mean.testing_effect_Im : 0.03
-prior.sd.testing_effect_Im : 0.02
-prior.lower.testing_effect_Im : 0
-prior.upper.testing_effect_Im : 0.2
+prior.mean.testing_effect : 0.03
+prior.sd.log.testing_effect: 0.6
+prior.lower.testing_effect : 0
+prior.upper.testing_effect : 0.2
 
 # E_init: initial number exposed on (day0 - time_num), does not need to be integer
-prior.mean.E_init: 20
-prior.sd.E_init: 5
+prior.mean.E_init: 35
+prior.sd.E_init: 4
 prior.lower.E_init: 1
-prior.upper.E_init: 50
+prior.upper.E_init: 100
 
-# lambda: variance parameter of beta distribution used in data likelihood
-prior.shape.lam : 6
-prior.rate.lam : 0.0003
+# sd_dh: variance of normal distribution used in data likelihood for death / hospitalization counts
+prior.shape.sd_dh : 200 
+prior.rate.sd_dh : 0.5
 
-# sd_e: variance of normal distribution used in data likelihood 
-prior.shape.sd_e : 2 
-prior.rate.sd_e : 20
+# sd_e: variance of normal distribution used in data likelihood for relative incidence
+prior.shape.sd_e : 6 
+prior.rate.sd_e : 40
 
 
 
@@ -83,53 +64,45 @@ upper.m_Hbar_mult : 2
 # OLD: not used in current version
 ####################################
 
-# prop_death_H: proportion of deaths occuring outside hospitals (nursing homes, etc); q_H is calculated from this
-# mean is based on data from hospital association + CT DPH reports with a lag
-prior.mean.prop_death_H : 0.48
-prior.sd.prop_death_H : 0.012
-prior.lower.prop_death_H : 0.36
-prior.upper.prop_death_H : 0.6
+# k_A: assume mean of 0.4 (there are no good estimates): largely absorbed in beta
+#prior.mean.k_A : 0.4
+#prior.sd.k_A : 0.05
+#prior.lower.k_A : 0.1
+#prior.upper.k_A : 0.7
+
+# total lockdown_effect: school closure effect + lockdown effect
+#prior.mean.tot_lockdown_effect : 0.8
+#prior.sd.tot_lockdown_effect : 0.12
+#prior.lower.tot_lockdown_effect : 0.4
+#prior.upper.tot_lockdown_effect : 0.99
 
 
-# k_Is: assume mean of 0.7, largely absorbed in beta
-prior.mean.k_Is : 0.7
-prior.sd.k_Is : 0.05
-prior.lower.k_Is : 0.5
-prior.upper.k_Is : 0.9
-
-
-# gamma_NH: for now, assume a bit longer than hospital stay (14.3 days) to absorb delay in reporting relative to hospitals
-prior.mean.gamma_NH : 0.07 
-prior.sd.gamma_NH : 0.01
-prior.lower.gamma_NH : 0.03
-prior.upper.gamma_NH : 0.11
-
-
-# m_NH_mult: assume 1.5 and update later if better estimate becomes available
-prior.mean.m_NH_mult : 1.5
-prior.sd.m_NH_mult : 0.15
-prior.lower.m_NH_mult : 1
-prior.upper.m_NH_mult : 2
-
-
-
-# distancing_effect: remaining reduction in contact rates after lockdown is lifted
-mean.distancing_effect: 0.7
-sd.distancing_effect: 0.03
-lower.distancing_effect : 0.6
-upper.distancing_effect : 0.8
+# school_closure_prop: proportion of total lockdown due to school closure
+#prior.mean.school_closure_prop : 0.2
+#prior.sd.school_closure_prop : 0.12
+#prior.lower.school_closure_prop : 0
+#prior.upper.school_closure_prop : 0.7
 
 
 # school_closure_effect: make relatively narrow, highly correlated with lockdown effect, which is wide
-prior.mean.school_closure_effect : 0.15
-prior.sd.school_closure_effect : 0.05
-prior.lower.school_closure_effect : 0.025
-prior.upper.school_closure_effect : 0.2775
+#prior.mean.school_closure_effect : 0.15
+#prior.sd.school_closure_effect : 0.05
+#prior.lower.school_closure_effect : 0.025
+#prior.upper.school_closure_effect : 0.2775
 
 # lockdown_effect: wide and flat
-prior.mean.lockdown_effect : 0.7
-prior.sd.lockdown_effect : 0.08
-prior.lower.lockdown_effect : 0.5
-prior.upper.lockdown_effect : 0.9
+#prior.mean.lockdown_effect : 0.7
+#prior.sd.lockdown_effect : 0.08
+#prior.lower.lockdown_effect : 0.5
+#prior.upper.lockdown_effect : 0.9
 
+# lambda: variance parameter of beta distribution used in data likelihood
+# prior.shape.lam : 6
+# prior.rate.lam : 0.0003
+
+# lambda: alternative prior specification, truncated
+# prior.mean.lam : 40000
+# prior.sd.lam : 25000
+# prior.lower.lam : 5000
+# prior.upper.lam : 150000
 

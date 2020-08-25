@@ -2,15 +2,15 @@
 ##### Epi parameters: means 
 # case type distribution
 q_A: 0.36 # asymptomatic
-q_Im: 0.58 # mild
-q_Is: 0.06 # severe
+q_Im: 0.6 # mild
+q_Is: 0.04 # severe
 
 # among severe: proportion going to H/Hbar stream (vs. nursing homes or prisons)
 # the value of 1 corresponds to a community transmission model
-q_H: 1 #0.56
+q_H: 1 
 
 # transmissibility
-beta_pre: 1
+beta_pre: 1.2
 
 # latency
 delta: 0.25   # 1/4
@@ -18,7 +18,7 @@ delta: 0.25   # 1/4
 ## FOI
 # FOI from Asymptomatic in the absence of testing
 alpha_A: 0.1428571   # 1/7 (infectious for 7 days)
-k_A: 0.38 # relative infectiousness of asymptomatic compared to mildly symptomatic
+k_A: 0.4 # relative infectiousness of asymptomatic compared to mildly symptomatic
 
 # FOI from Mild
 alpha_Im: 0.25   # 1/4 (infectious for 4 days, then isolated)
@@ -49,43 +49,49 @@ m_Hbar_mult: 1.5 # RR among hospital overflow
 k_n: 0.015 # transmission from adjacent counties
 
 # reporting lags (days)
-H_lag: 2
-D_lag: 3
-detect_lag: 5
+H_lag: 5
+D_lag: 5
+detect_lag: 7
 
 # initial number exposed on (day0 - time_num)
-E_init: 28
+E_init: 35
 
 # time point from candidate_state0 that becomes state0
-time_num: 18
+time_num: 14
 
-# ramping time for lockdown effect
-ramp_time: 15
+# main lockdown effect on log scale
+lockdown_effect: -1.7
 
-# the following effects are ADDITIVE and must sum to a number <= 1
-# e.g. an effect of 0.1 reduces the intervention from 1 (full effect) to 0.9. 
-# intervention effects on contact (combined in a list in the code): 
-school_closure_effect: 0.25
-lockdown_effect: 0.52
-
-tot_lockdown_effect: 0.77
-school_closure_prop: 0.33
-
-# post-lockdown
-ph1_release_effect: 0.01
-ph2_release_effect: 0
-ph3_release_effect: 0
+# school reopening effect on log scale
+school_reopening_effect: 0.2
 
 # intervention effect on isolation/recovery for A and I_m
 # this number times log(daily number of tests) is an increase in the rate of transitioning out of infectious compartment 
-testing_effect: 0.025 # corresponds to compartment I_m
+testing_effect: 0.03 # corresponds to compartment I_m
 te_A_mult: 0.5 # relative testing effect among A compared to I_m
 
 
 
 # standard deviations, lower and upper bounds 
 # of model parameters for uncertainty in projections
-sd_beta_pre: 0.05
-lower_beta_pre: 0.6
-upper_beta_pre: 1.4
+#sd_beta_pre: 0.05
+#lower_beta_pre: 0.6
+#upper_beta_pre: 1.4
+
+
+
+
+
+### not used with the random effects model
+# ramping time for lockdown effect
+#ramp_time: 1
+
+#school_closure_effect: 0
+
+# post-lockdown
+#ph1_release_effect: 0
+#ph2_release_effect: 0
+#ph3_release_effect: 0
+
+
 
