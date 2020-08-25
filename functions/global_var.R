@@ -1,6 +1,9 @@
 ########################################################################
 ## This script holds all global variables, functions and dependencies
 ########################################################################
+if("is.calibration" %in% ls() == FALSE){
+	is.calibration <- FALSE
+}
 
 library(deSolve)
 library(yaml)
@@ -8,14 +11,23 @@ library(lubridate)
 library(plyr)
 library(reshape2)
 library(dplyr)
-library(rgdal)
-library(SUMMER)
-library(ggplot2)
-library(mapproj)
-library(tidyr)
-library(patchwork)
-library(forecast)
-library(imputeTS)
+library(foreign)
+library(mvtnorm)
+library(readr)
+
+if(!is.calibration){
+	# things that not needed on cluster
+	library(rgdal)
+	library(SUMMER)
+	library(ggplot2)
+	library(mapproj)
+	library(tidyr)
+	library(patchwork)
+	library(forecast)
+	library(imputeTS)	
+	# Spatial polygons
+	CT_MAP <- readOGR("../map/wgs84/countyct_37800_0000_2010_s100_census_1_shp_wgs84.shp", verbose=FALSE)
+}
 
 ########################
 # Global variables of set dates: do not change
@@ -30,21 +42,6 @@ schools_reopen_date = ymd("2020-09-01") # school reopening
 INT_START_DATES = as.list(c(lockdown_start_date = lockdown_start_date, schools_reopen_date = schools_reopen_date))
 
 
-#state_schools_close = dmy("17/03/2020")
-#state_lockdown_order = dmy("20/03/2020") # order date
-#state_lockdown_start = dmy("23/03/2020") # actual lockdown start date
-#state_mask_start = dmy("20/04/2020") # start of order requiring mask wearing in public: used in lockdown ramping time calculation
-
-#state_phase1_start = dmy("20/05/2020") # start of phase 1 lockdown release
-#state_phase2_start = dmy("17/06/2020") # start of phase 2 lockdown release
-
-#INT_START_DATES = as.list(c(state_schools_close=state_schools_close, 
-#                      state_lockdown_start=state_lockdown_start, 
-#                      state_phase1_start=state_phase1_start, 
-#                      state_phase2_start=state_phase2_start))
-
-
-
 ########################
 source("../functions/model.R")
 source("../functions/run_ct_model.R")
@@ -52,7 +49,7 @@ source("../functions/get_data.R")
 source("../functions/intervention_functions.R")
 source("../functions/truncated_distributions.R")
 source("../functions/plot_functions.R")
-
+source("../functions/calibration_functions.R")
 
 #################################################### 
 # Other global variables that should not be changed
@@ -74,8 +71,6 @@ MOB <- global_dat$mob
 TESTING <- global_dat$testing
 # relative change in hospital death hazard
 DEATH_HAZ <- global_dat$smooth_hdeath_haz
-# Spatial polygons
-CT_MAP <- global_dat$CTmap
 # Spatial adj  matrix
 CT_ADJ <- global_dat$adj
 # Population count vector in the same order as CT_ADJ

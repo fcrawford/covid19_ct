@@ -1,11 +1,24 @@
 get_ct_data <- function(day0 = ymd("2020-03-01")){
 
 nyt <- "https://raw.githubusercontent.com/nytimes/covid-19-data/master/us-counties.csv"
-data <- try(read.csv(nyt), TRUE)
-if(is(data, "try-error")){
-	# resolve to local version if NYT site is down
-	data <- read.csv("../data/us-counties.csv")
+
+data0 <- read.csv("../data/us-counties.csv")
+data0$date <- as.Date(data0$date)
+out_date <- as.numeric(Sys.Date()  - max(data0$date))
+if(out_date > 7){
+  warning("Local data file out dated by 7 days or more: download from NYT github repository again...", immediate. = TRUE)
+  data <- try(read_csv(nyt), TRUE)
+  if(is(data, "try-error")){
+    # resolve to local version if NYT site is down
+    data <- data0
+    warning("NYT server not available, using local data.", immediate. = TRUE)
+  }else{
+    write.csv(data, file = "../data/us-counties.csv")
+  }
+}else{
+  data <- data0
 }
+
 
 dat_ct_county <- subset(data, state == "Connecticut")
 dat_ct_county$date <- ymd(dat_ct_county$date)
@@ -101,7 +114,7 @@ dat_ct_county$deaths[dat_ct_county$date == "2020-05-03" & dat_ct_county$county =
 dat_ct_county$deaths[dat_ct_county$date == "2020-05-03" & dat_ct_county$county == "Unknown" ] <- 2
 
 
-CTmap <- readOGR("../map/wgs84/countyct_37800_0000_2010_s100_census_1_shp_wgs84.shp", verbose=FALSE)
+# CTmap <- readOGR("../map/wgs84/countyct_37800_0000_2010_s100_census_1_shp_wgs84.shp", verbose=FALSE)
 adj = read.csv("../map/CT_adj_matrix.csv", stringsAsFactors=FALSE)
 colnames(adj)[-1] <- rownames(adj) <- adj$X
 adj = adj[,-1]
@@ -323,8 +336,7 @@ populations = pop$population[match(colnames(adj), pop$county)]
 # dat_ct_state$cum_hosp.prop = dat_ct_state$cum_hosp/sum(populations)
 
 
-return(list(dat_ct_state=dat_ct_state, dat_ct_county=dat_ct_county, hosp_cong=hosp_cong,
-            CTmap=CTmap, adj=adj, dat_ct_capacity=dat_ct_capacity, county_capacities=county_capacities, 
+return(list(dat_ct_state=dat_ct_state, dat_ct_county=dat_ct_county, hosp_cong=hosp_cong, adj=adj, dat_ct_capacity=dat_ct_capacity, county_capacities=county_capacities, 
             mob=mob_state, testing = testing_state, incidence = data.incidence,
             smooth_hdeath_haz = smooth_hdeath_haz, populations=populations))
 }
