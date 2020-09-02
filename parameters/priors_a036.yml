@@ -12,23 +12,23 @@ prior.sd.beta_pre: 0.5
 prior.lower.beta_pre: 0.01
 prior.upper.beta_pre: 2.4
 
-# gamma_H: mean = 10 days, consistent with different data sources
+# gamma_H: median = 8 days (YNHH data for patients with outcomes)
 prior.mean.gamma_H : 0.125 
 prior.sd.gamma_H : 0.03
-prior.lower.gamma_H : 0.03
-prior.upper.gamma_H : 0.23
+prior.lower.gamma_H : 0.025
+prior.upper.gamma_H : 0.225
 
-# m_H: mean is 0.2, consistent with hospital association and reports from NY and CA
-prior.mean.m_H : 0.15
+# m_H: 0.12, estimate among hospitalizations from non-congregate settings (excluding nursing homes)
+prior.mean.m_H : 0.12
 prior.sd.m_H : 0.03
-prior.lower.m_H : 0.05
-prior.upper.m_H : 0.25
+prior.lower.m_H : 0.02
+prior.upper.m_H : 0.22
 
 # total lockdown_effect: school closure effect + lockdown effect on log scale
-prior.mean.lockdown_effect : -1.55
-prior.sd.lockdown_effect : 0.15
-prior.lower.lockdown_effect : -4.6
-prior.upper.lockdown_effect : -0.5
+prior.mean.lockdown_effect : -1.5
+prior.sd.lockdown_effect : 0.5
+prior.lower.lockdown_effect : -3.6
+prior.upper.lockdown_effect : -0.3
 
 # testing_effect: increase in the rate of departure from I_m due to faster isolation per log increase in testing 
 prior.mean.testing_effect : 0.03

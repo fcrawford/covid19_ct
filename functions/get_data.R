@@ -19,7 +19,6 @@ if(out_date > 7){
   data <- data0
 }
 
-
 dat_ct_county <- subset(data, state == "Connecticut")
 dat_ct_county$date <- ymd(dat_ct_county$date)
 
@@ -44,12 +43,12 @@ ct.hosp$date <- ymd(ct.hosp$date)
 ct.hosp$time <- round(as.numeric(difftime(ct.hosp$date, day0, units="days")),0)
 
 
-
 # merge cases and death counts from NYT with hospitalization data
 # if dataset contain different number of observations, use all hospitalizations data
 dat_ct_state$date = NULL
-# if ( max(dat_ct_state$time) > max(ct.hosp$time) ) {ct.hosp$date = NULL} else {dat_ct_state$date = NULL}
-dat_ct_state <- merge(ct.hosp, dat_ct_state, by='time', all=F)
+   if ( max(dat_ct_state$time) > max(ct.hosp$time) ) 
+      {dat_ct_state <- merge(ct.hosp, dat_ct_state, by='time', all=F)} else 
+      {dat_ct_state <- merge(ct.hosp, dat_ct_state, by='time', all=T)}
 dat_ct_state$total_deaths <- dat_ct_state$deaths
 dat_ct_state$deaths <- dat_ct_state$hosp_death
 dat_ct_state = subset(dat_ct_state, select = c('time', 'date', 'cases', 'total_deaths', 'deaths', 'hosp_death', 'cur_hosp', 'cum_hosp'))
@@ -62,18 +61,12 @@ dat_ct_state = subset(dat_ct_state, select = c('time', 'date', 'cases', 'total_d
 hosp_cong = read.csv("../data/estimate_congregate_hospitalizations.csv", stringsAsFactors = FALSE)
 hosp_cong$date = ymd(hosp_cong$date)
 
-# number of data points in hosp_cong should be the same as dat_ct_state: repeat forward the last entry  
-time_range <- seq(min(dat_ct_state$time), max(dat_ct_state$time), by = 1) 
-missing_times = time_range[!time_range %in% hosp_cong$time] 
-missing_dates = dat_ct_state$date[dat_ct_state$time %in% missing_times]
-last_data = as.matrix(hosp_cong[nrow(hosp_cong),3:6])
- 
-if (length(missing_times)>0){
-    for (k in 1:length(missing_times)){
-      hosp_cong[nrow(hosp_cong) + 1,] = list(missing_times[k], ymd(missing_dates[k]), NA, NA, NA, NA)
-      hosp_cong[nrow(hosp_cong), 3:6] = last_data
-    }
-  }
+
+# last data point in hosp_cong should be the same as dat_ct_state
+# time_range <- seq(min(dat_ct_state$time), max(dat_ct_state$time), by = 1) 
+# missing_times = time_range[!time_range %in% hosp_cong$time] 
+if (max(dat_ct_state$time) != max(hosp_cong$time)) {stop("estimate_congregate_hospitalizations.csv should have the same last data point as DAT_CT_STATE")}
+
 
 
 
@@ -154,7 +147,7 @@ d$smooth.cum_hdeath <- sp$y
 
 # smooth daily deaths
 d$smooth.daily_hdeath <- c(diff(c(0, d$smooth.cum_hdeath)))
-#ggplot(d, aes(x = time, y = daily_hosp_death)) + geom_line(alpha = 0.5) + geom_line(aes(y = smooth.daily_hdeath), color='red')+ theme_bw()
+#ggplot(d, aes(x = time, y = daily_hdeath)) + geom_line(alpha = 0.5) + geom_line(aes(y = smooth.daily_hdeath), color='red')+ theme_bw()
 
 # remove the initial observations with small counts
 d = subset(d, time > 20) 
@@ -166,11 +159,6 @@ for (k in 2:nrow(d)){
 }
 d$haz[1] = d$haz[2]
 
-#d$movavg_haz <- forecast::ma(d$haz, order = 10)
-#d$movavg_haz[1:5] = d$movavg_haz[6]
-#d$movavg_haz[is.na(d$movavg_haz)] = d$movavg_haz[(nrow(d)-5)]
-#ggplot(d, aes(x = time, y = haz)) + geom_line(alpha = 0.5) + geom_line(aes(y = movavg_haz), color='red')+ theme_bw()
-#sp <- smooth.spline(d$time, d$movavg_haz, nknots=round(nrow(d)/30))
 
 # smooth hospital death hazard 
 sp <- smooth.spline(d$time, d$haz, nknots=round(nrow(d)/30))
