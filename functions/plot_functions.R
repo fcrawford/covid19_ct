@@ -172,6 +172,15 @@ lab.table <- data.frame(compartment=c("D","rD", "H","rH",
       sir_result_region_sub[i, "lower"] <- sir_result_region_sub[i, "lower"] + cong
       sir_result_region_sub[i, "upper"] <- sir_result_region_sub[i, "upper"] + cong
     }
+    
+    # use latest estimated proportion of community / congregare hospitalizations to apply to model-projected dynamics 
+    h_adj = HOSP_CONG$cur_hosp_cong[nrow(HOSP_CONG)]/DAT_CT_STATE$cur_hosp[nrow(DAT_CT_STATE)]
+    for (i in (max(HOSP_CONG$time)+2):dim(sir_result_region_sub)[1]){
+      cong <- sir_result_region_sub[i, "mean"] * h_adj/(1-h_adj)
+      sir_result_region_sub[i, "mean"] <- sir_result_region_sub[i, "mean"] + cong
+      sir_result_region_sub[i, "lower"] <- sir_result_region_sub[i, "lower"] + cong
+      sir_result_region_sub[i, "upper"] <- sir_result_region_sub[i, "upper"] + cong
+    }
   }
 
 
