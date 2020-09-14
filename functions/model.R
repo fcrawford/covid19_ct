@@ -4,7 +4,7 @@
 # region_adj is an adjacency matrix whose row/col labels are 
 
 
-run_sir_model = function(state0, params, region_adj, populations, tmax, interventions, int_effects, capacities, deathfun) {
+run_sir_model = function(state0, params, region_adj, populations, tmax, interventions, int_effects, capacities, deathfun, sevfun) {
 
   if(is.null(interventions$distancing_list) || is.null(interventions$mobility) || is.null(interventions$testing) ||
      !is.list(interventions$distancing_list) || !is.function(interventions$mobility) || !is.function(interventions$testing)) { 
@@ -101,7 +101,10 @@ run_sir_model = function(state0, params, region_adj, populations, tmax, interven
       m_H_cur = m_H * deathfun(time)
       m_Hbar = m_H_cur * m_Hbar_mult
       m_NH = m_H_cur * m_NH_mult
-  
+      
+      # severe proportion
+      q_Is_cur = q_Is * sevfun(time)
+      
       # effect of testing on early isolation / recovery for mild  and asymptomatic 
       a_t_Im = interventions$testing(time) * testing_effect_Im
       a_t_A  = interventions$testing(time) * testing_effect_A
@@ -151,9 +154,9 @@ run_sir_model = function(state0, params, region_adj, populations, tmax, interven
       
       dE    <-  -delta*E + S*( beta %*% ( k_Is * I_s + I_m + k_A * A )/populations ) 
       
-      dI_s  <-  q_Is * delta*E - alpha_Is * I_s 
+      dI_s  <-  q_Is_cur * delta*E - alpha_Is * I_s 
       
-      dI_m  <-  (1 - q_A - q_Is) * delta*E - (1 + a_t_Im) * alpha_Im * I_m
+      dI_m  <-  (1 - q_A - q_Is_cur) * delta*E - (1 + a_t_Im) * alpha_Im * I_m
       
       dA    <-  q_A * delta*E - (1 + a_t_A) * alpha_A * A
       
@@ -284,14 +287,17 @@ run_sir_model = function(state0, params, region_adj, populations, tmax, interven
   # dynamics of hospital CFR
   out$hCFR = params$m_H * deathfun(1:(tmax+1))
   
+  # dynamics of severe proportion
+  out$prop_Is = params$q_Is * sevfun(1:(tmax+1))
+  
   # dynamics of rates of removal from infectious compartments I_m and A
   out$alpha_Im.t = params$alpha_Im * (1 + params$testing_effect_Im * out$intervention_testing)
   out$alpha_A.t = params$alpha_A * (1 + params$testing_effect_A * out$intervention_testing)
     
   # dynamics of aggregate FOI
   out$FOI = ( params$q_A * params$k_A / out$alpha_A.t 
-              + (1 - params$q_Is - params$q_A) / out$alpha_Im.t 
-              + params$q_Is * params$k_Is / params$alpha_Is  )
+              + (1 - out$prop_Is - params$q_A) / out$alpha_Im.t 
+              + out$prop_Is * params$k_Is / params$alpha_Is  )
   
   # compute dynamics of R_eff at the state level
   # R_eff takes into account social distancing, testing effect in reducing FOI and depletion of susceptibles

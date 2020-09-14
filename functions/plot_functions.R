@@ -173,10 +173,24 @@ lab.table <- data.frame(compartment=c("D","rD", "H","rH",
       sir_result_region_sub[i, "upper"] <- sir_result_region_sub[i, "upper"] + cong
     }
     
-    # use latest estimated proportion of community / congregare hospitalizations to apply to model-projected dynamics 
-    h_adj = HOSP_CONG$cur_hosp_cong[nrow(HOSP_CONG)]/DAT_CT_STATE$cur_hosp[nrow(DAT_CT_STATE)]
+    ## use projected estimated proportion of community / congregare hospitalizations to apply to model-projected dynamics 
+    # predict decline in congregate hospitalizations for projections
+      d = merge(DAT_CT_STATE, HOSP_CONG, by = 'time', all=F)
+      d$prop_hosp_cong = d$cur_hosp_cong/d$cur_hosp
+
+      # fit regression line to estimate changes in prop_cong_hosp during the last 90 days
+      d2 = subset(d, time > (d$time[nrow(d)] - 90) , select = c('time', 'prop_hosp_cong'))
+      rg = lm(prop_hosp_cong ~ time, data=d2)
+      
+      # calculate predicted values
+      d3 = merge(sir_result_region_sub, d2, by='time', all=T)
+      d3$pred.prop_hosp_cong = predict(rg, newdata=d3)
+      d3$cong = d3$mean * d3$pred.prop_hosp_cong/(1-d3$pred.prop_hosp_cong)
+      d3$cong[d3$time <= max(HOSP_CONG$time)] = NA
+      
+    # add predicted values to projections
     for (i in (max(HOSP_CONG$time)+2):dim(sir_result_region_sub)[1]){
-      cong <- sir_result_region_sub[i, "mean"] * h_adj/(1-h_adj)
+      cong <- d3$cong[i]
       sir_result_region_sub[i, "mean"] <- sir_result_region_sub[i, "mean"] + cong
       sir_result_region_sub[i, "lower"] <- sir_result_region_sub[i, "lower"] + cong
       sir_result_region_sub[i, "upper"] <- sir_result_region_sub[i, "upper"] + cong
@@ -201,8 +215,51 @@ lab.table <- data.frame(compartment=c("D","rD", "H","rH",
       sir_result_region_sub[i, "lower"] <- sir_result_region_sub[i, "lower"] + cong
       sir_result_region_sub[i, "upper"] <- sir_result_region_sub[i, "upper"] + cong
     }
+  
+
+  ## add predicted deaths from congregate hospitalizations to projections ###
+  # estimate additional hospitalizations and project into the future  
+  hsp = filter(data, variable=="rHsum.Connecticut")
+      for(i in 1:dim(hsp)[1]){
+      cong <- HOSP_CONG$cur_hosp_cong[which(HOSP_CONG$time == hsp$time[i])]
+      if(length(cong) == 0) cong <- 0
+
+      hsp[i, "mean"] <- hsp[i, "mean"] + cong
+      hsp[i, "lower"] <- hsp[i, "lower"] + cong
+      hsp[i, "upper"] <- hsp[i, "upper"] + cong
+    }
+    
+    ## use projected estimated proportion of community / congregare hospitalizations to apply to model-projected dynamics 
+    # predict decline in congregate hospitalizations for projections
+      d = merge(DAT_CT_STATE, HOSP_CONG, by = 'time', all=F)
+      d$prop_hosp_cong = d$cur_hosp_cong/d$cur_hosp
+
+      # fit regression line to estimate changes in prop_cong_hosp during the last 90 days
+      d2 = subset(d, time > (d$time[nrow(d)] - 90) , select = c('time', 'prop_hosp_cong'))
+      rg = lm(prop_hosp_cong ~ time, data=d2)
+      
+      # calculate predicted values
+      d3 = merge(hsp, d2, by='time', all=T)
+      d3$pred.prop_hosp_cong = predict(rg, newdata=d3)
+      d3$cong = d3$mean * d3$pred.prop_hosp_cong/(1-d3$pred.prop_hosp_cong)
+      d3$cong[d3$time <= max(DAT_CT_STATE$time)] = NA
+      d3 = subset(d3, !is.na(d3$cong))
+      d3$deaths_cong = 0.12*d3$cong*0.38
+      d3$cum_deaths_cong = cumsum(d3$deaths_cong)
+  
+  cng = merge(sir_result_region_sub, d3, by='time', all=T)
+   
+   for (i in (max(HOSP_CONG$time)+2):dim(sir_result_region_sub)[1]){
+     cong = cng$cum_deaths_cong[i]
+       sir_result_region_sub[i, "mean"] <- sir_result_region_sub[i, "mean"] + cong
+       sir_result_region_sub[i, "lower"] <- sir_result_region_sub[i, "lower"] + cong
+       sir_result_region_sub[i, "upper"] <- sir_result_region_sub[i, "upper"] + cong
+     }
   }
 
+  
+  
+  
   if(is.null(ymax)) ymax <- max(sir_result_region_sub$upper[sir_result_region$time <= tmax.plot & sir_result_region$time >= tmin.plot], na.rm=TRUE)
 
   if("rD" %in% which.plot){

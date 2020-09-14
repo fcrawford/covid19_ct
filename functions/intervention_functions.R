@@ -65,7 +65,7 @@ get_distancing_fun_list = function(dayseq, startdates, offdates, rampings) {
 get_random_effect_fun = function(dayseq, random_effect_at, random_effect_values){
   
   re1_at = random_effect_at[1]
-  random_effect_at = c((re1_at-1), random_effect_at)
+  random_effect_at = c((re1_at-14), random_effect_at)
   random_effect_values = c(0, random_effect_values)
   
   return(approxfun(random_effect_at, random_effect_values, method="linear", rule=2))
@@ -144,7 +144,7 @@ get_testing_fun = function(dayseq, test.data){
  
 # relative change in hospital CFR
 
-# returns 1 at the beginning
+# returns first value in the data at the beginning
 # smoothed daily death hazard for dates when data is available
 # the latest available relative hazard into the future
 
@@ -167,6 +167,41 @@ get_death_fun = function(dayseq, dhaz.data){
    return(approxfun(0:tmax, dhaz, method="linear", rule=2))
 }
 
+
+
+
+
+
+
+
+
+
+#################################
+ 
+# relative change in SEVERITY: proportion of cases > 60 y.o.
+
+# returns first value in the data at the beginning (starting 05/01)
+# smoothed prportion of cases > 60 y.o. dates when data is available
+# the latest available relative value into the future
+
+
+get_severity_fun = function(dayseq, dsev.data){
+  
+  tmax = as.numeric(max(dayseq)-day0)
+  
+  dsev_day0 = ymd(dsev.data$date[1])
+  dsev_daymax = ymd(dsev.data$date[nrow(dsev.data)])
+  
+  dsev = sapply(dayseq, function(dy) {
+     if (dy <= dsev_day0) {dsev.data$smooth.rel.cases_60prop[1]}
+     else if(dy < dsev_daymax) {dsev.data$smooth.rel.cases_60prop[which( ymd(dsev.data$date) == dy)] } 
+     else {dsev.data$smooth.rel.cases_60prop[nrow(dsev.data)] }
+   })
+  
+   #time0 = as.numeric(d_day0 - day0)
+ 
+   return(approxfun(0:tmax, dsev, method="linear", rule=2))
+}
 
 
 

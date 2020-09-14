@@ -7,6 +7,7 @@ q_Is: 0.04 # severe
 
 # among severe: proportion going to H/Hbar stream (vs. nursing homes or prisons)
 # the value of 1 corresponds to a community transmission model
+# when q_H = 1, gamma_NH and m_NH_mult are ignored
 q_H: 1 
 
 # transmissibility
@@ -33,20 +34,13 @@ k_Is: 0.7        # some severe cases are likely isolated sooner than 9.5 days af
 gamma_H: 0.11   # 1/8.8
 gamma_Hbar: 0.11   
 
-# remaining time until recovery or death, nursing homes
-gamma_NH: 0.073  # 1/14 
-
 ## Mild : duration of isolation
-# replace with an estimate of duration of PCR detectable virus rather than duration of infectiousness
+# replace with an estimate of duration of PCR detectable virus rather than duration of infectiousness?
 gamma_NI: 0.1428571 # 1/7 (10 days from symptom onset - 3 days in I_m state)
 
 ## CFR
-m_H: 0.2 # among hospitalized
-m_NH_mult: 1.4 # RR among severe in nursing homes / prisons
+m_H: 0.2 # baseline, among hospitalized from community
 m_Hbar_mult: 1.5 # RR among hospital overflow
-
-# other
-k_n: 0.015 # transmission from adjacent counties
 
 # reporting lags (days)
 H_lag: 5
@@ -60,15 +54,30 @@ E_init: 35
 time_num: 14
 
 # main lockdown effect on log scale
-lockdown_effect: -1.7
+lockdown_effect: 0
 
 # school reopening effect on log scale
-school_reopening_effect: 0.2
+school_reopening_effect: 0
 
 # intervention effect on isolation/recovery for A and I_m
 # this number times log(daily number of tests) is an increase in the rate of transitioning out of infectious compartment 
 testing_effect: 0.03 # corresponds to compartment I_m
 te_A_mult: 0.5 # relative testing effect among A compared to I_m
+
+
+# other
+k_n: 0.015 # transmission from adjacent counties
+
+
+
+
+
+
+# only matter when U (NH) compartment is modelled, i.e. when q_H < 1
+# remaining time until recovery or death, nursing homes
+gamma_NH: 0.073  # 1/14 
+# CFR 
+m_NH_mult: 2 # RR among severe in nursing homes / prisons
 
 
 
@@ -77,9 +86,6 @@ te_A_mult: 0.5 # relative testing effect among A compared to I_m
 #sd_beta_pre: 0.05
 #lower_beta_pre: 0.6
 #upper_beta_pre: 1.4
-
-
-
 
 
 ### not used with the random effects model

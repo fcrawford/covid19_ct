@@ -37,7 +37,7 @@ day0 = ymd("2020-03-01")
 # actual dates: do not change
 
 lockdown_start_date = ymd("2020-03-17") # lockdown effect starts with school closure 
-schools_reopen_date = ymd("2020-09-01") # school reopening
+schools_reopen_date = ymd("2020-09-15") # school reopening
 
 INT_START_DATES = as.list(c(lockdown_start_date = lockdown_start_date, schools_reopen_date = schools_reopen_date))
 
@@ -48,8 +48,10 @@ source("../functions/run_ct_model.R")
 source("../functions/get_data.R")
 source("../functions/intervention_functions.R")
 source("../functions/truncated_distributions.R")
-source("../functions/plot_functions.R")
 
+if(!is.calibration){
+source("../functions/plot_functions.R")
+   }
 #################################################### 
 # Other global variables that should not be changed
 ####################################################
@@ -70,6 +72,8 @@ MOB <- global_dat$mob
 TESTING <- global_dat$testing
 # relative change in hospital death hazard
 DEATH_HAZ <- global_dat$smooth_hdeath_haz
+# relative severity proportion changes 
+SEV <- global_dat$severity
 # Spatial adj  matrix
 CT_ADJ <- global_dat$adj
 # Population count vector in the same order as CT_ADJ

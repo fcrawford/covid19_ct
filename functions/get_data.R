@@ -37,7 +37,7 @@ dat_ct_state$deaths[dat_ct_state$date == "2020-05-03"] <- 2495
 
 
 
-## add state-level hospitalizations and deaths: this csv file needs to be updated  from CHA reports ##
+## add state-level hospitalizations and deaths: this csv file needs to be updated from CHA reports ##
 ct.hosp <- read.csv('../data/ct_hosp.csv')
 ct.hosp$date <- ymd(ct.hosp$date)
 ct.hosp$time <- round(as.numeric(difftime(ct.hosp$date, day0, units="days")),0)
@@ -107,6 +107,8 @@ dat_ct_county$deaths[dat_ct_county$date == "2020-05-03" & dat_ct_county$county =
 dat_ct_county$deaths[dat_ct_county$date == "2020-05-03" & dat_ct_county$county == "Unknown" ] <- 2
 
 
+
+# adjacency matrix for counties
 # CTmap <- readOGR("../map/wgs84/countyct_37800_0000_2010_s100_census_1_shp_wgs84.shp", verbose=FALSE)
 adj = read.csv("../map/CT_adj_matrix.csv", stringsAsFactors=FALSE)
 colnames(adj)[-1] <- rownames(adj) <- adj$X
@@ -114,6 +116,8 @@ adj = adj[,-1]
 adj = as.matrix(adj)
 
 
+
+# hospital capacity at the county level
 dat_ct_capacity <- read.csv("../data/ct_hosp_cap.csv")
 # set county level capacities 
 county_capacities = list()
@@ -133,29 +137,46 @@ for(nm in colnames(adj)) {
 
 
 
-## get smooth hospital death hazard
+## get smooth hospital death hazard ##
+
+### based on estimated COMMUNITY hospitalizations and deaths only!!! ###
+
 if (length(which(is.na(dat_ct_state$cur_hosp) ) ) > 0){
-d = dat_ct_state[1:( min(which(is.na(dat_ct_state$cur_hosp))) -1 ), ]
-} else
-{d = dat_ct_state}
-d$daily_hdeath = c(diff(c(0, d$hosp_death)))
+   d = dat_ct_state[1:( min(which(is.na(dat_ct_state$cur_hosp))) -1 ), ]
+} else {d = dat_ct_state}
+
+d2 = hosp_cong
+d2$date = NULL
+d = merge(d, d2, by='time', all=F)
+
+d$cur_hosp_com = d$cur_hosp - d$cur_hosp_cong
+d$hosp_death_com = d$hosp_death - d$hosp_death_cong
+
+# d$daily_hdeath = c(diff(c(0, d$hosp_death)))
+d$daily_hdeath = c(diff(c(0, d$hosp_death_com)))
 
 # smooth cumulative deaths
-sp <- smooth.spline(d$time, d$hosp_death, nknots=round(nrow(d)/7))
+sp <- smooth.spline(d$time, d$hosp_death_com, nknots=round(nrow(d)/15))
 d$smooth.cum_hdeath <- sp$y
-#ggplot(d, aes(x = time, y = hosp_death)) + geom_line(alpha = 0.5) + geom_line(aes(y = smooth.cum_hdeath), color='red')+ theme_bw()
+#ggplot(d, aes(x = time, y = hosp_death_com)) + geom_line(alpha = 0.5) + geom_line(aes(y = smooth.cum_hdeath), color='red')+ theme_bw()
 
 # smooth daily deaths
-d$smooth.daily_hdeath <- c(diff(c(0, d$smooth.cum_hdeath)))
-#ggplot(d, aes(x = time, y = daily_hdeath)) + geom_line(alpha = 0.5) + geom_line(aes(y = smooth.daily_hdeath), color='red')+ theme_bw()
+d$smooth.daily_hdeath1 <- c(diff(c(0, d$smooth.cum_hdeath)))
+sp <- smooth.spline(d$time, d$smooth.daily_hdeath1, nknots=round(nrow(d)/30))
+d$smooth.daily_hdeath <- sp$y
+#ggplot(d, aes(x = time, y = daily_hdeath)) + geom_line(alpha = 0.5) + geom_line(aes(y = smooth.daily_hdeath1), color='red') + geom_line(aes(y = smooth.daily_hdeath), color='blue') + theme_bw()
+
+d$smooth.daily_hdeath[d$smooth.daily_hdeath<0]=0
 
 # remove the initial observations with small counts
-d = subset(d, time > 20) 
+# d = subset(d, time > 20) # total deaths
+d = subset(d, time > 24) # community deaths only
+
 
 # compute hospital death hazard
 d$haz = NA
 for (k in 2:nrow(d)){
-   d$haz[k] = d$smooth.daily_hdeath[k]/d$cur_hosp[k-1]
+   d$haz[k] = d$smooth.daily_hdeath[k]/d$cur_hosp_com[k-1]
 }
 d$haz[1] = d$haz[2]
 
@@ -165,9 +186,20 @@ sp <- smooth.spline(d$time, d$haz, nknots=round(nrow(d)/30))
 d$smooth.haz = sp$y
 #ggplot(d, aes(x = time, y = haz)) + geom_line(alpha = 0.5) + geom_line(aes(y = smooth.haz), color='red')+ theme_bw()
 
-# compute relative hospital death hazard: relative to the average of first 15 days
-d$rel_haz = d$haz / mean(d$haz[1:15])
-d$smooth.rel_haz = d$smooth.haz / mean(d$smooth.haz[1:15])
+# compute relative hospital death hazard: relative to the average of first 7 days
+d$rel_haz = d$haz / mean(d$haz[1:7])
+d$smooth.rel_haz = d$smooth.haz / mean(d$smooth.haz[1:7])
+
+# if smoothing at the end is not reasonable, carry forward the last reasonable value (> 0.15)
+for (i in nrow(d):(nrow(d)-15) ){
+   if (d$smooth.rel_haz[i] < 0.15) {d$smooth.rel_haz[i]=NA}
+}
+
+ii = which(is.na(d$smooth.rel_haz))
+
+if (length(ii)>0){
+   d$smooth.rel_haz[is.na(d$smooth.rel_haz)] = d$smooth.rel_haz[(min(ii)-1)]
+}
 
 smooth_hdeath_haz = subset(d, select=c(time, date, daily_hdeath, smooth.daily_hdeath, haz, smooth.haz, rel_haz, smooth.rel_haz))
 
@@ -181,56 +213,52 @@ smooth_hdeath_haz = subset(d, select=c(time, date, daily_hdeath, smooth.daily_hd
 
 
 
+
+
 ## get smooth mobility data ## 
 ##############################
+
+## updated with close contact data ##
+
 file.mobi <- "../data/ct_mobility.csv"
 data.mobi <- read.csv(file.mobi)
-data.mobi$county <- data.mobi$polygon_name
-pop <- read.csv("../data/ct_population.csv")
-pop$population <- pop$population / sum(pop$population)
-data.mobi <- data.mobi %>% 
-			left_join(pop[, -1]) %>%  
-			group_by(ds) %>% 
-			summarize(stay_put = sum(all_day_ratio_single_tile_users * population))
-data.mobi$date <- as.Date(data.mobi$ds)
-data.mobi$ds = NULL
+
+data.mobi$date <- ymd(data.mobi$date)
 data.mobi <- data.mobi[order(data.mobi$date), ]
 
 date_range <- seq(min(data.mobi$date), max(data.mobi$date), by = 1) 
 missing_dates = date_range[!date_range %in% data.mobi$date] 
 
 if (length(missing_dates)>0){
-for (k in 1:length(missing_dates)){
-  data.mobi[nrow(data.mobi) + 1,] = list(NA, ymd(missing_dates[k]))
-}
+   for (k in 1:length(missing_dates)){
+      data.mobi[nrow(data.mobi) + 1,] = list(ymd(missing_dates[k]), NA)
+   }
    
-data.mobi <- data.mobi[order(data.mobi$date), ]
-data.mobi = na_interpolation(data.mobi)
+   data.mobi <- data.mobi[order(data.mobi$date), ]
+   data.mobi = na_interpolation(data.mobi)
 }
-
-bl_mobile_prop = 1 - mean(data.mobi$stay_put[1:7])
-data.mobi$mobile_prop = 1 - data.mobi$stay_put
-data.mobi$relative_mobility = data.mobi$mobile_prop/bl_mobile_prop
-data.mobi$t <- as.numeric(data.mobi$date - data.mobi$date[1]) + 1
-
-# spline
-#sp <- smooth.spline(data.mobi$t, data.mobi$relative_mobility, nknots=round(max(data.mobi$t)/15))
-#data.mobi$smooth <- sp$y
-
-# 7-day moving average smoothed by spline with biweekly knots
-sp <- forecast::ma(data.mobi$relative_mobility, order = 7)
-sp[1:3] = sp[4]
-sp[(length(sp)-2):length(sp)] = sp[(length(sp)-3)]
-
-data.mobi$movavg <- sp
-
-# smooth moving average with spline
-sp <- smooth.spline(data.mobi$t, data.mobi$movavg, nknots=round(max(data.mobi$t)/14))
-data.mobi$smooth <- sp$y
 
 data.mobi$time <- round(as.numeric(difftime(ymd(data.mobi$date), day0, units="days")),0)
 
-mob_state = data.mobi[, c("time", "date", "relative_mobility", "movavg", "smooth")]
+bl_mobility = mean(data.mobi$mcont[1:30])
+data.mobi$rel_mob = data.mobi$mcont/bl_mobility
+
+# smooth spline
+sp <- smooth.spline(data.mobi$time, data.mobi$rel_mob, nknots=round(max(data.mobi$time)/7))
+data.mobi$smooth = sp$y
+
+# ggplot(data.mobi, aes(x = time, y = rel_mob)) + geom_line(alpha = 0.5) + geom_line(aes(y = smooth) , color='red') + theme_bw()
+
+mob_state = data.mobi[, c("time", "date", "rel_mob", "smooth")]
+
+
+
+
+
+
+
+
+
 
 
 
@@ -295,7 +323,12 @@ testing_state = data.test[, c("time", "date", "daily_tests", "daily_movavg", "sm
 
 
 
-
+## get smooth severity data ##
+##############################
+# changes in proportion of cases > 60 y.o after 05/01 #
+file.severity = "../data/ct_severity.csv"
+data.severity = read.csv(file.severity)
+data.severity$date = ymd(data.severity$date)
 
 
 
@@ -324,8 +357,9 @@ populations = pop$population[match(colnames(adj), pop$county)]
 # dat_ct_state$cum_hosp.prop = dat_ct_state$cum_hosp/sum(populations)
 
 
-return(list(dat_ct_state=dat_ct_state, dat_ct_county=dat_ct_county, hosp_cong=hosp_cong, adj=adj, dat_ct_capacity=dat_ct_capacity, county_capacities=county_capacities, 
-            mob=mob_state, testing = testing_state, incidence = data.incidence,
+return(list(dat_ct_state=dat_ct_state, dat_ct_county=dat_ct_county, hosp_cong=hosp_cong, incidence = data.incidence,
+            adj=adj, dat_ct_capacity=dat_ct_capacity, county_capacities=county_capacities, 
+            mob=mob_state, testing = testing_state, severity = data.severity, 
             smooth_hdeath_haz = smooth_hdeath_haz, populations=populations))
 }
 

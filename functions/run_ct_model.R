@@ -113,10 +113,13 @@ params_tmp$testing_effect <- 0
 params_tmp$H_lag <- 0
 params_tmp$D_lag <- 0
 
-mobfun_tmp = approxfun(1:mytmax, rep(1,mytmax) ,method='linear', rule=2)
+init_start_ind = which(MOB$time == -params_tmp$time_num)
+mb_init = MOB$smooth[init_start_ind:(init_start_ind+mytmax-1)]
+mobfun_tmp = approxfun(1:mytmax, mb_init ,method='linear', rule=2)
 interventions$mobility = mobfun_tmp
 
 deathfun_tmp = approxfun(1:mytmax, rep(DEATH_HAZ$smooth.rel_haz[1],mytmax) ,method='linear', rule=2)
+sevfun_tmp = approxfun(1:mytmax, rep(SEV$smooth.rel.cases_60prop[1],mytmax) ,method='linear', rule=2)
 
 # initial conditions at time day0 - time_num
 E_init = E_init_state0
@@ -141,7 +144,8 @@ res = run_sir_model(state0=state0,
                     interventions=interventions, 
                     int_effects = int_effects_tmp,
                     capacities=county_capacities,
-                    deathfun=deathfun_tmp)
+                    deathfun=deathfun_tmp,
+                    sevfun=sevfun_tmp)
 
 # get initial conditions corresponding to params, E_init, and time_num
 init = matrix(0, ncol=10, nrow=8)
@@ -282,6 +286,9 @@ get_sir_results = function(daymax,
 
    # hospital death hazard function
    deathfun = get_death_fun(dayseq, DEATH_HAZ)
+   
+   # severity functions
+   sevfun = get_severity_fun(dayseq, SEV)
 
  pars <- list()
  state0s <- list()
@@ -337,7 +344,8 @@ get_sir_results = function(daymax,
                         interventions=interventions_list[[i]],
                         int_effects = get_intervention_effects(pars[[i]]),
                         capacities=COUNTY_CAPACITIES,
-                        deathfun=deathfun)
+                        deathfun=deathfun,
+                        sevfun=sevfun)
     res$sim_id = i
     res
   })
