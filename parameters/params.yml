@@ -11,7 +11,7 @@ q_Is: 0.04 # severe
 q_H: 1 
 
 # transmissibility
-beta_pre: 1.2
+beta_pre: 1.7
 
 # latency
 delta: 0.25   # 1/4
@@ -31,24 +31,24 @@ k_Is: 0.7        # some severe cases are likely isolated sooner than 9.5 days af
 
 ## Severe
 # length of hospital stay
-gamma_H: 0.11   # 1/8.8
-gamma_Hbar: 0.11   
+gamma_H: 0.12   # 1/8.8
+gamma_Hbar: 0.12   
 
 ## Mild : duration of isolation
 # replace with an estimate of duration of PCR detectable virus rather than duration of infectiousness?
 gamma_NI: 0.1428571 # 1/7 (10 days from symptom onset - 3 days in I_m state)
 
 ## CFR
-m_H: 0.2 # baseline, among hospitalized from community
-m_Hbar_mult: 1.5 # RR among hospital overflow
+m_H: 0.15 # baseline, among hospitalized from community
+m_Hbar_mult: 1 # RR among hospital overflow
 
 # reporting lags (days)
-H_lag: 5
-D_lag: 5
+H_lag: 10
+D_lag: 8
 detect_lag: 7
 
 # initial number exposed on (day0 - time_num)
-E_init: 35
+E_init: 15
 
 # time point from candidate_state0 that becomes state0
 time_num: 14

@@ -7,14 +7,14 @@ prior.lower.q_Is : 0.01
 prior.upper.q_Is : 0.07
 
 # beta_pre: flat between 0.75 and 1.75, fat tails
-prior.mean.beta_pre: 1.2
+prior.mean.beta_pre: 1.75
 prior.sd.beta_pre: 0.5
-prior.lower.beta_pre: 0.01
-prior.upper.beta_pre: 2.4
+prior.lower.beta_pre: 0.25
+prior.upper.beta_pre: 3.25
 
 # gamma_H: median = 8 days (YNHH data for patients with outcomes)
 prior.mean.gamma_H : 0.125 
-prior.sd.gamma_H : 0.03
+prior.sd.gamma_H : 0.04
 prior.lower.gamma_H : 0.025
 prior.upper.gamma_H : 0.225
 
@@ -37,18 +37,24 @@ prior.lower.testing_effect : 0
 prior.upper.testing_effect : 0.2
 
 # E_init: initial number exposed on (day0 - time_num), does not need to be integer
-prior.mean.E_init: 35
-prior.sd.E_init: 4
+prior.mean.E_init: 25
+prior.sd.E_init: 10
 prior.lower.E_init: 1
 prior.upper.E_init: 100
 
 # sd_dh: variance of normal distribution used in data likelihood for death / hospitalization counts
-prior.shape.sd_dh : 250 
-prior.rate.sd_dh : 0.5
+prior.shape.prec.sd_dh: 12
+prior.rate.prec.sd_dh: 5000000
+
+#prior.shape.sd_dh : 250 
+#prior.rate.sd_dh : 0.5
 
 # sd_e: variance of normal distribution used in data likelihood for relative incidence
-prior.shape.sd_e : 6 
-prior.rate.sd_e : 40
+prior.shape.prec.sd_e: 3
+prior.rate.prec.sd_e: 0.05
+
+#prior.shape.sd_e : 6 
+#prior.rate.sd_e : 40
 
 
 

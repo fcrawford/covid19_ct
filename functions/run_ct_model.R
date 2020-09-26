@@ -118,7 +118,8 @@ mb_init = MOB$smooth[init_start_ind:(init_start_ind+mytmax-1)]
 mobfun_tmp = approxfun(1:mytmax, mb_init ,method='linear', rule=2)
 interventions$mobility = mobfun_tmp
 
-deathfun_tmp = approxfun(1:mytmax, rep(DEATH_HAZ$smooth.rel_haz[1],mytmax) ,method='linear', rule=2)
+#deathfun_tmp = approxfun(1:mytmax, rep( mean(DEATH_HAZ$smooth.rel_haz[1:7]),mytmax) ,method='linear', rule=2)
+deathfun_tmp = approxfun(1:mytmax, rep(DEATH_HAZ$smooth.rel_haz[1], mytmax) ,method='linear', rule=2)
 sevfun_tmp = approxfun(1:mytmax, rep(SEV$smooth.rel.cases_60prop[1],mytmax) ,method='linear', rule=2)
 
 # initial conditions at time day0 - time_num

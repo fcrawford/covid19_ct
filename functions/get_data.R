@@ -139,70 +139,71 @@ for(nm in colnames(adj)) {
 
 ## get smooth hospital death hazard ##
 
-### based on estimated COMMUNITY hospitalizations and deaths only!!! ###
+### ALL deaths and hospitalizations ###
 
 if (length(which(is.na(dat_ct_state$cur_hosp) ) ) > 0){
    d = dat_ct_state[1:( min(which(is.na(dat_ct_state$cur_hosp))) -1 ), ]
 } else {d = dat_ct_state}
 
-d2 = hosp_cong
-d2$date = NULL
-d = merge(d, d2, by='time', all=F)
-
-d$cur_hosp_com = d$cur_hosp - d$cur_hosp_cong
-d$hosp_death_com = d$hosp_death - d$hosp_death_cong
-
-# d$daily_hdeath = c(diff(c(0, d$hosp_death)))
-d$daily_hdeath = c(diff(c(0, d$hosp_death_com)))
+# daily deaths without smoothing
+d$daily_hdeath = c(diff(c(0, d$hosp_death)))
 
 # smooth cumulative deaths
-sp <- smooth.spline(d$time, d$hosp_death_com, nknots=round(nrow(d)/15))
+sp <- smooth.spline(d$time, d$hosp_death, nknots=round(nrow(d)/7))
 d$smooth.cum_hdeath <- sp$y
-#ggplot(d, aes(x = time, y = hosp_death_com)) + geom_line(alpha = 0.5) + geom_line(aes(y = smooth.cum_hdeath), color='red')+ theme_bw()
+# ggplot(d, aes(x = time, y = hosp_death)) + geom_line(alpha = 0.5) + geom_line(aes(y = smooth.cum_hdeath), color='red')+ theme_bw()
 
-# smooth daily deaths
-d$smooth.daily_hdeath1 <- c(diff(c(0, d$smooth.cum_hdeath)))
-sp <- smooth.spline(d$time, d$smooth.daily_hdeath1, nknots=round(nrow(d)/30))
-d$smooth.daily_hdeath <- sp$y
-#ggplot(d, aes(x = time, y = daily_hdeath)) + geom_line(alpha = 0.5) + geom_line(aes(y = smooth.daily_hdeath1), color='red') + geom_line(aes(y = smooth.daily_hdeath), color='blue') + theme_bw()
+# smooth daily deaths: first order difference of smooth cumulative deaths
+d$smooth.daily_hdeath <- c(diff(c(0, d$smooth.cum_hdeath)))
 
-d$smooth.daily_hdeath[d$smooth.daily_hdeath<0]=0
+# another spline approximation: not needed
+if(FALSE){
+  d$smooth.daily_hdeath1 <- c(diff(c(0, d$smooth.cum_hdeath)))
+  sp <- smooth.spline(d$time, d$smooth.daily_hdeath1, nknots=round(nrow(d)/30))
+  d$smooth.daily_hdeath <- sp$y
+  # ggplot(d, aes(x = time, y = daily_hdeath)) + geom_line(alpha = 0.5) + geom_line(aes(y = smooth.daily_hdeath1), color='red') + geom_line(aes(y = smooth.daily_hdeath), color='blue') + theme_bw()
+  d$smooth.daily_hdeath[d$smooth.daily_hdeath<0]=0
+}
 
-# remove the initial observations with small counts
-# d = subset(d, time > 20) # total deaths
-d = subset(d, time > 24) # community deaths only
 
+# remove early observations with small counts
+d = subset(d, time > 26) # total deaths
 
-# compute hospital death hazard
+# compute hospital death hazard: smooth daily deaths on day k / current hospitalizations on day (k-1)
 d$haz = NA
 for (k in 2:nrow(d)){
-   d$haz[k] = d$smooth.daily_hdeath[k]/d$cur_hosp_com[k-1]
+   d$haz[k] = d$smooth.daily_hdeath[k]/d$cur_hosp[k-1]
 }
 d$haz[1] = d$haz[2]
 
 
-# smooth hospital death hazard 
-sp <- smooth.spline(d$time, d$haz, nknots=round(nrow(d)/30))
+# smooth hospital death hazard: spline on death hazard
+sp <- smooth.spline(d$time, d$haz, nknots=round(nrow(d)/45)) # 15
 d$smooth.haz = sp$y
 #ggplot(d, aes(x = time, y = haz)) + geom_line(alpha = 0.5) + geom_line(aes(y = smooth.haz), color='red')+ theme_bw()
 
-# compute relative hospital death hazard: relative to the average of first 7 days
-d$rel_haz = d$haz / mean(d$haz[1:7])
-d$smooth.rel_haz = d$smooth.haz / mean(d$smooth.haz[1:7])
+# compute relative hospital death hazard: relative to the average of first 15 (7?) days
+d$rel_haz = d$haz / mean(d$haz[1:15]) # 7
+d$smooth.rel_haz = d$smooth.haz / mean(d$smooth.haz[1:15]) # 7
+
+#ggplot(d, aes(x = time, y = rel_haz)) + geom_line(alpha = 0.5) + geom_line(aes(y = smooth.rel_haz), color='red')+ theme_bw()
+
 
 # if smoothing at the end is not reasonable, carry forward the last reasonable value (> 0.15)
-for (i in nrow(d):(nrow(d)-15) ){
-   if (d$smooth.rel_haz[i] < 0.15) {d$smooth.rel_haz[i]=NA}
+if(FALSE){
+    for (i in nrow(d):(nrow(d)-15) ){
+       if (d$smooth.rel_haz[i] < 0.15) {d$smooth.rel_haz[i]=NA}
+    }
+    
+    ii = which(is.na(d$smooth.rel_haz))
+    
+    if (length(ii)>0){
+       d$smooth.rel_haz[is.na(d$smooth.rel_haz)] = d$smooth.rel_haz[(min(ii)-1)]
+    }
 }
 
-ii = which(is.na(d$smooth.rel_haz))
-
-if (length(ii)>0){
-   d$smooth.rel_haz[is.na(d$smooth.rel_haz)] = d$smooth.rel_haz[(min(ii)-1)]
-}
-
+# subset and save
 smooth_hdeath_haz = subset(d, select=c(time, date, daily_hdeath, smooth.daily_hdeath, haz, smooth.haz, rel_haz, smooth.rel_haz))
-
 #ggplot(smooth_hdeath_haz, aes(x = time, y = rel_haz)) + geom_line(alpha = 0.5) + geom_line(aes(y = smooth.rel_haz), color='red')+ theme_bw()
 
 
@@ -244,7 +245,7 @@ bl_mobility = mean(data.mobi$mcont[1:30])
 data.mobi$rel_mob = data.mobi$mcont/bl_mobility
 
 # smooth spline
-sp <- smooth.spline(data.mobi$time, data.mobi$rel_mob, nknots=round(max(data.mobi$time)/7))
+sp <- smooth.spline(data.mobi$time, data.mobi$rel_mob, nknots=round(nrow(data.mobi)/14))
 data.mobi$smooth = sp$y
 
 # ggplot(data.mobi, aes(x = time, y = rel_mob)) + geom_line(alpha = 0.5) + geom_line(aes(y = smooth) , color='red') + theme_bw()
@@ -309,7 +310,7 @@ data.test$daily_movavg = c(diff(c(0, data.test$movavg)))
 data.test$daily_movavg[1] = data.test$daily_tests[1]
 
 # smooth moving average with spline
-sp <- smooth.spline(data.test$t, log(data.test$movavg), nknots=round(max(data.test$t)/14))
+sp <- smooth.spline(data.test$t, log(data.test$movavg), nknots=round(nrow(data.test)/21))
 data.test$smooth.cum <- exp(sp$y)
 
 data.test$smooth <- c(diff(c(0, data.test$smooth.cum)))

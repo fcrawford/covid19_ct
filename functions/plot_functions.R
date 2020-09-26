@@ -203,7 +203,8 @@ lab.table <- data.frame(compartment=c("D","rD", "H","rH",
     tmp <- data.frame(time = DAT_CT_STATE$time, 
                       diff = DAT_CT_STATE$total_deaths - DAT_CT_STATE$hosp_death)
     cong.data <- merge(cong.data, tmp, by = "time", all.x = TRUE)
-    cong.data$diff[is.na(cong.data$diff)] <- 0
+    cong.data$diff[is.na(cong.data$diff) & cong.data$time<100] <- 0
+    cong.data$diff[is.na(cong.data$diff) & cong.data$time>=100] <- max(cong.data$diff, na.rm = TRUE)
     cong.data$cong <- cong.data$hosp_death_cong + cong.data$diff
 
 
