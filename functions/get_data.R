@@ -244,13 +244,21 @@ data.mobi$time <- round(as.numeric(difftime(ymd(data.mobi$date), day0, units="da
 bl_mobility = mean(data.mobi$mcont[1:30])
 data.mobi$rel_mob = data.mobi$mcont/bl_mobility
 
+# 7-day moving average
+xx <- forecast::ma(data.mobi$rel_mob, order = 7)
+xx[1:3] = xx[4]
+xx[(length(xx)-2):length(xx)] = xx[(length(xx)-3)]
+data.mobi$movavg = xx
+# ggplot(mb, aes(x = time, y = rel_mob)) + geom_line(alpha = 0.5) + geom_line(aes(y = movavg) , color='red') + theme_bw()
+
 # smooth spline
-sp <- smooth.spline(data.mobi$time, data.mobi$rel_mob, nknots=round(nrow(data.mobi)/14))
+#sp <- smooth.spline(data.mobi$time, data.mobi$rel_mob, nknots=round(nrow(data.mobi)/14))
+sp <- smooth.spline(data.mobi$time, data.mobi$movavg, nknots=round(nrow(data.mobi)/14))
 data.mobi$smooth = sp$y
 
 # ggplot(data.mobi, aes(x = time, y = rel_mob)) + geom_line(alpha = 0.5) + geom_line(aes(y = smooth) , color='red') + theme_bw()
 
-mob_state = data.mobi[, c("time", "date", "rel_mob", "smooth")]
+mob_state = data.mobi[, c("time", "date", "rel_mob", "movavg", "smooth")]
 
 
 
@@ -276,8 +284,8 @@ file.test <- "../data/ct_cum_pcr_tests.csv"
 data.test <- read.csv(file.test)
 data.test$date = ymd(data.test$date)
 
-# assume linear increase in daily number of tests between day0 (March 1) and the first day of test numbers reporting
-add.dates = seq(day0, data.test$date[1], by="day")
+# assume linear increase in daily number of tests between March 8 and the first day of test numbers reporting
+add.dates = seq(ymd("2020-03-08"), data.test$date[1], by="day")
 b = data.test$cum_tests[1]/(0.5*length(add.dates)*(length(add.dates)+1))
 add_daily_tests = c(1:length(add.dates))*b
 add_cum_tests = cumsum(add_daily_tests)
@@ -287,39 +295,69 @@ colnames(add.data.tests) = colnames(data.test)
 
 data.test = rbind(add.data.tests, data.test[-1,])
 
+# add time
+data.test$t <- as.numeric(data.test$date - data.test$date[1]) + 1
+
 # compute daily number of tests
 data.test$daily_tests = c(NA, diff(data.test$cum_tests))
 data.test$daily_tests[1] = data.test$cum_tests[1]
 
-data.test$t <- as.numeric(data.test$date - data.test$date[1]) + 1
+
+# smooth cumulative number of tests
+sp <- smooth.spline(data.test$t, data.test$cum_tests, nknots=round(nrow(data.test)/7))
+data.test$cum_tests.smooth = sp$y
+
+# ggplot(data.test, aes(x = t, y = cum_tests)) + geom_line(alpha = 0.5) + geom_line(aes(y = cum_tests.smooth), color='red')+ theme_bw()
+
+# smooth daily tests
+data.test$daily_tests.cumsmooth = c(NA, diff(data.test$cum_tests.smooth))
+data.test$daily_tests.cumsmooth[1] = data.test$daily_tests[1]
+
+# ggplot(data.test, aes(x = t, y = daily_tests)) + geom_line(alpha = 0.5) + geom_line(aes(y = daily_tests.cumsmooth), color='red')+ theme_bw()
+
+sp <- smooth.spline(data.test$t, data.test$daily_tests.cumsmooth, nknots=round(nrow(data.test)/21))
+data.test$daily_tests.smooth <- sp$y
+data.test$daily_tests.smooth[data.test$daily_tests.smooth<0]=1
+
+#ggplot(data.test, aes(x = t, y = daily_tests)) + geom_line(alpha = 0.5) + geom_line(aes(y = daily_tests.smooth), color='red')+ theme_bw()
+#ggplot(data.test, aes(x = t, y = log(daily_tests))) + geom_line(alpha = 0.5) + geom_line(aes(y = log(daily_tests.smooth)), color='red')+ theme_bw()
+
+data.test$smooth = data.test$daily_tests.smooth
+data.test$time <- round(as.numeric(difftime(ymd(data.test$date), day0, units="days")),0)
+
+testing_state = data.test[, c("time", "date", "daily_tests", "smooth")]
 
 # spline
 #sp <- smooth.spline(data.test$t, log(data.test$cum_tests), nknots=round(max(data.test$t)/15))
 #data.test$smooth.cum <- exp(sp$y)
 
 # 7-day moving average smoothed by spline with biweekly knots
-cum_tests = c(c(0,0,0), data.test$cum_tests)
-sp <- forecast::ma(cum_tests, order = 7)
+# cum_tests = c(c(0,0,0), data.test$cum_tests)
+# sp <- forecast::ma(cum_tests, order = 7)
+# 
+# sp = sp[4:length(sp)]
+# last_daily = sp[length(sp)-3] - sp[length(sp)-4]
+# sp[(length(sp)-2):length(sp)] = sp[(length(sp)-3)] + last_daily*c(1,2,3)
+# 
+# data.test$movavg <- sp
+# data.test$daily_movavg = c(diff(c(0, data.test$movavg)))
+# data.test$daily_movavg[1] = data.test$daily_tests[1]
+# 
+# # smooth moving average with spline
+# sp <- smooth.spline(data.test$t, log(data.test$movavg), nknots=round(nrow(data.test)/21))
+# data.test$smooth.cum <- exp(sp$y)
+# 
+# data.test$smooth <- c(diff(c(0, data.test$smooth.cum)))
+# data.test$smooth[1:3] <- data.test$daily_tests[1:3]
+# 
+# 
+# data.test$time <- round(as.numeric(difftime(ymd(data.test$date), day0, units="days")),0)
+# 
+# testing_state = data.test[, c("time", "date", "daily_tests", "daily_movavg", "smooth")]
+# 
 
-sp = sp[4:length(sp)]
-last_daily = sp[length(sp)-3] - sp[length(sp)-4]
-sp[(length(sp)-2):length(sp)] = sp[(length(sp)-3)] + last_daily*c(1,2,3)
-
-data.test$movavg <- sp
-data.test$daily_movavg = c(diff(c(0, data.test$movavg)))
-data.test$daily_movavg[1] = data.test$daily_tests[1]
-
-# smooth moving average with spline
-sp <- smooth.spline(data.test$t, log(data.test$movavg), nknots=round(nrow(data.test)/21))
-data.test$smooth.cum <- exp(sp$y)
-
-data.test$smooth <- c(diff(c(0, data.test$smooth.cum)))
-data.test$smooth[1:3] <- data.test$daily_tests[1:3]
 
 
-data.test$time <- round(as.numeric(difftime(ymd(data.test$date), day0, units="days")),0)
-
-testing_state = data.test[, c("time", "date", "daily_tests", "daily_movavg", "smooth")]
 
 
 

@@ -2,5 +2,6 @@
 COVID Data Extract (4-17-20).csv
 COVID Data Extract*.csv
 *.pdf
+*.png
 output/*.RData
 update_figures.sh

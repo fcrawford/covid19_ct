@@ -31,6 +31,7 @@ plot_ct_region = function(data=NULL,
                           obs_state = DAT_CT_STATE,
                           obs_county = DAT_CT_COUNTY, 
                           ymax = NULL,
+                          avg = "mean",
                           sentence=TRUE,
                           show.data=TRUE, 
                           title.override=NULL,
@@ -169,6 +170,7 @@ lab.table <- data.frame(compartment=c("D","rD", "H","rH",
       if(length(cong) == 0) cong <- 0
 
       sir_result_region_sub[i, "mean"] <- sir_result_region_sub[i, "mean"] + cong
+      sir_result_region_sub[i, "median"] <- sir_result_region_sub[i, "median"] + cong
       sir_result_region_sub[i, "lower"] <- sir_result_region_sub[i, "lower"] + cong
       sir_result_region_sub[i, "upper"] <- sir_result_region_sub[i, "upper"] + cong
     }
@@ -186,12 +188,17 @@ lab.table <- data.frame(compartment=c("D","rD", "H","rH",
       d3 = merge(sir_result_region_sub, d2, by='time', all=T)
       d3$pred.prop_hosp_cong = predict(rg, newdata=d3)
       d3$cong = d3$mean * d3$pred.prop_hosp_cong/(1-d3$pred.prop_hosp_cong)
+      # adjust predicted values by the difference beween estimated and predicted values at last observation to make a smooth transition
+      adjh = HOSP_CONG$cur_hosp_cong[nrow(HOSP_CONG)] - d3$cong[d3$time == max(HOSP_CONG$time)]
+      
+      # remove values for observed period
       d3$cong[d3$time <= max(HOSP_CONG$time)] = NA
       
     # add predicted values to projections
     for (i in (max(HOSP_CONG$time)+2):dim(sir_result_region_sub)[1]){
-      cong <- d3$cong[i]
+      cong <- d3$cong[i] + adjh
       sir_result_region_sub[i, "mean"] <- sir_result_region_sub[i, "mean"] + cong
+      sir_result_region_sub[i, "median"] <- sir_result_region_sub[i, "median"] + cong
       sir_result_region_sub[i, "lower"] <- sir_result_region_sub[i, "lower"] + cong
       sir_result_region_sub[i, "upper"] <- sir_result_region_sub[i, "upper"] + cong
     }
@@ -213,6 +220,7 @@ lab.table <- data.frame(compartment=c("D","rD", "H","rH",
       if(length(cong) == 0) cong <- cong.data$cong[which.max(cong.data$time)]
 
       sir_result_region_sub[i, "mean"] <- sir_result_region_sub[i, "mean"] + cong
+      sir_result_region_sub[i, "median"] <- sir_result_region_sub[i, "median"] + cong    
       sir_result_region_sub[i, "lower"] <- sir_result_region_sub[i, "lower"] + cong
       sir_result_region_sub[i, "upper"] <- sir_result_region_sub[i, "upper"] + cong
     }
@@ -226,6 +234,7 @@ lab.table <- data.frame(compartment=c("D","rD", "H","rH",
       if(length(cong) == 0) cong <- 0
 
       hsp[i, "mean"] <- hsp[i, "mean"] + cong
+      hsp[i, "median"] <- hsp[i, "median"] + cong      
       hsp[i, "lower"] <- hsp[i, "lower"] + cong
       hsp[i, "upper"] <- hsp[i, "upper"] + cong
     }
@@ -253,6 +262,7 @@ lab.table <- data.frame(compartment=c("D","rD", "H","rH",
    for (i in (max(HOSP_CONG$time)+2):dim(sir_result_region_sub)[1]){
      cong = cng$cum_deaths_cong[i]
        sir_result_region_sub[i, "mean"] <- sir_result_region_sub[i, "mean"] + cong
+       sir_result_region_sub[i, "median"] <- sir_result_region_sub[i, "median"] + cong       
        sir_result_region_sub[i, "lower"] <- sir_result_region_sub[i, "lower"] + cong
        sir_result_region_sub[i, "upper"] <- sir_result_region_sub[i, "upper"] + cong
      }
@@ -293,12 +303,14 @@ lab.table <- data.frame(compartment=c("D","rD", "H","rH",
     time.print <- tmax.plot + 0.5
     polygon(c(sir_result_region_sub$time, rev(sir_result_region_sub$time)), c(sir_result_region_sub$lower, rev(sir_result_region_sub$upper)), col=col.polygon, border=NA)
     if(!goodness){
-      text(sir_result_region_sub$time[tmax.plot+1], sir_result_region_sub$mean[time.print], format(sir_result_region_sub$mean[time.print],digits=2, big.mark=","), pos=4, col=col.line)
+      if (avg=='median') {text(sir_result_region_sub$time[tmax.plot+1], sir_result_region_sub$median[time.print], format(sir_result_region_sub$median[time.print],digits=2, big.mark=","), pos=4, col=col.line)} else
+      {text(sir_result_region_sub$time[tmax.plot+1], sir_result_region_sub$mean[time.print], format(sir_result_region_sub$mean[time.print],digits=2, big.mark=","), pos=4, col=col.line)}
       text(sir_result_region_sub$time[tmax.plot+1], sir_result_region_sub$lower[time.print], format(sir_result_region_sub$lower[time.print],digits=2, big.mark=","), pos=4, col=col.polygon)
       text(sir_result_region_sub$time[tmax.plot+1], sir_result_region_sub$upper[time.print], format(sir_result_region_sub$upper[time.print],digits=2, big.mark=","), pos=4, col=col.polygon)
     }
   
-    lines(sir_result_region_sub$time, sir_result_region_sub$mean, col=col.line)
+    if (avg=='median') {lines(sir_result_region_sub$time, sir_result_region_sub$median, col=col.line)} else
+    {lines(sir_result_region_sub$time, sir_result_region_sub$mean, col=col.line)}
   
 
   if(add && (!goodness)){
@@ -369,6 +381,27 @@ lab.table <- data.frame(compartment=c("D","rD", "H","rH",
   }
   return(region_summary)
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+#####################################
 
 plot_ct_region_list = function(data=NULL, 
                           region_name = "Connecticut", 

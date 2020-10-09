@@ -95,7 +95,7 @@ get_state0_params <- function(params, interventions, populations, adj, county_ca
 E_init_state0 = params$E_init * E_INIT_COUNTY
 
 nregions = length(E_init_state0)
-mytmax = params$time_num + 1
+mytmax = max(params$detect_lag+1, params$time_num + 1)
 
 params_tmp <- params
 
@@ -364,7 +364,8 @@ get_sir_results = function(daymax,
                            summarise(
                              mean = mean(value),
                              lower = quantile(value, (1-CI)/2, na.rm=TRUE),
-                             upper = quantile(value, 1-(1-CI)/2, na.rm=TRUE))
+                             upper = quantile(value, 1-(1-CI)/2, na.rm=TRUE),
+                             median = median(value))
   return(list(raw_results=sir_results, summary=sir_results_summary))
 }
 
