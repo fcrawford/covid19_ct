@@ -13,6 +13,8 @@ list <- list.files("../data")
 list <- list[grep("COVID Data Extract", list)]
 dates <- gsub("COVID Data Extract \\(", "", list)
 dates <- gsub("\\).csv", "", dates)
+year <- substr(dates, 7, 8)
+dates <- dates[year == "21"]
 data_stream <- max(dates)
 print(data_stream)
 raw <- fread(paste0("../data/COVID Data Extract (", data_stream, ").csv"))
