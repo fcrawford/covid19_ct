@@ -59,8 +59,9 @@ get_distancing_fun_list = function(dayseq, startdates, offdates, rampings) {
 
 
 #################################
-# linear interpolation between the dates at which random effects are evaluated
-# prior to the first random effect date, function should return 0
+
+# random effects
+
 
 get_random_effect_fun = function(dayseq, random_effect_at, random_effect_values){
   
@@ -68,8 +69,29 @@ get_random_effect_fun = function(dayseq, random_effect_at, random_effect_values)
   random_effect_at = c((re1_at-14), random_effect_at)
   random_effect_values = c(0, random_effect_values)
   
-  return(approxfun(random_effect_at, random_effect_values, method="linear", rule=2))
+  ff = approxfun(random_effect_at, random_effect_values, method="linear", rule=2)
+  
+  xx = as.data.frame(cbind(c(0:(length(dayseq)-1)), ff(c(0:(length(dayseq)-1) )) ) )
+  colnames(xx) = c('time', 're')
+  
+  sp <- smooth.spline(xx$time[(re1_at-1):nrow(xx)], xx$re[(re1_at-1):nrow(xx)], nknots=(length(random_effect_at)) )
+  xx$smooth.re = c(rep(0,(re1_at-2)),sp$y)
+  xx$smooth.re[1:re1_at]=0
+  xx$smooth.re[(re1_at+1):(re1_at+3)]=xx$re[(re1_at+1):(re1_at+3)]
+  
+  tmax = as.numeric(max(dayseq)-day0)
+
+  re.smooth = sapply(c(0:tmax),function(dy) {
+    if(dy<0) {0}
+    else if(dy<tmax) {xx$smooth.re[which(xx$time==dy)] }
+    else {xx$smooth.re[nrow(xx)]}
+  })
+
+   return(approxfun(0:tmax, re.smooth, method="linear", rule=2))
 }
+
+
+
 
 
 
@@ -77,7 +99,7 @@ get_random_effect_fun = function(dayseq, random_effect_at, random_effect_values)
 
 ##########################
  
-# mobility
+# mobility (close contact)
 
  # returns 1 for dates prior to 03/01 (first day of mobility data) 
  # smoothed mobility for dates when data is available
@@ -110,8 +132,8 @@ get_mobility_fun = function(dayseq, mob.data){
  
 # testing / contact tracing
 
- # returns 0 for dates prior to day0, corresponds to no testings 
- # smoothed daily number of tests for dates when data is available
+ # returns 0 for dates prior to March 1 (first reported date) 
+ # smoothed log(daily number of tests) - log(daily tests on the first available date) for dates when data is available
  # the latest available testing value is extrapolated into the future 
 
 get_testing_fun = function(dayseq, test.data){
@@ -121,10 +143,12 @@ get_testing_fun = function(dayseq, test.data){
    test_day0 = ymd(test.data$date[1])
    test_daymax = ymd(test.data$date[nrow(test.data)])
    
+   log.smooth.test_day0 = log(test.data$smooth[1])
+     
    testing = sapply(dayseq,function(dy) {
-     if (dy <= test_day0) {0}
-     else if(dy < test_daymax) { log(test.data$smooth[which( ymd(test.data$date) == dy)]) } 
-     else { log(test.data$smooth[nrow(test.data)] ) }
+     if (dy < test_day0) {0}
+     else if(dy < test_daymax) { max( (log(test.data$smooth[which( ymd(test.data$date) == dy)]) - log.smooth.test_day0) , 0) } 
+     else { log(test.data$smooth[nrow(test.data)] ) - log.smooth.test_day0 }
    })
    
    #time0 = as.numeric(day0 - test_day0)
@@ -193,9 +217,9 @@ get_severity_fun = function(dayseq, dsev.data){
   dsev_daymax = ymd(dsev.data$date[nrow(dsev.data)])
   
   dsev = sapply(dayseq, function(dy) {
-     if (dy <= dsev_day0) {dsev.data$smooth.rel.cases_60prop[1]}
-     else if(dy < dsev_daymax) {dsev.data$smooth.rel.cases_60prop[which( ymd(dsev.data$date) == dy)] } 
-     else {dsev.data$smooth.rel.cases_60prop[nrow(dsev.data)] }
+     if (dy <= dsev_day0) {dsev.data$sev.measure[1]}
+     else if(dy < dsev_daymax) {dsev.data$sev.measure[which( ymd(dsev.data$date) == dy)] } 
+     else {dsev.data$sev.measure[nrow(dsev.data)] }
    })
   
    #time0 = as.numeric(d_day0 - day0)
@@ -208,56 +232,32 @@ get_severity_fun = function(dayseq, dsev.data){
 
 
 
+#################################
+
+# rate of hospital departure: 1/hospital LOS (length of stay)
+
+# smoothed monthly averages for hospital LOS, days 
+# latest value is projected into the future
 
 
+get_hosp_discharge_fun = function(dayseq, hlos.data){
 
-
-
-######################################
-
-# current hospitalizations coming from congregate settings
-
-get_current_congregate_hosp_fun = function(dayseq, hosp_cong.data){
-  
   tmax = as.numeric(max(dayseq)-day0)
   
-  dat_day0 = ymd(hosp_cong.data$date[1])
-  dat_daymax = ymd(hosp_cong.data$date[nrow(hosp_cong.data)])
+  dat_day0 = ymd(hlos.data$date[1])
+  dat_daymax = ymd(hlos.data$date[nrow(hlos.data)])
   
-  d = sapply(dayseq, function(dy){
-    if (dy < dat_day0) {0}
-    else if (dy < dat_daymax) {hosp_cong.data$cur_hosp_cong[ which (ymd(hosp_cong.data$date) == dy)] }
-    else {0}
-  })
+  hlos.data$rate = 1/hlos.data$smooth.alos
+    
+  dhdisch = sapply(dayseq, function(dy) {
+     if (dy <= dat_day0) {hlos.data$rate[1]}
+     else if(dy < dat_daymax) {hlos.data$rate[which( ymd(hlos.data$date) == dy)] } 
+     else {hlos.data$rate[nrow(hlos.data)] }
+   })
   
-  return( approxfun(0:tmax, d, method="linear", rule=2))
-}
-
-
-
-
-
-
-
-
-######################################
-
-# arrival hospitalizations coming from congregate settings
-
-get_arrival_congregate_hosp_fun = function(dayseq, hosp_cong.data){
-  
-  tmax = as.numeric(max(dayseq)-day0)
-  
-  dat_day0 = ymd(hosp_cong.data$date[1])
-  dat_daymax = ymd(hosp_cong.data$date[nrow(hosp_cong.data)])
-  
-  d = sapply(dayseq, function(dy){
-    if (dy < dat_day0) {0}
-    else if (dy < dat_daymax) {hosp_cong.data$arrival_hosp_cong[ which (ymd(hosp_cong.data$date) == dy)] }
-    else {0}
-  })
-  
-  return( approxfun(0:tmax, d, method="linear", rule=2))
+   #time0 = as.numeric(d_day0 - day0)
+ 
+   return(approxfun(0:tmax, dhdisch, method="linear", rule=2))
 }
 
 
@@ -293,11 +293,86 @@ get_arrival_congregate_hosp_fun = function(dayseq, hosp_cong.data){
 
 
 
-############################
-### not in use currently ###
-############################
+
+
+
+
+
+
+
+
+############################################
+### not used in the latest model version ###
+############################################
+
+######################################
+
+# # current hospitalizations coming from congregate settings
+# 
+# get_current_congregate_hosp_fun = function(dayseq, hosp_cong.data){
+#   
+#   tmax = as.numeric(max(dayseq)-day0)
+#   
+#   dat_day0 = ymd(hosp_cong.data$date[1])
+#   dat_daymax = ymd(hosp_cong.data$date[nrow(hosp_cong.data)])
+#   
+#   d = sapply(dayseq, function(dy){
+#     if (dy < dat_day0) {0}
+#     else if (dy < dat_daymax) {hosp_cong.data$cur_hosp_cong[ which (ymd(hosp_cong.data$date) == dy)] }
+#     else {0}
+#   })
+#   
+#   return( approxfun(0:tmax, d, method="linear", rule=2))
+# }
+# 
+# 
+# 
+# 
+# 
+# 
+# 
+# 
+# ######################################
+# 
+# # arrival hospitalizations coming from congregate settings
+# 
+# get_arrival_congregate_hosp_fun = function(dayseq, hosp_cong.data){
+#   
+#   tmax = as.numeric(max(dayseq)-day0)
+#   
+#   dat_day0 = ymd(hosp_cong.data$date[1])
+#   dat_daymax = ymd(hosp_cong.data$date[nrow(hosp_cong.data)])
+#   
+#   d = sapply(dayseq, function(dy){
+#     if (dy < dat_day0) {0}
+#     else if (dy < dat_daymax) {hosp_cong.data$arrival_hosp_cong[ which (ymd(hosp_cong.data$date) == dy)] }
+#     else {0}
+#   })
+#   
+#   return( approxfun(0:tmax, d, method="linear", rule=2))
+# }
+# 
+# 
+
+
+
+
+
 
 ###########################
+
+# linear interpolation between the dates at which random effects are evaluated
+# prior to the first random effect date, function should return 0
+
+#get_random_effect_fun = function(dayseq, random_effect_at, random_effect_values){
+  
+#  re1_at = random_effect_at[1]
+#  random_effect_at = c((re1_at-14), random_effect_at)
+#  random_effect_values = c(0, random_effect_values)
+  
+#  return(approxfun(random_effect_at, random_effect_values, method="linear", rule=2))
+# }
+
 
 # R0 based on beta and FOI parameters
 

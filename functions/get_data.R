@@ -139,11 +139,32 @@ for(nm in colnames(adj)) {
 
 ## get smooth hospital death hazard ##
 
-### ALL deaths and hospitalizations ###
+# death function is based on estimated community hCFR, which is computed separately and saved in a CSV file
+file.dhaz <- "../data/ct_hdeath_haz.csv"
+smooth_hdeath_haz <- read.csv(file.dhaz)
+smooth_hdeath_haz$date = ymd(smooth_hdeath_haz$date)
+
+
+# code for estimation of instantaneous hospital death hazard: deaths[t]/hosp[t-1]
+if (FALSE){
+### ALL deaths and hospitalizations (community and congregate) ###
 
 if (length(which(is.na(dat_ct_state$cur_hosp) ) ) > 0){
    d = dat_ct_state[1:( min(which(is.na(dat_ct_state$cur_hosp))) -1 ), ]
 } else {d = dat_ct_state}
+
+### Community deaths and hospitalizations ###
+if (FALSE){
+dd = hosp_cong
+dd$date = NULL
+d = merge(d, dd, by='time')
+d$hosp_death = d$deaths - d$hosp_death_cong
+d$cur_hosp_all = d$cur_hosp
+d$cur_hosp = d$cur_hosp_all - d$cur_hosp_cong
+}
+###
+
+
 
 # daily deaths without smoothing
 d$daily_hdeath = c(diff(c(0, d$hosp_death)))
@@ -156,18 +177,8 @@ d$smooth.cum_hdeath <- sp$y
 # smooth daily deaths: first order difference of smooth cumulative deaths
 d$smooth.daily_hdeath <- c(diff(c(0, d$smooth.cum_hdeath)))
 
-# another spline approximation: not needed
-if(FALSE){
-  d$smooth.daily_hdeath1 <- c(diff(c(0, d$smooth.cum_hdeath)))
-  sp <- smooth.spline(d$time, d$smooth.daily_hdeath1, nknots=round(nrow(d)/30))
-  d$smooth.daily_hdeath <- sp$y
-  # ggplot(d, aes(x = time, y = daily_hdeath)) + geom_line(alpha = 0.5) + geom_line(aes(y = smooth.daily_hdeath1), color='red') + geom_line(aes(y = smooth.daily_hdeath), color='blue') + theme_bw()
-  d$smooth.daily_hdeath[d$smooth.daily_hdeath<0]=0
-}
-
-
 # remove early observations with small counts
-d = subset(d, time > 26) # total deaths
+d = subset(d, time > 26) # total deaths: 26; community deaths 30
 
 # compute hospital death hazard: smooth daily deaths on day k / current hospitalizations on day (k-1)
 d$haz = NA
@@ -176,15 +187,14 @@ for (k in 2:nrow(d)){
 }
 d$haz[1] = d$haz[2]
 
-
 # smooth hospital death hazard: spline on death hazard
-sp <- smooth.spline(d$time, d$haz, nknots=round(nrow(d)/45)) # 15
+sp <- smooth.spline(d$time, d$haz, nknots=round(nrow(d)/60)) # 45 for community
 d$smooth.haz = sp$y
 #ggplot(d, aes(x = time, y = haz)) + geom_line(alpha = 0.5) + geom_line(aes(y = smooth.haz), color='red')+ theme_bw()
 
-# compute relative hospital death hazard: relative to the average of first 15 (7?) days
-d$rel_haz = d$haz / mean(d$haz[1:15]) # 7
-d$smooth.rel_haz = d$smooth.haz / mean(d$smooth.haz[1:15]) # 7
+# compute relative hospital death hazard: relative to the average of first 14 days
+d$rel_haz = d$haz / mean(d$haz[1:14]) # 1 for community; 7, 14
+d$smooth.rel_haz = d$smooth.haz / mean(d$smooth.haz[1:14]) # 1 for community; 7, 14
 
 #ggplot(d, aes(x = time, y = rel_haz)) + geom_line(alpha = 0.5) + geom_line(aes(y = smooth.rel_haz), color='red')+ theme_bw()
 
@@ -205,6 +215,7 @@ if(FALSE){
 # subset and save
 smooth_hdeath_haz = subset(d, select=c(time, date, daily_hdeath, smooth.daily_hdeath, haz, smooth.haz, rel_haz, smooth.rel_haz))
 #ggplot(smooth_hdeath_haz, aes(x = time, y = rel_haz)) + geom_line(alpha = 0.5) + geom_line(aes(y = smooth.rel_haz), color='red')+ theme_bw()
+}
 
 
 
@@ -216,8 +227,10 @@ smooth_hdeath_haz = subset(d, select=c(time, date, daily_hdeath, smooth.daily_hd
 
 
 
-## get smooth mobility data ## 
-##############################
+
+
+## get smooth mobility (contact) data ## 
+########################################
 
 ## updated with close contact data ##
 
@@ -241,7 +254,7 @@ if (length(missing_dates)>0){
 
 data.mobi$time <- round(as.numeric(difftime(ymd(data.mobi$date), day0, units="days")),0)
 
-bl_mobility = mean(data.mobi$mcont[1:30])
+bl_mobility = mean(data.mobi$mcont[1:41]) # major drop happened in 03-13 (from 1 to 0.5), all time points before this date contribute to 'baseline'
 data.mobi$rel_mob = data.mobi$mcont/bl_mobility
 
 # 7-day moving average
@@ -251,10 +264,11 @@ xx[(length(xx)-2):length(xx)] = xx[(length(xx)-3)]
 data.mobi$movavg = xx
 # ggplot(mb, aes(x = time, y = rel_mob)) + geom_line(alpha = 0.5) + geom_line(aes(y = movavg) , color='red') + theme_bw()
 
-# smooth spline
+# smooth spline of moving average
 #sp <- smooth.spline(data.mobi$time, data.mobi$rel_mob, nknots=round(nrow(data.mobi)/14))
-sp <- smooth.spline(data.mobi$time, data.mobi$movavg, nknots=round(nrow(data.mobi)/14))
+sp <- smooth.spline(data.mobi$time, data.mobi$movavg, nknots=round(nrow(data.mobi)/14)) #14
 data.mobi$smooth = sp$y
+data.mobi$smooth[1:41] = 1
 
 # ggplot(data.mobi, aes(x = time, y = rel_mob)) + geom_line(alpha = 0.5) + geom_line(aes(y = smooth) , color='red') + theme_bw()
 
@@ -285,22 +299,22 @@ data.test <- read.csv(file.test)
 data.test$date = ymd(data.test$date)
 
 # assume linear increase in daily number of tests between March 8 and the first day of test numbers reporting
-add.dates = seq(ymd("2020-03-08"), data.test$date[1], by="day")
-b = data.test$cum_tests[1]/(0.5*length(add.dates)*(length(add.dates)+1))
-add_daily_tests = c(1:length(add.dates))*b
-add_cum_tests = cumsum(add_daily_tests)
+#add.dates = seq(ymd("2020-03-08"), data.test$date[1], by="day")
+#b = data.test$cum_tests[1]/(0.5*length(add.dates)*(length(add.dates)+1))
+#add_daily_tests = c(1:length(add.dates))*b
+#add_cum_tests = cumsum(add_daily_tests)
 
-add.data.tests = tibble(add.dates, add_cum_tests)
-colnames(add.data.tests) = colnames(data.test)
+#add.data.tests = tibble(add.dates, add_cum_tests)
+#colnames(add.data.tests) = colnames(data.test)
 
-data.test = rbind(add.data.tests, data.test[-1,])
+#data.test = rbind(add.data.tests, data.test[-1,])
 
 # add time
 data.test$t <- as.numeric(data.test$date - data.test$date[1]) + 1
 
 # compute daily number of tests
 data.test$daily_tests = c(NA, diff(data.test$cum_tests))
-data.test$daily_tests[1] = data.test$cum_tests[1]
+data.test$daily_tests[1] = data.test$daily_tests[2]
 
 
 # smooth cumulative number of tests
@@ -311,11 +325,11 @@ data.test$cum_tests.smooth = sp$y
 
 # smooth daily tests
 data.test$daily_tests.cumsmooth = c(NA, diff(data.test$cum_tests.smooth))
-data.test$daily_tests.cumsmooth[1] = data.test$daily_tests[1]
+data.test$daily_tests.cumsmooth[1] = data.test$daily_tests.cumsmooth[2]
 
 # ggplot(data.test, aes(x = t, y = daily_tests)) + geom_line(alpha = 0.5) + geom_line(aes(y = daily_tests.cumsmooth), color='red')+ theme_bw()
 
-sp <- smooth.spline(data.test$t, data.test$daily_tests.cumsmooth, nknots=round(nrow(data.test)/21))
+sp <- smooth.spline(data.test$t, data.test$daily_tests.cumsmooth, nknots=round(nrow(data.test)/45))
 data.test$daily_tests.smooth <- sp$y
 data.test$daily_tests.smooth[data.test$daily_tests.smooth<0]=1
 
@@ -376,7 +390,8 @@ data.severity$date = ymd(data.severity$date)
 
 
 
-# get combined testing positive proportion and CLI ED visits data
+## get combined testing positive proportion and CLI ED visits data
+##############################
 # this is a combined measure of incidence
 file.incidence = "../data/ct_incidence.csv"
 data.incidence = read.csv(file.incidence)
@@ -384,9 +399,33 @@ data.incidence$date = ymd(data.incidence$date)
 
 
 
+
+
+
+
+
+
+## get smooth hospital LOS ##
+#############################
+file.hlos = "../data/ct_hlos.csv"
+data.hlos = read.csv(file.hlos)
+data.hlos$date = ymd(data.hlos$date)
+
+
+
+
+
+
+
+
+
+
+
 # county populations
 pop = read.csv('../data/ct_population.csv', stringsAsFactors=FALSE)
 populations = pop$population[match(colnames(adj), pop$county)]
+
+
 
 
 # state hospitalizations and deaths as proportion of the population
@@ -398,7 +437,7 @@ populations = pop$population[match(colnames(adj), pop$county)]
 
 return(list(dat_ct_state=dat_ct_state, dat_ct_county=dat_ct_county, hosp_cong=hosp_cong, incidence = data.incidence,
             adj=adj, dat_ct_capacity=dat_ct_capacity, county_capacities=county_capacities, 
-            mob=mob_state, testing = testing_state, severity = data.severity, 
+            mob=mob_state, testing = testing_state, severity = data.severity, hlos = data.hlos,
             smooth_hdeath_haz = smooth_hdeath_haz, populations=populations))
 }
 

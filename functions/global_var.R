@@ -34,23 +34,23 @@ if(!is.calibration){
 # starting day
 day0 = ymd("2020-03-01")
 
-# actual dates: do not change
 
-lockdown_start_date = ymd("2020-03-17") # lockdown effect starts with school closure 
-schools_reopen_date = ymd("2020-09-15") # school reopening
+## interventions: reserved for making projections under different scenarios in the future, not used in historic calibration
+# school closure, lockdown and reopening effect is replaced with contact function and random effects
+intv1_start_date = ymd("2022-09-01") # in the future 
 
-INT_START_DATES = as.list(c(lockdown_start_date = lockdown_start_date, schools_reopen_date = schools_reopen_date))
+INT_START_DATES = as.list(c(intv1_start_date = intv1_start_date))
 
 
 ########################
 source("../functions/model.R")
-source("../functions/run_ct_model.R")
 source("../functions/get_data.R")
 source("../functions/intervention_functions.R")
 source("../functions/truncated_distributions.R")
 
 if(!is.calibration){
 source("../functions/plot_functions.R")
+source("../functions/run_ct_model.R")   
    }
 #################################################### 
 # Other global variables that should not be changed
@@ -74,6 +74,8 @@ TESTING <- global_dat$testing
 DEATH_HAZ <- global_dat$smooth_hdeath_haz
 # relative severity proportion changes 
 SEV <- global_dat$severity
+# smooth hospital LOS
+HLOS <- global_dat$hlos
 # Spatial adj  matrix
 CT_ADJ <- global_dat$adj
 # Population count vector in the same order as CT_ADJ
@@ -95,7 +97,7 @@ E_INIT_COUNTY <- c(0.4,    # 1. "Fairfield"
                    0.005,  # 7. "Middlesex" 
                    0.24)   # 8. "New Haven"
 
-# initial numbers exposed in each county from v1
+# initial numbers exposed in each county from model version 1
 # E_init_state0 <- c(7.5,    # 1. "Fairfield" 
 #                  0.13,    # 2. "New London" 
 #                  0,       # 3. "Litchfield" 

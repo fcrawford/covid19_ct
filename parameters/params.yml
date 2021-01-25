@@ -11,7 +11,7 @@ q_Is: 0.04 # severe
 q_H: 1 
 
 # transmissibility
-beta_pre: 1.7
+beta_pre: 2
 
 # latency
 delta: 0.25   # 1/4
@@ -25,45 +25,40 @@ k_A: 0.4 # relative infectiousness of asymptomatic compared to mildly symptomati
 alpha_Im: 0.25   # 1/4 (infectious for 4 days, then isolated)
 
 # FOI from Severe
-alpha_Is: 0.1052632    # 1/9.5 (9.5 days between end of latency and hospitalization, 13.5 between infection and hosp)
-k_Is: 0.7        # some severe cases are likely isolated sooner than 9.5 days after infection onset
-                 # but probably more infectious at the beginning 
+alpha_Is: 0.08333333    # 1/12 (12 days between end of latency and hospitalization)
+k_Is: 1        
 
 ## Severe
 # length of hospital stay
-gamma_H: 0.12   # 1/8.8
-gamma_Hbar: 0.12   
+gamma_H: 0.12   # replaced with hdischarge function
+gamma_Hbar: 0.12   # same
 
 ## Mild : duration of isolation
 # replace with an estimate of duration of PCR detectable virus rather than duration of infectiousness?
 gamma_NI: 0.1428571 # 1/7 (10 days from symptom onset - 3 days in I_m state)
 
 ## CFR
-m_H: 0.15 # baseline, among hospitalized from community
+m_H: 0.12 # baseline, among hospitalized from community
 m_Hbar_mult: 1 # RR among hospital overflow
 
 # reporting lags (days)
-H_lag: 10
-D_lag: 8
+H_lag: 5
+D_lag: 5
 detect_lag: 7
 
 # initial number exposed on (day0 - time_num)
-E_init: 15
+E_init: 300
 
 # time point from candidate_state0 that becomes state0
-time_num: 14
-
-# main lockdown effect on log scale
-lockdown_effect: 0
-
-# school reopening effect on log scale
-school_reopening_effect: 0
+time_num: 7
 
 # intervention effect on isolation/recovery for A and I_m
 # this number times log(daily number of tests) is an increase in the rate of transitioning out of infectious compartment 
-testing_effect: 0.03 # corresponds to compartment I_m
+testing_effect: 0.08 # corresponds to compartment I_m
 te_A_mult: 0.5 # relative testing effect among A compared to I_m
 
+# hypothetical intervention effect in the future
+intv1_effect: 0
 
 # other
 k_n: 0.015 # transmission from adjacent counties
@@ -99,5 +94,7 @@ m_NH_mult: 2 # RR among severe in nursing homes / prisons
 #ph2_release_effect: 0
 #ph3_release_effect: 0
 
+#lockdown_effect: 0
+#school_reopening_effect: 0
 
 

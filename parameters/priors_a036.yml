@@ -1,61 +1,42 @@
 # use rtuncdist to make flat priors for some params
 
-# q_Is: relatively flat, centered around 0.064 = 0.1 * symptomatic
+# q_Is
 prior.mean.q_Is : 0.04
 prior.sd.q_Is : 0.007
 prior.lower.q_Is : 0.01
 prior.upper.q_Is : 0.07
 
-# beta_pre: flat between 0.75 and 1.75, fat tails
-prior.mean.beta_pre: 1.75
-prior.sd.beta_pre: 0.5
-prior.lower.beta_pre: 0.25
-prior.upper.beta_pre: 3.25
+# beta_pre
+prior.mean.beta_pre: 2
+prior.sd.beta_pre: 0.7
+prior.lower.beta_pre: 0.5
+prior.upper.beta_pre: 3.5
 
-# gamma_H: median = 8 days (YNHH data for patients with outcomes)
-prior.mean.gamma_H : 0.125 
-prior.sd.gamma_H : 0.04
-prior.lower.gamma_H : 0.025
-prior.upper.gamma_H : 0.225
-
-# m_H: 0.12, baseline estimate among hospitalizations from non-congregate settings (excluding nursing homes)
-prior.mean.m_H : 0.2
-prior.sd.m_H : 0.07
-prior.lower.m_H : 0.05
-prior.upper.m_H : 0.35
-
-# total lockdown_effect: school closure effect + lockdown effect on log scale
-#prior.mean.lockdown_effect : -1.5
-#prior.sd.lockdown_effect : 0.15
-#prior.lower.lockdown_effect : -3.6
-#prior.upper.lockdown_effect : -0.3
-
-# testing_effect: increase in the rate of departure from I_m due to faster isolation per log increase in testing 
-prior.mean.testing_effect : 0.03
-prior.sd.log.testing_effect: 0.6
-prior.lower.testing_effect : 0
-prior.upper.testing_effect : 0.2
+# m_H (baseline value)
+prior.mean.m_H : 0.15
+prior.sd.m_H : 0.05
+prior.lower.m_H : 0.03
+prior.upper.m_H : 0.27
 
 # E_init: initial number exposed on (day0 - time_num), does not need to be integer
-prior.mean.E_init: 25
+prior.mean.E_init: 300
 prior.sd.E_init: 10
-prior.lower.E_init: 1
-prior.upper.E_init: 100
+prior.lower.E_init: 150
+prior.upper.E_init: 450
 
-# sd_dh: variance of normal distribution used in data likelihood for death / hospitalization counts
-prior.shape.prec.sd_dh: 12
-prior.rate.prec.sd_dh: 5000000
+# testing_effect: increase in the rate of departure from I_m due to faster isolation per log increase in testing 
+prior.mean.testing_effect : 0.08
+prior.sd.log.testing_effect: 0 # fix at the prior value
+prior.lower.testing_effect : 0.01
+prior.upper.testing_effect : 0.15
 
-#prior.shape.sd_dh : 250 
-#prior.rate.sd_dh : 0.5
+# sd_dh: variance of normal distribution used in data likelihood for death / hospitalization counts (absolute counts)
+prior.shape.prec.sd_dh: 20
+prior.rate.prec.sd_dh: 50000000
 
 # sd_e: variance of normal distribution used in data likelihood for relative incidence
 prior.shape.prec.sd_e: 3
 prior.rate.prec.sd_e: 0.05
-
-#prior.shape.sd_e : 6 
-#prior.rate.sd_e : 40
-
 
 
 ## these parameters are not calibrated to data, so prior = posterior
@@ -69,6 +50,19 @@ upper.m_Hbar_mult : 2
 
 # OLD: not used in current version
 ####################################
+
+# gamma_H: median = 8 days (YNHH data for patients with outcomes)
+# prior.mean.gamma_H : 0.125 
+# prior.sd.gamma_H : 0.04
+# prior.lower.gamma_H : 0.025
+# prior.upper.gamma_H : 0.225
+
+
+# total lockdown_effect: school closure effect + lockdown effect on log scale
+#prior.mean.lockdown_effect : -1.5
+#prior.sd.lockdown_effect : 0.15
+#prior.lower.lockdown_effect : -3.6
+#prior.upper.lockdown_effect : -0.3
 
 # k_A: assume mean of 0.4 (there are no good estimates): largely absorbed in beta
 #prior.mean.k_A : 0.4

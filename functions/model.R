@@ -4,7 +4,7 @@
 # region_adj is an adjacency matrix whose row/col labels are 
 
 
-run_sir_model = function(state0, params, region_adj, populations, tmax, interventions, int_effects, capacities, deathfun, sevfun) {
+run_sir_model = function(state0, params, region_adj, populations, tmax, interventions, int_effects, capacities, deathfun, sevfun, hdischargefun) {
 
   if(is.null(interventions$distancing_list) || is.null(interventions$mobility) || is.null(interventions$testing) ||
      !is.list(interventions$distancing_list) || !is.function(interventions$mobility) || !is.function(interventions$testing)) { 
@@ -45,9 +45,11 @@ run_sir_model = function(state0, params, region_adj, populations, tmax, interven
   contact_intervention_fun = function(t_tmp) {
     
     main_effects = 0
-    for (k in 1:length(interventions$distancing_list)){
-      main_effects = main_effects + interventions$distancing_list[[k]](t_tmp) * int_effects[[k]]
-    }
+    ## use this loop when using distancing list for interventions 
+    #for (k in 1:length(interventions$distancing_list)){
+    #  main_effects = main_effects + interventions$distancing_list[[k]](t_tmp) * int_effects[[k]]
+    #}
+    
     # if(distance > 1){
     #   message("contact intervention function sum > 1")
     #   for (k in 1:length(interventions$distancing_list)){
@@ -105,6 +107,10 @@ run_sir_model = function(state0, params, region_adj, populations, tmax, interven
       # severe proportion
       q_Is_cur = q_Is * sevfun(time)
       
+      # gamma_H: rate of hospital discharge
+      gamma_H_cur = hdischargefun(time)
+      gamma_Hbar_cur = gamma_H_cur
+      
       # effect of testing on early isolation / recovery for mild  and asymptomatic 
       a_t_Im = interventions$testing(time) * testing_effect_Im
       a_t_A  = interventions$testing(time) * testing_effect_A
@@ -113,7 +119,7 @@ run_sir_model = function(state0, params, region_adj, populations, tmax, interven
       red_im_dur = 1/alpha_Im - 1/( (1 + a_t_Im) * alpha_Im ) # reduction in duration of infectiousness before isolation
       gamma_NI = 1 / (1/gamma_NI + red_im_dur) # new gamma_NI accounts for increased duration of isolation, remains unchanged if a_t_Im = 0
       
-      # the is no isolation compartment for asymptomatic: testing effect among asymptomatic moves them sooner directly to R
+      # there is no isolation compartment for asymptomatic: testing effect among asymptomatic moves them sooner directly to R
       
       # Hospital capacities
       actual_capacities = as.numeric(lapply(COUNTY_CAPACITIES, function(cap)cap(time)))
@@ -160,17 +166,17 @@ run_sir_model = function(state0, params, region_adj, populations, tmax, interven
       
       dA    <-  q_A * delta*E - (1 + a_t_A) * alpha_A * A
       
-      dH    <-  q_H * (1-Hospital_capacities_breached) * (alpha_Is * I_s ) - gamma_H * H
+      dH    <-  q_H * (1-Hospital_capacities_breached) * (alpha_Is * I_s ) - gamma_H_cur * H
       
-      dHbar <-  q_H * Hospital_capacities_breached * (alpha_Is * I_s ) - gamma_Hbar * Hbar
+      dHbar <-  q_H * Hospital_capacities_breached * (alpha_Is * I_s ) - gamma_Hbar_cur * Hbar
       
       dNH   <-  (1 - q_H) * alpha_Is * I_s - gamma_NH * NH
       
       dNI   <-  (1 + a_t_Im) * alpha_Im * I_m - gamma_NI * NI 
       
-      dD    <-  gamma_H * m_H_cur * H     + gamma_Hbar * m_Hbar * Hbar     + gamma_NH * m_NH * NH
+      dD    <-  gamma_H_cur * m_H_cur * H     + gamma_Hbar_cur * m_Hbar * Hbar     + gamma_NH * m_NH * NH
       
-      dR    <-  gamma_H * (1-m_H_cur) * H + gamma_Hbar * (1-m_Hbar) * Hbar + gamma_NH * (1-m_NH) * NH + gamma_NI * NI + (1 + a_t_A) * alpha_A * A
+      dR    <-  gamma_H_cur * (1-m_H_cur) * H + gamma_Hbar_cur * (1-m_Hbar) * Hbar + gamma_NH * (1-m_NH) * NH + gamma_NI * NI + (1 + a_t_A) * alpha_A * A
 
       return(list(c(dS,dE,dI_s,dI_m,dA,dH,dHbar,dNH,dNI,dD,dR)))
     })
@@ -206,20 +212,23 @@ run_sir_model = function(state0, params, region_adj, populations, tmax, interven
   out$D.Connecticut    = rowSums(out[,paste0("D.", region_names, sep="")])
   out$R.Connecticut    = rowSums(out[,paste0("R.", region_names, sep="")])
 
+  # sum of hospitalization and hospital breach
+  out$Hsum.Connecticut = out$H.Connecticut + out$Hbar.Connecticut
   
   ## track modified or combined compartments for CT
   
   # daily new infections 
   out$dailyI.Connecticut <- params$delta * out$E.Connecticut
-  # daily new hospitalizations
+  # daily new hospitalizations: includes potential breach (H+Hbar)
   out$dailyH.Connecticut <- params$q_H * params$alpha_Is * out$I_s.Connecticut
   # daily new severe cases in nursing homes and ALFs
   # out$dailyIs_NH.Connecticut <- (1 - params$q_H) * params$q_Is * params$delta * out$E.Connecticut
   
   # cumulative infections, including those who died
   out$cum_modI.Connecticut <- cumsum(out$dailyI.Connecticut)
-  # cumulative hospitalizations
+  # cumulative hospitalizations: includes potential breach (H+Hbar)
   out$cum_modH.Connecticut <- cumsum(out$dailyH.Connecticut)
+  
   # cumulative severe cases in nursing homes and ALFs
   # out$cum_Is_NH.Connecticut <- cumsum(out$dailyIs_NH.Connecticut)
   
@@ -260,9 +269,10 @@ run_sir_model = function(state0, params, region_adj, populations, tmax, interven
   out$time_H_lag <- out$time + H_lag
 
   # lagged compartments in Connecticut: deaths, current hospitalizations, cumulative hospitalizations
-  out$rD.Connecticut    = lag_shift(out$D.Connecticu, D_lag)
+  out$rD.Connecticut    = lag_shift(out$D.Connecticut, D_lag)
   out$rH.Connecticut    = lag_shift(out$H.Connecticut, H_lag)
   out$rHbar.Connecticut = lag_shift(out$Hbar.Connecticut, H_lag)
+  out$rHsum.Connecticut = out$rH.Connecticut + out$rHbar.Connecticut
   out$rcum_modH.Connecticut = lag_shift(out$cum_modH.Connecticut, H_lag)
  
   # lagged compartment E: detection lag
@@ -278,17 +288,17 @@ run_sir_model = function(state0, params, region_adj, populations, tmax, interven
 
 
   ## contact, mobility, testing patterns ##  
-  out$contact_pattern = contact_intervention_fun(1:(tmax+1))
+  out$contact_pattern = contact_intervention_fun(0:tmax)
   #out$intervention_schools = interventions$schools(1:(tmax+1))
   #out$intervention_lockdown = interventions$lockdown(1:(tmax+1))
-  out$mobility = interventions$mobility(1:(tmax+1))
-  out$intervention_testing = interventions$testing(1:(tmax+1))
+  out$mobility = interventions$mobility(0:tmax)
+  out$intervention_testing = interventions$testing(0:tmax)
   
   # dynamics of hospital CFR
-  out$hCFR = params$m_H * deathfun(1:(tmax+1))
+  out$hCFR = params$m_H * deathfun(0:tmax)
   
   # dynamics of severe proportion
-  out$prop_Is = params$q_Is * sevfun(1:(tmax+1))
+  out$prop_Is = params$q_Is * sevfun(0:tmax)
   
   # dynamics of rates of removal from infectious compartments I_m and A
   out$alpha_Im.t = params$alpha_Im * (1 + params$testing_effect_Im * out$intervention_testing)

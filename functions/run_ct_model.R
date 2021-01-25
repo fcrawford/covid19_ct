@@ -1,49 +1,27 @@
 # the ordering of counties is the standard throughout the code (in the global_var.R)
 # make sure adj and initial conditions have the same ordering! 
 
-########################
-# draw random params
+#########################################
+# draw random params: limit to beta only
 
 rparams = function(params) {
   params_tmp = params
-  # sample new param values
-  params_tmp$beta_pre = rtruncdist(1, mean=(params$beta_pre*0.9975), sd=params$sd_beta_pre, lower=params$lower_beta_pre, upper=params$upper_beta_pre)
-  #params_tmp$q_Is = rtruncdist(1, mean=(params$q_Is), sd=params$sd_q_Is, lower=params$lower_q_Is, upper=params$upper_q_Is)
-  #params_tmp$gamma_H = rtruncdist(1, mean=params$gamma_H, sd=params$sd_gamma_H, lower=params$lower_gamma_H, upper=params$upper_gamma_H)
-  #params_tmp$gamma_Hbar = params_tmp$gamma_H
-  #params_tmp$m_H = rtruncdist(1, mean=params$m_H, sd=params$sd_m_H, lower=params$lower_m_H, upper=params$upper_m_H)
-  #params_tmp$lockdown_effect = rtruncdist(1, mean=params$lockdown_effect, sd=params$sd_lockdown_effect, lower=params$lower_lockdown_effect, upper=params$upper_lockdown_effect)
-  # post-lockdown
-  #params_tmp$distancing_effect = rtruncdist(1, mean=params$distancing_effect, sd=params$sd_distancing_effect, lower=params$lower_distancing_effect, upper=params$upper_distancing_effect)
-  #params_tmp$testing_effect_Im = rtruncdist(1, mean=params$testing_effect_Im, sd=params$sd_testing_effect_Im, lower=params$lower_testing_effect_Im, upper=params$upper_testing_effect_Im)
-  #params_tmp$testing_effect_A = rtruncdist(1, mean=params$testing_effect_A, sd=params$sd_testing_effect_A, lower=params$lower_testing_effect_A, upper=params$upper_testing_effect_A)
-  #params_tmp$m_Hbar_mult = rtruncdist(1, mean=params$m_Hbar_mult, sd=params$sd_m_Hbar_mult, lower=params$lower_m_Hbar_mult, upper=params$upper_m_Hbar_mult)
-  # params_tmp$q_Im = rtruncdist(1, mean=(params$q_Im), sd=params$sd_q_Im, lower=params$lower_q_Im, upper=params$upper_q_Im)
-  # params_tmp$q_A = rtruncdist(1, mean=(params$q_A), sd=params$sd_q_A, lower=params$lower_q_A, upper=params$upper_q_A)
-  # params_tmp$delta = rtruncdist(1, mean=params$delta, sd=params$sd_delta, lower=params$lower_delta, upper=params$upper_delta)
+  params_tmp$beta_pre = rtruncdist(1, mean=(params$beta_pre), sd=params$sd_beta_pre, lower=params$lower_beta_pre, upper=params$upper_beta_pre)
   return(params_tmp)
 }
 
 
 
-
-# UPDATE THIS FUNCTION AS WE INCREASE THE NUMBER OF INTERVENTIONS
-## currently 2 interventions that are not captured by random effects:
-# lockdown
-# school reopening (for projections)
-################################################## 
+## functions for scenario evaluation in the future: imposed changes in transmission parameter
+# UPDATE THIS FUNCTION WITH DESIRED NUMBER OF INTERVENTIONS IN THE FUTURE
+########################################################################## 
 # create a list of contact intervention effects from params
 get_intervention_effects = function(params) {
-   
-   return( as.list(c(params$lockdown_effect, params$school_reopening_effect)) )
+   return( as.list(c(params$intv1_effect)) )
 }
 
-
-# first value is ramping time for lockdown effect
-# second value is raming time for school reopening effect
 get_ramping_times = function(params) {
-   
-   return( as.list(c(14, 2)) )
+   return( as.list(c(2)) )
 }
 
 
@@ -91,6 +69,22 @@ get_state0 = function(init_file_csv){
 # get state0 on day0 for a given set of parameters
 get_state0_params <- function(params, interventions, populations, adj, county_capacities){
 
+time_num = params$time_num
+if (time_num<0){
+     stop("time_num cannot be negative")
+} else if (time_num==0){
+  E_init = params$E_init * E_INIT_COUNTY
+  I_s_init = rep(0,nregions)
+  I_m_init = rep(0,nregions)
+  A_init = rep(0,nregions)
+  H_init = rep(0,nregions)
+  Hbar_init = rep(0,nregions)
+  NH_init = rep(0,nregions)
+  NI_init = rep(0,nregions)
+  D_init = rep(0,nregions)
+  R_init = rep(0,nregions)
+  S_init = as.numeric(populations) - (E_init + I_s_init + I_m_init + A_init + H_init + Hbar_init + NH_init + NI_init + D_init + R_init)
+} else {
 # initial number exposed
 E_init_state0 = params$E_init * E_INIT_COUNTY
 
@@ -120,7 +114,8 @@ interventions$mobility = mobfun_tmp
 
 #deathfun_tmp = approxfun(1:mytmax, rep( mean(DEATH_HAZ$smooth.rel_haz[1:7]),mytmax) ,method='linear', rule=2)
 deathfun_tmp = approxfun(1:mytmax, rep(DEATH_HAZ$smooth.rel_haz[1], mytmax) ,method='linear', rule=2)
-sevfun_tmp = approxfun(1:mytmax, rep(SEV$smooth.rel.cases_60prop[1],mytmax) ,method='linear', rule=2)
+sevfun_tmp = approxfun(1:mytmax, rep(SEV$sev.measure[1],mytmax) ,method='linear', rule=2)
+hdischargefun_tmp = approxfun(1:mytmax, rep(1/HLOS$smooth.alos[1],mytmax) ,method='linear', rule=2)
 
 # initial conditions at time day0 - time_num
 E_init = E_init_state0
@@ -146,7 +141,8 @@ res = run_sir_model(state0=state0,
                     int_effects = int_effects_tmp,
                     capacities=county_capacities,
                     deathfun=deathfun_tmp,
-                    sevfun=sevfun_tmp)
+                    sevfun=sevfun_tmp,
+                    hdischargefun=hdischargefun_tmp)
 
 # get initial conditions corresponding to params, E_init, and time_num
 init = matrix(0, ncol=10, nrow=8)
@@ -177,7 +173,7 @@ for (k in 1:length(compartments)){
       D_init = init$D
       R_init = init$R
       S_init = as.numeric(populations) - (E_init + I_s_init + I_m_init + A_init + H_init + Hbar_init + NH_init + NI_init + D_init + R_init)
-
+}
        # this is state0 to be passed to get_sir_results 
       state0 = c(S=S_init, E=E_init, I_s=I_s_init, I_m=I_m_init, A=A_init, H=H_init, Hbar=Hbar_init, NH=NH_init, NI=NI_init, D=D_init, R=R_init)
       return(state0)
@@ -211,7 +207,7 @@ rposterior = function(params, posterior, interventions){
 
 
 
-# update parameter values that can vary
+# update parameter values that are calibrated
 ################################################## 
 set_params_mcmc = function(myparams, varparams){
   
@@ -288,8 +284,11 @@ get_sir_results = function(daymax,
    # hospital death hazard function
    deathfun = get_death_fun(dayseq, DEATH_HAZ)
    
-   # severity functions
+   # severity function
    sevfun = get_severity_fun(dayseq, SEV)
+   
+   # hospital discharge rate function
+   hdischargefun = get_hosp_discharge_fun(dayseq, HLOS)
 
  pars <- list()
  state0s <- list()
@@ -322,7 +321,7 @@ get_sir_results = function(daymax,
            state0s[[i]] = rpost_out[[2]]
            index <- rpost_out[[3]]
            
-          # update interventions with ramping times from posterior
+          # update interventions with random effects
            #ramping_upd = get_ramping_times(pars[[i]])
            #distancingfun_list_upd = get_distancing_fun_list(dayseq, INT_START_DATES, int_off_dates, ramping_upd)
            #interventions_list[[i]] = list(distancing_list=distancingfun_list_upd, mobility=mobilityfun, testing=testingfun)
@@ -346,14 +345,15 @@ get_sir_results = function(daymax,
                         int_effects = get_intervention_effects(pars[[i]]),
                         capacities=COUNTY_CAPACITIES,
                         deathfun=deathfun,
-                        sevfun=sevfun)
+                        sevfun=sevfun,
+                        hdischargefun=hdischargefun)
     res$sim_id = i
     res
   })
 
   sir_results_all = ldply(sir_results, rbind)
   
-  sir_results_all[,"rHsum.Connecticut"] <- sir_results_all[,"rH.Connecticut"]+sir_results_all[,"rHbar.Connecticut"]
+  # sir_results_all[,"rHsum.Connecticut"] <- sir_results_all[,"rH.Connecticut"]+sir_results_all[,"rHbar.Connecticut"]
   
   #for(nm in c("Connecticut", colnames(CT_ADJ))){
    #    sir_results_all[, paste0("rHsum.", nm)] <-  sir_results_all[,paste0("rH.", nm)]+sir_results_all[,paste0("rHbar.", nm)]
