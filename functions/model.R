@@ -122,8 +122,9 @@ run_sir_model = function(state0, params, region_adj, populations, tmax, interven
       # there is no isolation compartment for asymptomatic: testing effect among asymptomatic moves them sooner directly to R
       
       # Hospital capacities
-      actual_capacities = as.numeric(lapply(COUNTY_CAPACITIES, function(cap)cap(time)))
-
+      #actual_capacities = as.numeric(lapply(COUNTY_CAPACITIES, function(cap)cap(time)))
+      actual_capacities = as.numeric(lapply(capacities, function(cap)cap(time)))
+      
       smoothstep = function(x) 1/(1+exp(-0.5*x))
       Hospital_capacities_breached = smoothstep(H-actual_capacities)
       
@@ -200,6 +201,7 @@ run_sir_model = function(state0, params, region_adj, populations, tmax, interven
                  paste0("D.", region_names, sep=""),
                  paste0("R.", region_names, sep=""))
 
+  if (nregions>1){
   out$S.Connecticut    = rowSums(out[,paste0("S.", region_names, sep="")])
   out$E.Connecticut    = rowSums(out[,paste0("E.", region_names, sep="")])
   out$I_s.Connecticut  = rowSums(out[,paste0("I_s.", region_names, sep="")])
@@ -211,7 +213,20 @@ run_sir_model = function(state0, params, region_adj, populations, tmax, interven
   out$NI.Connecticut    = rowSums(out[,paste0("NI.", region_names, sep="")])
   out$D.Connecticut    = rowSums(out[,paste0("D.", region_names, sep="")])
   out$R.Connecticut    = rowSums(out[,paste0("R.", region_names, sep="")])
-
+  } else {
+  out$S.Connecticut    = out[,paste0("S.", region_names, sep="")]
+  out$E.Connecticut    = out[,paste0("E.", region_names, sep="")]
+  out$I_s.Connecticut  = out[,paste0("I_s.", region_names, sep="")]
+  out$I_m.Connecticut  = out[,paste0("I_m.", region_names, sep="")]
+  out$A.Connecticut    = out[,paste0("A.", region_names, sep="")]
+  out$H.Connecticut    = out[,paste0("H.", region_names, sep="")]
+  out$Hbar.Connecticut = out[,paste0("Hbar.", region_names, sep="")]
+  out$NH.Connecticut    = out[,paste0("NH.", region_names, sep="")]
+  out$NI.Connecticut    = out[,paste0("NI.", region_names, sep="")]
+  out$D.Connecticut    = out[,paste0("D.", region_names, sep="")]
+  out$R.Connecticut    = out[,paste0("R.", region_names, sep="")]
+  }
+  
   # sum of hospitalization and hospital breach
   out$Hsum.Connecticut = out$H.Connecticut + out$Hbar.Connecticut
   
@@ -236,6 +251,9 @@ run_sir_model = function(state0, params, region_adj, populations, tmax, interven
   # number and proportion of alive cumulative incidence: sum of currently infected and recovered
   out$alive_cum_incid_num.Connecticut = pop_ct - out$S.Connecticut - out$E.Connecticut - out$D.Connecticut
   out$alive_cum_incid_prop.Connecticut = out$alive_cum_incid_num.Connecticut / (pop_ct - out$D.Connecticut)
+  
+  # recovered as proportion of the population
+  out$R_prop.Connecticut = out$R.Connecticut/ (pop_ct - out$D.Connecticut)
 
   # current number and prevalence of infections outside of hospitals and nursing homes at the state level; includes asymptomatic and those isolated at home
   out$currentI.Connecticut = out$A.Connecticut + out$I_m.Connecticut + out$NI.Connecticut + params$q_H * out$I_s.Connecticut + out$Hbar.Connecticut
@@ -289,8 +307,6 @@ run_sir_model = function(state0, params, region_adj, populations, tmax, interven
 
   ## contact, mobility, testing patterns ##  
   out$contact_pattern = contact_intervention_fun(0:tmax)
-  #out$intervention_schools = interventions$schools(1:(tmax+1))
-  #out$intervention_lockdown = interventions$lockdown(1:(tmax+1))
   out$mobility = interventions$mobility(0:tmax)
   out$intervention_testing = interventions$testing(0:tmax)
   

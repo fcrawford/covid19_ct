@@ -148,7 +148,7 @@ get_testing_fun = function(dayseq, test.data){
    testing = sapply(dayseq,function(dy) {
      if (dy < test_day0) {0}
      else if(dy < test_daymax) { max( (log(test.data$smooth[which( ymd(test.data$date) == dy)]) - log.smooth.test_day0) , 0) } 
-     else { log(test.data$smooth[nrow(test.data)] ) - log.smooth.test_day0 }
+     else { max ( ( log(test.data$smooth[nrow(test.data)] ) - log.smooth.test_day0 ), 0) }
    })
    
    #time0 = as.numeric(day0 - test_day0)

@@ -266,9 +266,9 @@ data.mobi$movavg = xx
 
 # smooth spline of moving average
 #sp <- smooth.spline(data.mobi$time, data.mobi$rel_mob, nknots=round(nrow(data.mobi)/14))
-sp <- smooth.spline(data.mobi$time, data.mobi$movavg, nknots=round(nrow(data.mobi)/14)) #14
+sp <- smooth.spline(data.mobi$time, data.mobi$movavg, nknots=round(nrow(data.mobi)/21)) #14
 data.mobi$smooth = sp$y
-data.mobi$smooth[1:41] = 1
+#data.mobi$smooth[1:41] = 1
 
 # ggplot(data.mobi, aes(x = time, y = rel_mob)) + geom_line(alpha = 0.5) + geom_line(aes(y = smooth) , color='red') + theme_bw()
 
@@ -424,7 +424,7 @@ data.hlos$date = ymd(data.hlos$date)
 # county populations
 pop = read.csv('../data/ct_population.csv', stringsAsFactors=FALSE)
 populations = pop$population[match(colnames(adj), pop$county)]
-
+populations = round(populations * (1-0.018)) # 1.8% is an estimated proportion residing in congregate settings (about 65,000)
 
 
 

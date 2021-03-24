@@ -69,6 +69,8 @@ get_state0 = function(init_file_csv){
 # get state0 on day0 for a given set of parameters
 get_state0_params <- function(params, interventions, populations, adj, county_capacities){
 
+nregions = nrow(adj)
+    
 time_num = params$time_num
 if (time_num<0){
      stop("time_num cannot be negative")
@@ -145,7 +147,7 @@ res = run_sir_model(state0=state0,
                     hdischargefun=hdischargefun_tmp)
 
 # get initial conditions corresponding to params, E_init, and time_num
-init = matrix(0, ncol=10, nrow=8)
+init = matrix(0, ncol=10, nrow=nregions)
 compartments <- c("E", "I_s", "I_m", "A", "H", "NH", "NI", "D", "R" )
   
 for (k in 1:length(compartments)){

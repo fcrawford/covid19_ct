@@ -14,15 +14,15 @@ if (FALSE){
 
 
 ## simulate model projections through this date
-mydaymax              = ymd("2021-02-28") 
+mydaymax              = ymd("2021-04-30") 
 
 ##########################################
 # intervention end dates for testing hypothetical interventions in the future
-intv1_end_date = ymd("2022-09-01") # in the future
+intv1_end_date = ymd("2022-12-31") # in the future
 
 
 # number of simulations 
-nsim = 1500
+nsim = 1000
 ####################################
 
 
@@ -105,7 +105,7 @@ connecticut_summary_hosp1 = plot_ct_region(data=res1$summary,
                                              title=str,
                                              region_name="Connecticut", 
                                              which.plot="rHsum",
-                                             avg='mean',
+                                             avg='median',
                                              ymax=3000,
                                              add.cong = TRUE)
 
@@ -115,7 +115,7 @@ connecticut_summary_deaths1 = plot_ct_region(data=res1$summary,
                                              title=str,
                                              region_name="Connecticut", 
                                              which.plot="rD",
-                                             avg='mean',
+                                             avg='median',
                                              add.cong = TRUE)
 
 ##   Row 2
@@ -162,6 +162,16 @@ dev.off()
 
 
 
+#### R_eff #####
+connecticut_R_eff = plot_ct_region(data=res1$summary, 
+                                             end_day=mydaymax, 
+                                             title.override = paste0("Community R effective in Connecticut", str),
+                                             title=str,
+                                             region_name="Connecticut", 
+                                             which.plot="R_eff",
+                                             avg="mean",
+                                             ymax=2, ylab="Effective reproductive number")
+abline(h=1, lty="dotted", col="gray")
 
 
 

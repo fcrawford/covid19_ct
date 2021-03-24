@@ -38,8 +38,8 @@ day0 = ymd("2020-03-01")
 ## interventions: reserved for making projections under different scenarios in the future, not used in historic calibration
 # school closure, lockdown and reopening effect is replaced with contact function and random effects
 intv1_start_date = ymd("2022-09-01") # in the future 
-
 INT_START_DATES = as.list(c(intv1_start_date = intv1_start_date))
+
 
 
 ########################

@@ -31,6 +31,7 @@ plot_ct_region = function(data=NULL,
                           obs_state = DAT_CT_STATE,
                           obs_county = DAT_CT_COUNTY, 
                           ymax = NULL,
+                          xmax = NULL,
                           avg = "mean",
                           sentence=TRUE,
                           show.data=TRUE, 
@@ -46,7 +47,7 @@ lab.table <- data.frame(compartment=c("D","rD", "H","rH",
                                        "alive_cum_incid_num", "R_eff", "currentI", 
                                        "contact_pattern"),
                           color=c('#e41a1c','#e41a1c','#377eb8','#377eb8', 
-                                  '#4daf4a','#4daf4a','#377eb8', '#984ea3',
+                                  '#4daf4a','#4daf4a','#377eb8', '#7d618d', #'#984ea3',
                                   '#ff7f00','#ffff33', '#a65628','#f781bf',
                                   '#999999', '#a65628', '#388a72', "#006d2c", 
                                   "#09543e", "#6a3d9a", "#ff7f00", 
@@ -83,19 +84,24 @@ lab.table <- data.frame(compartment=c("D","rD", "H","rH",
  #dayseq = seq(day0, daymax, by="day")
   start_day = day0
   tmax.plot = as.numeric(difftime(end_day, day0, units="days"))
-
+  daymax.plot = ymd(end_day+1)
+  if (!is.null(xmax)) {daymax.plot = ymd(ymd(day0)+xmax+1)}
+  
   if(goodness) {
-    monthseq = seq(start_day, ymd(end_day+1), by="week")
+    monthseq = seq(start_day, daymax.plot, by="week")
     lab_show = format(monthseq, "%b %d")
     lab_where = difftime(monthseq, start_day, units="days")
     lab_cex <- 0.95
   } else {
-    monthseq = seq(start_day, ymd(end_day+1), by="month")
+    monthseq = seq(start_day, daymax.plot, by="month")
     lab_show = format(monthseq, "%b %Y")
     lab_where = difftime(monthseq, start_day, units="days")
     lab_cex <- 0.95
-  }
+  } 
   
+  HOSP_CONG = subset(HOSP_CONG, time <= (tmax.plot-1))
+  DAT_CT_STATE = subset(DAT_CT_STATE, time <= (tmax.plot-1))
+
 
   which.plot.ci <- which.plot
   add <- FALSE
@@ -164,6 +170,7 @@ lab.table <- data.frame(compartment=c("D","rD", "H","rH",
   sir_result_region_sub <- filter(sir_result_region, variable==variable_name)
   sir_result_region_sub <- subset(sir_result_region_sub, time <= tmax.plot)
   
+  ## add congregate contribution: hospitalizations census
   if(add.cong && which.plot == "rHsum"){
     for(i in 1:dim(sir_result_region_sub)[1]){
       cong <- HOSP_CONG$cur_hosp_cong[which(HOSP_CONG$time == sir_result_region_sub$time[i])]
@@ -198,18 +205,25 @@ lab.table <- data.frame(compartment=c("D","rD", "H","rH",
       d3$cong[d3$time <= max(HOSP_CONG$time)] = NA
       }
       
+      
       # use mean / median proportion of congregate hospitalizations during the last 30 days for projections into the future
-      pred.prop_hosp_cong = mean(d$prop_hosp_cong[(nrow(d)-30):nrow(d)])
+      if (FALSE){  pred.prop_hosp_cong = mean(d$prop_hosp_cong[(nrow(d)-30):nrow(d)]) }
+      # use the last value of proportion of congregate hospitalizations
+      pred.prop_hosp_cong = d$prop_hosp_cong[nrow(d)]
       d3 = sir_result_region_sub
       d3$cong_mean = d3$mean * pred.prop_hosp_cong/(1-pred.prop_hosp_cong)
       d3$cong_median = d3$median * pred.prop_hosp_cong/(1-pred.prop_hosp_cong)
+      
       
       # remove values for observed period
       d3$cong_mean[d3$time <= max(HOSP_CONG$time)] = NA
       d3$cong_median[d3$time <= max(HOSP_CONG$time)] = NA
       
       # set adjustment to 0
-      adjh_mean = adjh_median = 0
+      i = which(sir_result_region_sub$time == max(HOSP_CONG$time)) 
+      adjh_mean = sir_result_region_sub[i, "mean"] - (sir_result_region_sub[(i+1), "mean"] + d3$cong_mean[i+1])
+      adjh_median = sir_result_region_sub[i, "median"] - (sir_result_region_sub[(i+1), "median"] + d3$cong_median[i+1])
+      #adjh_mean = adjh_median = 0
       
     # add predicted values to projections
     for (i in (max(HOSP_CONG$time)+2):dim(sir_result_region_sub)[1]){
@@ -223,6 +237,82 @@ lab.table <- data.frame(compartment=c("D","rD", "H","rH",
   }
 
 
+  
+  ## add congregate contribution: cumulative hospitalizations
+  if(add.cong && which.plot == "rcum_modH"){
+    for(i in 1:dim(sir_result_region_sub)[1]){
+      cong <- HOSP_CONG$cum_hosp_cong[which(HOSP_CONG$time == sir_result_region_sub$time[i])]
+      if(length(cong) == 0) cong <- 0
+
+      sir_result_region_sub[i, "mean"] <- sir_result_region_sub[i, "mean"] + cong
+      sir_result_region_sub[i, "median"] <- sir_result_region_sub[i, "median"] + cong
+      sir_result_region_sub[i, "lower"] <- sir_result_region_sub[i, "lower"] + cong
+      sir_result_region_sub[i, "upper"] <- sir_result_region_sub[i, "upper"] + cong
+    }
+
+    ## use projected estimated proportion of community / congregare hospitalizations to apply to model-projected dynamics 
+    # predict hospitalizations for projections
+      d = merge(DAT_CT_STATE, HOSP_CONG, by = 'time', all=F)
+      d$prop_hosp_cong = d$cum_hosp_cong/d$cum_hosp
+
+      if (FALSE){
+      # fit regression line to estimate changes in prop_cong_hosp during the last 90 days
+      d2 = subset(d, time > (d$time[nrow(d)] - 90) , select = c('time', 'prop_hosp_cong'))
+      rg = lm(prop_hosp_cong ~ time, data=d2)
+      
+      # calculate predicted values
+      d3 = merge(sir_result_region_sub, d2, by='time', all=T)
+      d3$pred.prop_hosp_cong = predict(rg, newdata=d3)
+      d3$cong_mean = d3$mean * d3$pred.prop_hosp_cong/(1-d3$pred.prop_hosp_cong)
+      d3$cong_median = d3$median * d3$pred.prop_hosp_cong/(1-d3$pred.prop_hosp_cong)
+      # adjust predicted values by the difference beween estimated and predicted values at last observation to make a smooth transition
+      adjh_mean = HOSP_CONG$cum_hosp_cong[nrow(HOSP_CONG)] - d3$cong_mean[d3$time == max(HOSP_CONG$time)]
+      adjh_median = HOSP_CONG$cum_hosp_cong[nrow(HOSP_CONG)] - d3$cong_median[d3$time == max(HOSP_CONG$time)]
+      
+      # remove values for observed period
+      d3$cong[d3$time <= max(HOSP_CONG$time)] = NA
+      }
+      
+      if (FALSE){
+      # use mean / median proportion of congregate hospitalizations during the last 30 days for projections into the future
+      pred.prop_hosp_cong = mean(d$prop_hosp_cong[(nrow(d)-30):nrow(d)])
+      d3 = sir_result_region_sub
+      d3$cong_mean = d3$mean * pred.prop_hosp_cong/(1-pred.prop_hosp_cong)
+      d3$cong_median = d3$median * pred.prop_hosp_cong/(1-pred.prop_hosp_cong)
+      }
+      
+      # use last value of proportion of congregate hospitalizations for projections into the future
+      pred.prop_hosp_cong = d$prop_hosp_cong[nrow(d)]
+      d3 = sir_result_region_sub
+      d3$cong_mean = d3$mean * pred.prop_hosp_cong/(1-pred.prop_hosp_cong)
+      d3$cong_median = d3$median * pred.prop_hosp_cong/(1-pred.prop_hosp_cong)
+      
+      # remove values for observed period
+      d3$cong_mean[d3$time <= max(HOSP_CONG$time)] = NA
+      d3$cong_median[d3$time <= max(HOSP_CONG$time)] = NA
+      
+      # set adjustment to 0
+      i = which(sir_result_region_sub$time == max(HOSP_CONG$time)) 
+      adjh_mean = sir_result_region_sub[i, "mean"] - (sir_result_region_sub[(i+1), "mean"] + d3$cong_mean[i+1])
+      adjh_median = sir_result_region_sub[i, "median"] - (sir_result_region_sub[(i+1), "median"] + d3$cong_median[i+1])
+      #adjh_mean = adjh_median = 0
+      
+    # add predicted values to projections
+    for (i in (max(HOSP_CONG$time)+2):dim(sir_result_region_sub)[1]){
+      cong_mean <- d3$cong_mean[i] + adjh_mean
+      cong_median <- d3$cong_median[i] + adjh_median
+      sir_result_region_sub[i, "mean"] <- sir_result_region_sub[i, "mean"] + cong_mean
+      sir_result_region_sub[i, "median"] <- sir_result_region_sub[i, "median"] + cong_median
+      sir_result_region_sub[i, "lower"] <- sir_result_region_sub[i, "lower"] + cong_mean
+      sir_result_region_sub[i, "upper"] <- sir_result_region_sub[i, "upper"] + cong_mean
+    }
+  }
+
+  
+  
+  
+  
+  ## add congregate contribution: cumulative deaths
   if(add.cong && which.plot == "rD"){
     cong.data <- data.frame(HOSP_CONG[, c("hosp_death_cong", "time")]) 
     tmp <- data.frame(time = DAT_CT_STATE$time, 
@@ -277,8 +367,11 @@ lab.table <- data.frame(compartment=c("D","rD", "H","rH",
       d3$cum_deaths_cong = cumsum(d3$deaths_cong)
       }
       
-      # use mean proportion of congregate hospitalizations during the last 30 days for projections 
-      pred.prop_hosp_cong = mean(d$prop_hosp_cong[(nrow(d)-30):nrow(d)])
+      # use mean / median proportion of congregate hospitalizations during the last 30 days for projections into the future
+      if (FALSE){  pred.prop_hosp_cong = mean(d$prop_hosp_cong[(nrow(d)-30):nrow(d)]) }
+      # use the last value of proportion of congregate hospitalizations
+      pred.prop_hosp_cong = d$prop_hosp_cong[nrow(d)]
+
       d3 = hsp
       d3$cong_mean = d3$mean * pred.prop_hosp_cong/(1-pred.prop_hosp_cong)
       d3$cong_median = d3$median * pred.prop_hosp_cong/(1-pred.prop_hosp_cong)
@@ -314,28 +407,33 @@ lab.table <- data.frame(compartment=c("D","rD", "H","rH",
   
   if(is.null(ymax)) ymax <- max(sir_result_region_sub$upper[sir_result_region$time <= tmax.plot & sir_result_region$time >= tmin.plot], na.rm=TRUE)
 
-  if("rD" %in% which.plot){
+  if("rD" %in% which.plot & show.data==TRUE){
     points.add$toplot <- points.add$total_deaths
     ymax <- max(c(ymax, points.add$toplot), na.rm=TRUE)
   }
-  if("rH" %in% which.plot || "rHsum" %in% which.plot){
+  if(("rH" %in% which.plot || "rHsum" %in% which.plot) & show.data==TRUE){
     points.add$toplot <- points.add$cur_hosp
     ymax <- max(c(ymax, points.add$toplot), na.rm=TRUE)
   }
-   if("rcum_modH" %in% which.plot){
+   if("rcum_modH" %in% which.plot & show.data==TRUE){
     points.add$toplot <- points.add$cum_hosp
     ymax <- max(c(ymax, points.add$toplot), na.rm=TRUE)
   }
-   if("Inc" %in% which.plot){
+   if("Inc" %in% which.plot & show.data==TRUE){
     points.add$toplot <- points.add$rel_inc
     ymax <- max(c(ymax, points.add$toplot[points.add$rel_inc > 0]), na.rm=TRUE)
   }
 
-
    if(is.null(xlab)) xlab <- ""
-   if(is.null(ylab)) ylab <- "People"
+   if(is.null(ylab)) ylab <- "people"
+   
+   if(is.null(xmax)) {xmax = 1.1*tmax.plot} else {xmax = xmax}
+  
+#    plot(0, type="n", xlab=xlab, ylab=ylab, main=title, col="black", 
+#         ylim=c(0,1.05*ymax), xlim=c(tmin.plot,1.1*tmax.plot), axes=FALSE)
+#    axis(1,at=lab_where, lab=lab_show, cex.axis=lab_cex)
     plot(0, type="n", xlab=xlab, ylab=ylab, main=title, col="black", 
-         ylim=c(0,1.05*ymax), xlim=c(tmin.plot,1.1*tmax.plot), axes=FALSE)
+         ylim=c(0,1.05*ymax), xlim=c(tmin.plot,xmax), axes=FALSE)
     axis(1,at=lab_where, lab=lab_show, cex.axis=lab_cex)
     axis(2)
 
@@ -358,28 +456,30 @@ lab.table <- data.frame(compartment=c("D","rD", "H","rH",
     lines(sub.add$time, sub.add$Capacity, col='gray30', lty  = 2,  lwd=1.2)
   }
 
-  # Add observed deaths
-  if(which.plot %in% "rD"){
-    # col.line <- lab.table$color[which(lab.table$compartment=="D")]
-    points.add <- subset(points.add, time <= ref_day-start_day)
-    points(points.add$time, points.add$toplot, pch=16, cex=0.6, col=col.line)
-  }
-  if(which.plot %in% c("rH", "rHsum")){
-    # col.line <- lab.table$color[which(lab.table$compartment=="H")]
-    points.add <- subset(points.add, time <= ref_day-start_day)
-    points(points.add$time, points.add$toplot, pch=16, cex=0.6, col=col.line)
-  }
-  if(which.plot %in% "rcum_modH"){
-    # col.line <- lab.table$color[which(lab.table$compartment=="rcum_modH")]
-    points.add <- subset(points.add, time <= ref_day-start_day)
-    points(points.add$time, points.add$toplot, pch=16, cex=0.6, col=col.line)
-  }
- if(which.plot %in% "Inc"){
-    # col.line <- lab.table$color[which(lab.table$compartment=="currentI")]
-    points.add <- subset(points.add, time <= ref_day-start_day)
-    points(points.add$time, points.add$toplot, pch=16, cex=0.6, col=col.line)
-  }
-
+  # Add observed counts
+  if (show.data==TRUE){
+    if(which.plot %in% "rD"){
+      # col.line <- lab.table$color[which(lab.table$compartment=="D")]
+      points.add <- subset(points.add, time <= ref_day-start_day)
+      points(points.add$time, points.add$toplot, pch=16, cex=0.6, col=col.line)
+    }
+    if(which.plot %in% c("rH", "rHsum")){
+      # col.line <- lab.table$color[which(lab.table$compartment=="H")]
+      points.add <- subset(points.add, time <= ref_day-start_day)
+      points(points.add$time, points.add$toplot, pch=16, cex=0.6, col=col.line)
+    }
+    if(which.plot %in% "rcum_modH"){
+      # col.line <- lab.table$color[which(lab.table$compartment=="rcum_modH")]
+      points.add <- subset(points.add, time <= ref_day-start_day)
+      points.add <- subset(points.add, time >= 89) # May 29 when CHA started reporting cumulative counts
+      points(points.add$time, points.add$toplot, pch=16, cex=0.6, col=col.line)
+    }
+   if(which.plot %in% "Inc"){
+      # col.line <- lab.table$color[which(lab.table$compartment=="currentI")]
+      points.add <- subset(points.add, time <= ref_day-start_day)
+      points(points.add$time, points.add$toplot, pch=16, cex=0.6, col=col.line)
+    }
+ }
 
   if("D" %in% which.plot || "rD" %in% which.plot || "rHsum" %in% which.plot || "dailyI" %in% which.plot || "Inc" %in% which.plot){
       sir_result_region_sub <- filter(sir_result_region, variable==variable_name)
