@@ -1,10 +1,10 @@
 # use rtuncdist to make flat priors for some params
 
 # q_Is
-prior.mean.q_Is : 0.04
+prior.mean.q_Is : 0.042
 prior.sd.q_Is : 0.007
-prior.lower.q_Is : 0.01
-prior.upper.q_Is : 0.07
+prior.lower.q_Is : 0.012
+prior.upper.q_Is : 0.072
 
 # beta_pre
 prior.mean.beta_pre: 2

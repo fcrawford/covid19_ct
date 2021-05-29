@@ -76,6 +76,8 @@ DEATH_HAZ <- global_dat$smooth_hdeath_haz
 SEV <- global_dat$severity
 # smooth hospital LOS
 HLOS <- global_dat$hlos
+# cumulative vaccinated counts
+VAC <- global_dat$vac
 # Spatial adj  matrix
 CT_ADJ <- global_dat$adj
 # Population count vector in the same order as CT_ADJ

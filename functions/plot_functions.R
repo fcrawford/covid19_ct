@@ -425,7 +425,7 @@ lab.table <- data.frame(compartment=c("D","rD", "H","rH",
   }
 
    if(is.null(xlab)) xlab <- ""
-   if(is.null(ylab)) ylab <- "people"
+   if(is.null(ylab)) ylab <- "People"
    
    if(is.null(xmax)) {xmax = 1.1*tmax.plot} else {xmax = xmax}
   

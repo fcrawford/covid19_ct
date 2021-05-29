@@ -1,9 +1,9 @@
 
 ##### Epi parameters: means 
 # case type distribution
-q_A: 0.36 # asymptomatic
+q_A: 0.358 # asymptomatic
 q_Im: 0.6 # mild
-q_Is: 0.04 # severe
+q_Is: 0.042 # severe
 
 # among severe: proportion going to H/Hbar stream (vs. nursing homes or prisons)
 # the value of 1 corresponds to a community transmission model
@@ -56,6 +56,10 @@ time_num: 7
 # this number times log(daily number of tests) is an increase in the rate of transitioning out of infectious compartment 
 testing_effect: 0.08 # corresponds to compartment I_m
 te_A_mult: 0.5 # relative testing effect among A compared to I_m
+
+# vaccination effects
+vac_eff: 0.75 # vaccine efficacy for infection susceptibility 
+vac_prop_sus: 0.75 # proportion susceptible (i.e. no prior infection) among vaccinated
 
 # hypothetical intervention effect in the future
 intv1_effect: 0

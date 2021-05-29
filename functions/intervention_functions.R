@@ -277,7 +277,33 @@ get_hosp_discharge_fun = function(dayseq, hlos.data){
 
 
 
+#################################
 
+# cumulative NUMBER vaccinated in the community
+
+# this function returns the total cumulative number vaccinated in the community
+# it DOES NOT adjust for:
+## vaccine efficacy
+## proportion susceptible (no Hx of prior infection) among vaccinated 
+
+
+get_vac_fun = function(dayseq, vac.data){
+  
+  tmax = as.numeric(max(dayseq)-day0)
+  
+  vac_day0 = ymd(vac.data$date[1])
+  vac_daymax = ymd(vac.data$date[nrow(vac.data)])
+  
+  dvac = sapply(dayseq, function(dy) {
+     if (dy <= vac_day0) {0}
+     else if(dy < vac_daymax) {vac.data$vcount[which( ymd(vac.data$date) == dy)] } 
+     else {vac.data$vcount[nrow(vac.data)] }
+   })
+  
+   #time0 = as.numeric(d_day0 - day0)
+ 
+   return(approxfun(0:tmax, dvac, method="linear", rule=2))
+}
 
 
 

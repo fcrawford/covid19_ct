@@ -419,6 +419,19 @@ data.hlos$date = ymd(data.hlos$date)
 
 
 
+## get vaccinated counts  ##
+############################
+file.vac = "../data/ct_vaccination.csv"
+data.vac = read.csv(file.vac)
+data.vac$date = mdy(data.vac$date)
+
+
+
+
+
+
+
+
 
 
 # county populations
@@ -438,6 +451,6 @@ populations = round(populations * (1-0.018)) # 1.8% is an estimated proportion r
 return(list(dat_ct_state=dat_ct_state, dat_ct_county=dat_ct_county, hosp_cong=hosp_cong, incidence = data.incidence,
             adj=adj, dat_ct_capacity=dat_ct_capacity, county_capacities=county_capacities, 
             mob=mob_state, testing = testing_state, severity = data.severity, hlos = data.hlos,
-            smooth_hdeath_haz = smooth_hdeath_haz, populations=populations))
+            smooth_hdeath_haz = smooth_hdeath_haz, vac = data.vac, populations=populations))
 }
 
